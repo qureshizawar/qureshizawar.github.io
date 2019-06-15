@@ -350,7 +350,8 @@ footer {
     height: 100vh;
     min-height: 500px;
     max-height: 1080px;
-    background: url(../images/lead-bg.jpg);
+    //background: url(../images/lead-bg.jpg);
+    background: url(../images/bg.gif);
     background-size: cover;
     padding: 15px;
     overflow: hidden;
@@ -422,6 +423,16 @@ footer {
         animation: pulsate 1.5s ease;
         animation-iteration-count: infinite;
         padding-top: 5px;;
+    }
+}
+
+.lead-image {
+    float: center;
+    img {
+      width: 150px;
+      height: auto;
+      border-radius: 50%;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     }
 }
 
@@ -645,7 +656,7 @@ footer {
     position: relative;
     max-width: 900px;
     margin: 0 auto 30px auto;
-    overflow: hidden;
+    overflow: scroll;
     background: #fff;
     border-radius: 4px;
 }
@@ -662,7 +673,7 @@ footer {
     padding: 15px;
 
     h3 {
-        font-size: 1.5em;
+        font-size: 1.4em;
         font-weight: 300;
         color: $heading;
         margin: 0 0 15px 0;
@@ -671,7 +682,7 @@ footer {
     p {
         color: $text;
         margin: 0 0 15px 0;
-        font-size: 0.9em;
+        font-size: 0.8em;
     }
 }
 
