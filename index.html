@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 
 <head>
-	
+
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-157023283-1"></script>
     <script>
@@ -14,16 +14,64 @@
     </script>
 
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--meta http-equiv="X-UA-Compatible" content="IE=edge"!-->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>My Portfolio</title>
-	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-	<link rel="icon" href="favicon.ico" type="image/x-icon">
+		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+		<link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.4.0/dist/tf.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900" rel="stylesheet">
     <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/styles.css" rel="stylesheet">
 </head>
+
+<style>
+  .pred-container {
+    margin-bottom: 20px;
+  }
+
+  .pred-container > div {
+    display: inline-block;
+    margin-right: 20px;
+    vertical-align: top;
+  }
+
+  .file-container {
+    margin-bottom: 20px;
+  }
+
+  .collapsible {
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+  }
+
+  .active, .collapsible:hover {
+    background-color: #217dbb;
+  }
+
+  .content {
+    padding: 0px 18px;
+    max-height: 280;
+    overflow: auto;
+    transition: max-height 0.2s ease-out;
+    background-color: #f1f1f1;
+  }
+
+  .canvas {
+    position: relative;
+    border:1px;
+  }
+
+</style>
 
 <body>
     <div id="mobile-menu-open" class="shadow-large">
@@ -67,7 +115,7 @@
               <img src="images/profile_pic2.png" />
           </div>
             <h1>Zawar Qureshi</h1>
-            <h2>Machine Learning/Perception Engineer</h2>
+            <h2>Machine Learning Engineer</h2>
             <a href="assets/CV_Zawar_Qureshi.pdf" download="CV_Zawar_Qureshi.pdf" class="btn-rounded-white">Download CV</a>
         </div>
         <!-- End #lead-content -->
@@ -108,30 +156,27 @@
         <div id="experience-timeline">
             <div data-date="September 2018 – ">
                 <h3>Jaguar Land Rover, Autonomous Driving Pre-Development Team</h3>
-                <h4>Machine Learning/Perception Engineer</h4>
+                <h4>Machine Learning Engineer</h4>
                 <p>
-                  • Perception engineer tackling problems ranging from deep monocular depth estimation to
-                  object recognition (Cameras & LIDAR), deployable on real time hardware (such as Nvidia
-                  drive platform) </br>
+                  • Perception engineer tackling problems ranging from deep monocular depth estimation to object recognition
+									 (Cameras & LIDAR), deployable for tooling and real time hardware </br>
                   </br>
-                  • Researching multitask autoencoders to tackle problems such as semantic segmentation
-                  and depth estimation with interest in sequential data and estimation uncertainties </br>
+                  • Developing multitask auto-encoders to tackle problems such as semantic segmentation and depth estimation
+with interest in sequential data and estimation uncertainties. Actively read and evaluate state-of-the-art
+research papers to propose potential improvements to the algorithms currently in use </br>
                   </br>
-                  • Developed a pipeline for NN hyper-parameter optimisation using bayesian optimisation
-                  methods allowing for automated tuning, saving weeks of engineering time for every NN
-                  algorithm that is being developed. looking at adding NN pruning into the pipeline using
-                  the ADMM algorithm which allows orders of magnitude of reduction in NN parameters </br>
+                  • Developed a pipeline for NN hyper-parameter optimisation using bayesian optimisation methods allowing for
+automated tuning, saving weeks of engineering time for every NN algorithm that is being developed </br>
                   </br>
-                  • Productionised an object detection algorithm actively being researched using docker and
-                  flask to allow engineers within the company to study algorithm performance in a scenario
-                  of their choosing by simply typing a URL in their browser to open a GUI/visualization </br>
+                  • Deployed an object detection algorithm actively being researched using docker and flask to allow engineers
+within the company to study algorithm performance in a scenario of their choosing by simply typing a URL in
+their browser to open a GUI/visualisation </br>
                   </br>
-                  • Leading a team of 4-5 engineers in R&D of the algorithms following SCRUM framework </br>
+                  • Supporting a team of 4-5 engineers in R&D of the algorithms following SCRUM framework </br>
                   </br>
-                  • Actively support exchanges between suppliers/startups to share knowledge and explore
-                  potential for collaboration. Supported talks between suppliers such as DELL EMC and
-                  Nvidia for devising JLR’s scale-able infrastructure (worth over £500,000 in the initial
-                  phase) for inference/training ML algorithms. </br>
+                  • Actively support exchanges between suppliers/startups to share knowledge and explore potential for
+collaboration. Supported talks between suppliers such as DELL EMC and Nvidia for devising JLR’s scale-able
+infrastructure (worth over £500,000) for data ingest, training and inference for ML algorithms </br>
                 </p>
             </div>
 
@@ -139,12 +184,12 @@
                 <h3>Oxford University Visual Geometry Group (VGG)</h3>
                 <h4>Summer Researcher</h4>
                 <p>
-                  • Worked under Prof. Andrea Vidaldi on the challenging problem of estimating depth using a single camera
-                   with deep convolutional neural networks (supervised/unsupervised structure from motion (SFM) using
-                    deep encoder-decoder architectures). </br>
+                  • Worked under Prof. Andrea Vidaldi on the challenging problem of estimating depth using a single camera with
+deep convolutional neural networks (supervised/unsupervised structure from motion (SFM) using deep
+encoder-decoder architectures) </br>
                     </br>
                   • Replicated state of the art results produced by VGG on Tensorflow and developed the model in Pytorch.
-                   Investigated possible novel improvements to the state of the art into the estimation pipeline.
+Investigated possible novel improvements to the state of the art
                 </p>
             </div>
 
@@ -153,14 +198,26 @@
                 <h4>Software Engineer</h4>
                 <p>
                   • Responsible for devising a software platform for use throughout JLR (from design to functional safety)
-                  to aid in deciding the required sensor set and their positions on different vehicles. </br>
+                  to aid in deciding the required sensor set and their positions on different vehicles </br>
                   </br>
                   • Developed a program with a GUI to advise on safety critical positioning of LiDARs on JLR vehicles;
                    Program widely used by engineers and management in decision making. Developed simple sensor models for
-                    LiDAR, RADAR, ultrasonic, and cameras for use in the software platform. </br>
+                    LiDAR, RADAR, ultrasonic, and cameras for use in the software platform </br>
                     </br>
                   • Briefly worked with a tech startup part of JLR InMotion to look into developing a  Javascript based
                    routing algorithm using Google Maps API
+                </p>
+            </div>
+
+						<div data-date="September 2016 – June 2017">
+                <h3>CERN, Large Hadron Collider Unidentified Falling Objects (UFOs) Group</h3>
+                <h4>Research Engineer</h4>
+                <p>
+                  • Worked with a team of engineers from Oxford and CERN to find a solution for high power beam losses due to
+interactions with unknown particles inside the LHC at CERN causing significant loss of money/research time.
+Relying on large amounts of data from previous experiments, developed and modelled a solution which was
+then presented at CERN to a panel of scientists and engineers. Recommendations considered for further
+development work </br>
                 </p>
             </div>
         </div>
@@ -256,10 +313,48 @@
 
     <div id="demo" class="optional-section background-alt">
     <!--<div class="optional-section background-alt">-->
-    <h2 class="heading">Demo</h2>
+    <h2 class="heading">Demos</h2>
 
     <div class="optional-section-block">
-        <h3>WIP</h3>
+        <h4>Some models developed by me over the years, now available in your broswer to try! (WIP)</h4>
+
+				<button class="collapsible">Image classifier</button>
+		    <div class="content">
+
+		    <section>
+		      <p> MobileNet model used to create an image classifier for Nexar challenge which was trained using
+						 rear view images of of different types of vehicles (cars, buses, etc.) </p>
+
+		      <div id="file-container">
+		        Upload an image: <input type="file" id="files0" name="files0" />
+		      </div>
+
+		      <div id="predictions0"></div>
+
+		      <img id="inpimg0" />
+		    </section>
+		    <section>
+		      <p class="section-head">Prediction:</p>
+					<div id="status_classifier"></div>
+		      <p id="classifier_out"></p>
+		    </section>
+
+		    </div>
+
+				<button class="collapsible">Depth</button>
+		    <div class="content">
+		        <section>
+							<p> Monocular depth estimation model trained using single camera views from the kitti dataset</p>
+
+		          <div id="file-container">
+		            Upload an image: <input type="file" id="files" name="files" />
+		          </div>
+							<div id="status_depth"></div>
+		          <img id="inpimg" />
+		            <canvas id="depth" class="canvas"></canvas>
+		        </section>
+		    </div>
+
     </div>
     <!-- End .optional-section-block -->
 
@@ -307,10 +402,14 @@
                 <div class="col-sm-5 copyright">
                     <p>
 <<<<<<< HEAD
+<<<<<<< HEAD
                         Copyright &copy; 2020 YOUR NAME
 =======
                         Copyright &copy; 2019 Zawar Qureshi
 >>>>>>> modified template, added personal details
+=======
+                        Copyright &copy; 2020 Zawar Qureshi
+>>>>>>> added JS models
                     </p>
                 </div>
                 <div class="col-sm-2 top">
@@ -342,8 +441,26 @@
     </footer>
     <!-- End footer -->
 
+    <script>
+      var coll = document.getElementsByClassName("collapsible");
+      var i;
+
+      for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+          this.classList.toggle("active");
+          var content = this.nextElementSibling;
+          if (content.style.maxHeight){
+          content.style.maxHeight = null;
+          } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+          }
+        });
+      }
+    </script>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="js/scripts.min.js"></script>
+		<script src="js/index.js"></script>
 </body>
 
 </html>
