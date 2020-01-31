@@ -61,9 +61,35 @@ filesElement0.addEventListener('change', evt => {
 });
 
 
+const ClassiferWarmup = async () => {
+
+  status_classifier.textContent = 'Status: Loading...';
+  const model = await tf.loadGraphModel('/assets/tfjs_model/model.json');
+
+  // Warmup the model. This isn't necessary, but makes the first prediction
+  // faster. Call `dispose` to release the WebGL memory allocated for the return
+  // value of `predict`.
+  model.predict(tf.zeros([1, IMAGE_HEIGHT, IMAGE_HEIGHT, 3])).dispose();
+
+  // Make a prediction through the locally hosted inpimg0.jpg.
+  const inpElement = document.getElementById('inpimg0');
+  if (inpElement.complete && inpElement.naturalHeight !== 0) {
+    classifier_Demo(inpElement);
+    inpElement.style.display = '';
+  } else {
+    inpElement.onload = () => {
+      classifier_Demo(inpElement);
+      inpElement.style.display = '';
+    }
+  }
+
+  document.getElementById('file-container').style.display = '';
+};
+
+
 const classifier_Demo = async (imElement) => {
     // const imElement = document.getElementById('inpimg');
-    status_classifier.textContent = 'Loading model...';
+    status_classifier.textContent = 'Status: Loading...';
     const offset = 0; // label mask offset
     const img = tf.browser.fromPixels(imElement).toFloat();
     const scale = tf.scalar(255.);
@@ -71,7 +97,7 @@ const classifier_Demo = async (imElement) => {
     const std = tf.tensor3d([0.229, 0.224, 0.225], [1,1,3]);
     const normalised = img.div(scale).sub(mean).div(std);
     const model = await tf.loadGraphModel('/assets/tfjs_model/model.json');
-    status_classifier.textContent = 'Model loaded! running inference';
+    status_classifier.textContent = 'Status: Model loaded! running inference';
     //const batched = normalised.transpose([2,0,1]).expandDims();
     const batched = normalised.transpose([0,1,2]).expandDims();
 
@@ -89,8 +115,36 @@ const classifier_Demo = async (imElement) => {
     //console.log(output);
     // done to sort vals as numbers instead of strings
     output.sort(function(a, b){return b[1] - a[1]});
-    status_classifier.textContent = 'Done!';
-    document.getElementById("classifier_out").innerHTML = output[0];
+    status_classifier.textContent = 'Status: Done!';
+    document.getElementById("classifier_out1").innerHTML = output[0];
+    document.getElementById("classifier_out2").innerHTML = output[1];
+    document.getElementById("classifier_out3").innerHTML = output[2];
+  };
+
+
+  const DepthWarmup = async () => {
+
+    status_depth.textContent = 'Status: Loading...';
+    const model = await tf.loadLayersModel('/assets/tfjs_depth/model.json');
+
+    // Warmup the model. This isn't necessary, but makes the first prediction
+    // faster. Call `dispose` to release the WebGL memory allocated for the return
+    // value of `predict`.
+    model.predict(tf.zeros([1, 3, IMAGE_HEIGHT, IMAGE_WIDTH])).dispose();
+
+    // Make a prediction through the locally hosted inpimg.jpg.
+    const inpElement = document.getElementById('inpimg');
+    if (inpElement.complete && inpElement.naturalHeight !== 0) {
+      Depth_Demo(inpElement);
+      inpElement.style.display = '';
+    } else {
+      inpElement.onload = () => {
+        Depth_Demo(inpElement);
+        inpElement.style.display = '';
+      }
+    }
+
+    document.getElementById('file-container').style.display = '';
   };
 
 
@@ -98,7 +152,7 @@ const classifier_Demo = async (imElement) => {
       // triplet: depth, normals, segmentation
     // const imElement = document.getElementById('inpimg');
 
-    status_depth.textContent = 'Loading model...';
+    status_depth.textContent = 'Status: Loading...';
     const offset = 1; // label mask offset
     const img = tf.browser.fromPixels(imElement).toFloat();
     //console.log(img);
@@ -109,7 +163,7 @@ const classifier_Demo = async (imElement) => {
     const normsub = tf.tensor3d([-1., -1., 1], [1,1,3]);
     const normalised = img.div(scale)//.sub(mean).div(std);
     const model = await tf.loadLayersModel('/assets/tfjs_depth/model.json');
-    status_depth.textContent = 'Model loaded! running inference';
+    status_depth.textContent = 'Status: Model loaded! running inference';
     const batched = normalised.transpose([2,0,1]).expandDims();
 
     const predictions = model.predict(batched);
@@ -125,6 +179,9 @@ const classifier_Demo = async (imElement) => {
     const depthMask = depthPred.sub(MIN_D).divNoNan(MAX_D.sub(MIN_D));
 
     const depthCanvas = document.getElementById('depth');
-    status_depth.textContent = 'Done!';
+    status_depth.textContent = 'Status: Done!';
     await tf.browser.toPixels(depthMask, depthCanvas);
   };
+
+  ClassiferWarmup();
+  DepthWarmup();

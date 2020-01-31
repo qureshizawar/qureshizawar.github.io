@@ -283,7 +283,7 @@ development work </br>
                             speed up of over 18X using GPUs vs CPUs, making an impractical scenario based approach for learning from
                             large amount of past data implementable. Academic paper discussing algorithm and results accepted at ACC19.
                         </p>
-                        <a href="#">View Project</a>
+                        <a href="https://github.com/qureshizawar/CUDA-quartic-solver" target="_blank">View Project</a>
                     </div>
                     <!-- End .project-info -->
                 </div>
@@ -301,7 +301,7 @@ development work </br>
                             (NEXET dataset) of different types of vehicles (cars, buses, etc.). The model was deployed on an android phone
                             using Tensorflow.
                         </p>
-                        <a href="#">View Project</a>
+                        <a href="#demo">View Project</a>
                     </div>
                     <!-- End .project-info -->
                 </div>
@@ -316,7 +316,7 @@ development work </br>
     <h2 class="heading">Demos</h2>
 
     <div class="optional-section-block">
-        <h4>Some models developed by me over the years, now available in your broswer to try! (WIP)</h4>
+        <h4>Some models developed by me over the years, now available in your browser to try! (WIP)</h4>
 
 				<button class="collapsible">Image classifier</button>
 		    <div class="content">
@@ -328,15 +328,15 @@ development work </br>
 		      <div id="file-container">
 		        Upload an image: <input type="file" id="files0" name="files0" />
 		      </div>
-
+					<p id="status_classifier"></p>
 		      <div id="predictions0"></div>
-
-		      <img id="inpimg0" />
+		      <img id="inpimg0" src="/assets/demo_images/box_6109.jpg" width="224" height="224"/>
 		    </section>
 		    <section>
 		      <p class="section-head">Prediction:</p>
-					<div id="status_classifier"></div>
-		      <p id="classifier_out"></p>
+		      <p id="classifier_out1"></p>
+					<p id="classifier_out2"></p>
+					<p id="classifier_out3"></p>
 		    </section>
 
 		    </div>
@@ -349,8 +349,8 @@ development work </br>
 		          <div id="file-container">
 		            Upload an image: <input type="file" id="files" name="files" />
 		          </div>
-							<div id="status_depth"></div>
-		          <img id="inpimg" />
+							<p id="status_depth"></p>
+		          <img id="inpimg" src="/assets/demo_images/sample.png" width="384" height="224" />
 		            <canvas id="depth" class="canvas"></canvas>
 		        </section>
 		    </div>
@@ -441,7 +441,7 @@ development work </br>
     </footer>
     <!-- End footer -->
 
-    <script>
+    <!-- script>
       var coll = document.getElementsByClassName("collapsible");
       var i;
 
@@ -456,11 +456,11 @@ development work </br>
           }
         });
       }
-    </script>
+    </script!-->
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="js/scripts.min.js"></script>
-		<script src="js/index.js"></script>
+		<script src="js/index.js?123"></script>
 </body>
 
 </html>
