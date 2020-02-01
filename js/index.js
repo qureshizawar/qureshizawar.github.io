@@ -162,7 +162,7 @@ const classifier_Demo = async (imElement) => {
     const normscale = tf.tensor3d([1., 1., -1.], [1,1,3]);
     const normsub = tf.tensor3d([-1., -1., 1], [1,1,3]);
     const normalised = img.div(scale)//.sub(mean).div(std);
-    const model = await tf.loadLayersModel('/assets/tfjs_depth/model.json');
+    const model = await tf.loadLayersModel('/assets/tfjs_depth_quant/model.json');
     status_depth.textContent = 'Status: Model loaded! running inference';
     const batched = normalised.transpose([2,0,1]).expandDims();
 
