@@ -125,7 +125,7 @@ const classifier_Demo = async (imElement) => {
   const DepthWarmup = async () => {
 
     status_depth.textContent = 'Status: Loading...';
-    const model = await tf.loadLayersModel('/assets/tfjs_depth/model.json');
+    const model = await tf.loadLayersModel('/assets/tfjs_depth_quant/model.json');
 
     // Warmup the model. This isn't necessary, but makes the first prediction
     // faster. Call `dispose` to release the WebGL memory allocated for the return
