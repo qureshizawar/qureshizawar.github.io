@@ -163,10 +163,12 @@ const classifier_Demo = async (imElement) => {
     //console.log(output);
     // done to sort vals as numbers instead of strings
     output.sort(function(a, b){return b[1] - a[1]});
-    status_classifier.textContent = 'Status: Done!';
     document.getElementById("classifier_out1").innerHTML = output[0];
     document.getElementById("classifier_out2").innerHTML = output[1];
     document.getElementById("classifier_out3").innerHTML = output[2];
+
+    predictions.dispose()
+    status_classifier.textContent = 'Status: Done!';
   };
 
 
@@ -227,6 +229,10 @@ const classifier_Demo = async (imElement) => {
     const depthMask = depthPred.sub(MIN_D).divNoNan(MAX_D.sub(MIN_D));
 
     const depthCanvas = document.getElementById('depth');
+
+    predictions.dispose()
+    depthPred.dispose()
+
     status_depth.textContent = 'Status: Done!';
     await tf.browser.toPixels(depthMask, depthCanvas);
   };
