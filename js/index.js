@@ -34,6 +34,30 @@ filesElement.addEventListener('change', evt => {
   }
 });
 
+document.getElementById('btn').onclick = function() {
+    let url = new URL(document.getElementById('imagename').value);
+    //console.log(url)
+    
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.responseType = 'blob';
+    request.send();
+
+    request.onload = function() {
+        var reader = new FileReader();
+        reader.readAsDataURL(request.response);
+        reader.onload = e => {
+            //console.log('DataURL:', e.target.result);
+          // Fill the image & call predict.
+          let img = document.getElementById('inpimg');
+          img.src = e.target.result;
+          img.height = IMAGE_HEIGHT;
+          img.width = IMAGE_WIDTH;
+          img.onload = () => Depth_Demo(img);
+        };
+    };
+}
+
 const filesElement0 = document.getElementById('files0');
 filesElement0.addEventListener('change', evt => {
   let files = evt.target.files;
@@ -60,6 +84,30 @@ filesElement0.addEventListener('change', evt => {
   }
 });
 
+document.getElementById('btn0').onclick = function() {
+    //var val = document.getElementById('imagename0').value;
+    let url = new URL(document.getElementById('imagename0').value);
+
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.responseType = 'blob';
+    request.send();
+
+    request.onload = function() {
+        var reader = new FileReader();
+        reader.readAsDataURL(request.response);
+        reader.onload = e => {
+            //console.log('DataURL:', e.target.result);
+          // Fill the image & call predict.
+          let img = document.getElementById('inpimg0');
+          img.src = e.target.result;
+          img.height = IMAGE_HEIGHT;
+          img.width = IMAGE_HEIGHT;
+          img.onload = () => classifier_Demo(img);
+        };
+    };
+}
+
 
 const ClassiferWarmup = async () => {
 
@@ -69,7 +117,7 @@ const ClassiferWarmup = async () => {
   // Warmup the model. This isn't necessary, but makes the first prediction
   // faster. Call `dispose` to release the WebGL memory allocated for the return
   // value of `predict`.
-  model.predict(tf.zeros([1, IMAGE_HEIGHT, IMAGE_HEIGHT, 3])).dispose();
+  //model.predict(tf.zeros([1, IMAGE_HEIGHT, IMAGE_HEIGHT, 3])).dispose();
 
   // Make a prediction through the locally hosted inpimg0.jpg.
   const inpElement = document.getElementById('inpimg0');
@@ -130,7 +178,7 @@ const classifier_Demo = async (imElement) => {
     // Warmup the model. This isn't necessary, but makes the first prediction
     // faster. Call `dispose` to release the WebGL memory allocated for the return
     // value of `predict`.
-    model.predict(tf.zeros([1, 3, IMAGE_HEIGHT, IMAGE_WIDTH])).dispose();
+    // model.predict(tf.zeros([1, 3, IMAGE_HEIGHT, IMAGE_WIDTH])).dispose();
 
     // Make a prediction through the locally hosted inpimg.jpg.
     const inpElement = document.getElementById('inpimg');

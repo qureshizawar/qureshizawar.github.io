@@ -328,6 +328,11 @@ development work </br>
 		      <div id="file-container">
 		        Upload an image: <input type="file" id="files0" name="files0" />
 		      </div>
+              <form>
+                Or enter URL:
+                <input type="text" value="" id="imagename0"/>
+                <input type="button" id="btn0" value="Run" />
+              </form>
 					<p id="status_classifier"></p>
 		      <div id="predictions0"></div>
 		      <img id="inpimg0" src="/assets/demo_images/box_6109.jpg" width="224" height="224"/>
@@ -349,6 +354,11 @@ development work </br>
 		          <div id="file-container">
 		            Upload an image: <input type="file" id="files" name="files" />
 		          </div>
+                  <form>
+                    Or enter URL:
+                    <input type="text" value="" id="imagename"/>
+                    <input type="button" id="btn" value="Run" />
+                  </form>
 							<p id="status_depth"></p>
 		          <img id="inpimg" src="/assets/demo_images/sample.png" width="384" height="224" />
 							<p class="section-head">Prediction:</p>
@@ -442,26 +452,9 @@ development work </br>
     </footer>
     <!-- End footer -->
 
-    <!-- script>
-      var coll = document.getElementsByClassName("collapsible");
-      var i;
-
-      for (i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function() {
-          this.classList.toggle("active");
-          var content = this.nextElementSibling;
-          if (content.style.maxHeight){
-          content.style.maxHeight = null;
-          } else {
-          content.style.maxHeight = content.scrollHeight + "px";
-          }
-        });
-      }
-    </script!-->
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="js/scripts.min.js"></script>
-		<script src="js/index.js?126"></script>
+		<script src="js/index.js?v=171"></script>
 </body>
 
 </html>
