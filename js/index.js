@@ -5,6 +5,8 @@ tf.setBackend('webgl');
 const IMAGE_HEIGHT = 224;
 const IMAGE_WIDTH = 384;
 
+var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
+
 const status_classifier = document.getElementById('status_classifier');
 const status_depth = document.getElementById('status_depth');
 
@@ -37,9 +39,9 @@ filesElement.addEventListener('change', evt => {
 document.getElementById('btn').onclick = function() {
     let url = new URL(document.getElementById('imagename').value);
     //console.log(url)
-    
+
     var request = new XMLHttpRequest();
-    request.open('GET', url, true);
+    request.open('GET', cors_api_url + url, true);
     request.responseType = 'blob';
     request.send();
 
@@ -89,7 +91,7 @@ document.getElementById('btn0').onclick = function() {
     let url = new URL(document.getElementById('imagename0').value);
 
     var request = new XMLHttpRequest();
-    request.open('GET', url, true);
+    request.open('GET', cors_api_url + url, true);
     request.responseType = 'blob';
     request.send();
 
