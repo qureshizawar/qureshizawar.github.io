@@ -244,6 +244,9 @@ const classifier_Demo = async (imElement) => {
 
     const depthCanvas = document.getElementById('depth');
 
+    status_depth.textContent = 'Status: Done!';
+    await tf.browser.toPixels(depthMask, depthCanvas);
+
     var x;
     for (x of features) {
       x.dispose();
@@ -253,9 +256,7 @@ const classifier_Demo = async (imElement) => {
     }
     //predictions.dispose()
     depthPred.dispose()
-
-    status_depth.textContent = 'Status: Done!';
-    await tf.browser.toPixels(depthMask, depthCanvas);
+    depthMask.dispose()
   };
 
   ClassiferWarmup();
