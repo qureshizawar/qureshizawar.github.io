@@ -5,6 +5,9 @@ tf.setBackend('webgl');
 const IMAGE_HEIGHT = 224;
 const IMAGE_WIDTH = 384;
 
+const Depth_IMAGE_HEIGHT = 192;
+const Depth_IMAGE_WIDTH = 640;
+
 var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
 
 const status_classifier = document.getElementById('status_classifier');
@@ -26,8 +29,8 @@ filesElement.addEventListener('change', evt => {
       // Fill the image & call predict.
       let img = document.getElementById('inpimg');
       img.src = e.target.result;
-      img.height = IMAGE_HEIGHT;
-      img.width = IMAGE_WIDTH;
+      img.height = Depth_IMAGE_HEIGHT;
+      img.width = Depth_IMAGE_WIDTH;
       img.onload = () => Depth_Demo(img);
     };
 
@@ -53,8 +56,8 @@ document.getElementById('btn').onclick = function() {
           // Fill the image & call predict.
           let img = document.getElementById('inpimg');
           img.src = e.target.result;
-          img.height = IMAGE_HEIGHT;
-          img.width = IMAGE_WIDTH;
+          img.height = Depth_IMAGE_HEIGHT;
+          img.width = Depth_IMAGE_WIDTH;
           img.onload = () => Depth_Demo(img);
         };
     };
@@ -177,7 +180,8 @@ const classifier_Demo = async (imElement) => {
   const DepthWarmup = async () => {
 
     status_depth.textContent = 'Status: Loading...';
-    const model = await tf.loadLayersModel('/assets/tfjs_depth_quant/model.json');
+    const model_encoder = await tf.loadLayersModel('/assets/tfjs_encoder_quant/model.json');
+    const model_decoder = await tf.loadLayersModel('/assets/tfjs_decoder_quant/model.json');
 
     // Warmup the model. This isn't necessary, but makes the first prediction
     // faster. Call `dispose` to release the WebGL memory allocated for the return
@@ -185,7 +189,10 @@ const classifier_Demo = async (imElement) => {
     // model.predict(tf.zeros([1, 3, IMAGE_HEIGHT, IMAGE_WIDTH])).dispose();
 
     // Make a prediction through the locally hosted inpimg.jpg.
-    const inpElement = document.getElementById('inpimg');
+    let inpElement = document.getElementById('inpimg');
+    //inpElement.src = e.target.result;
+    inpElement.height = Depth_IMAGE_HEIGHT;
+    inpElement.width = Depth_IMAGE_WIDTH;
     if (inpElement.complete && inpElement.naturalHeight !== 0) {
       Depth_Demo(inpElement);
       inpElement.style.display = '';
@@ -209,22 +216,27 @@ const classifier_Demo = async (imElement) => {
     const img = tf.browser.fromPixels(imElement).toFloat();
     //console.log(img);
     const scale = tf.scalar(255.);
-    //const mean = tf.tensor3d([0.485, 0.456, 0.406], [1,1,3]);
-    //const std = tf.tensor3d([0.229, 0.224, 0.225], [1,1,3]);
+    const mean = tf.tensor3d([0.485, 0.456, 0.406], [1,1,3]);
+    const std = tf.tensor3d([0.229, 0.224, 0.225], [1,1,3]);
     const normscale = tf.tensor3d([1., 1., -1.], [1,1,3]);
     const normsub = tf.tensor3d([-1., -1., 1], [1,1,3]);
-    const normalised = img.div(scale)//.sub(mean).div(std);
-    const model = await tf.loadLayersModel('/assets/tfjs_depth_quant/model.json');
+    const normalised = img.div(scale).sub(mean).div(std);
+
+    const model_encoder = await tf.loadLayersModel('/assets/tfjs_encoder_quant/model.json');
+    const model_decoder = await tf.loadLayersModel('/assets/tfjs_decoder_quant/model.json');
+
     status_depth.textContent = 'Status: Model loaded! running inference';
     const batched = normalised.transpose([2,0,1]).expandDims();
 
-    const predictions = model.predict(batched);
+    //const predictions = model.predict(batched);
 
+    const features = model_encoder.predict(batched);
+    const predictions = model_decoder.predict(features);
 
     //console.log(predictions);
-    const initShape = batched.shape.slice(2,4);
+    //const initShape = batched.shape.slice(2,4);
 
-    const depthPred = predictions.squeeze(0).transpose([1,2,0]);
+    const depthPred = predictions[3].squeeze(0).transpose([1,2,0]);
     const MAX_D = depthPred.max();
     const MIN_D = depthPred.min();
 
@@ -232,7 +244,14 @@ const classifier_Demo = async (imElement) => {
 
     const depthCanvas = document.getElementById('depth');
 
-    predictions.dispose()
+    var x;
+    for (x of features) {
+      x.dispose();
+    }
+    for (x of predictions) {
+      x.dispose();
+    }
+    //predictions.dispose()
     depthPred.dispose()
 
     status_depth.textContent = 'Status: Done!';
