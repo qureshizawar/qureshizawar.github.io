@@ -29,8 +29,8 @@ filesElement.addEventListener('change', evt => {
       // Fill the image & call predict.
       let img = document.getElementById('inpimg');
       img.src = e.target.result;
-      img.height = Depth_IMAGE_HEIGHT;
-      img.width = Depth_IMAGE_WIDTH;
+      img.height = IMAGE_HEIGHT;
+      img.width = IMAGE_WIDTH;
       img.onload = () => Depth_Demo(img);
     };
 
@@ -56,8 +56,8 @@ document.getElementById('btn').onclick = function() {
           // Fill the image & call predict.
           let img = document.getElementById('inpimg');
           img.src = e.target.result;
-          img.height = Depth_IMAGE_HEIGHT;
-          img.width = Depth_IMAGE_WIDTH;
+          img.height = IMAGE_HEIGHT;
+          img.width = IMAGE_WIDTH;
           img.onload = () => Depth_Demo(img);
         };
     };
@@ -172,7 +172,10 @@ const classifier_Demo = async (imElement) => {
     document.getElementById("classifier_out2").innerHTML = output[1];
     document.getElementById("classifier_out3").innerHTML = output[2];
 
-    predictions.dispose()
+    //console.log("before: ", tf.memory());
+    //predictions.dispose();
+    tf.disposeVariables();
+    //console.log("after: ", tf.memory());
     status_classifier.textContent = 'Status: Done!';
   };
 
@@ -191,8 +194,6 @@ const classifier_Demo = async (imElement) => {
     // Make a prediction through the locally hosted inpimg.jpg.
     let inpElement = document.getElementById('inpimg');
     //inpElement.src = e.target.result;
-    inpElement.height = Depth_IMAGE_HEIGHT;
-    inpElement.width = Depth_IMAGE_WIDTH;
     if (inpElement.complete && inpElement.naturalHeight !== 0) {
       Depth_Demo(inpElement);
       inpElement.style.display = '';
@@ -213,14 +214,15 @@ const classifier_Demo = async (imElement) => {
 
     status_depth.textContent = 'Status: Loading...';
     const offset = 1; // label mask offset
-    const img = tf.browser.fromPixels(imElement).toFloat();
+    const img = tf.image.resizeBilinear(tf.browser.fromPixels(imElement).toFloat(),
+      [Depth_IMAGE_HEIGHT,Depth_IMAGE_WIDTH]);
     //console.log(img);
     const scale = tf.scalar(255.);
-    const mean = tf.tensor3d([0.485, 0.456, 0.406], [1,1,3]);
-    const std = tf.tensor3d([0.229, 0.224, 0.225], [1,1,3]);
+    //const mean = tf.tensor3d([0.485, 0.456, 0.406], [1,1,3]);
+    //const std = tf.tensor3d([0.229, 0.224, 0.225], [1,1,3]);
     const normscale = tf.tensor3d([1., 1., -1.], [1,1,3]);
     const normsub = tf.tensor3d([-1., -1., 1], [1,1,3]);
-    const normalised = img.div(scale).sub(mean).div(std);
+    const normalised = img.div(scale);//.sub(mean).div(std);
 
     const model_encoder = await tf.loadLayersModel('/assets/tfjs_encoder_quant/model.json');
     const model_decoder = await tf.loadLayersModel('/assets/tfjs_decoder_quant/model.json');
@@ -244,10 +246,13 @@ const classifier_Demo = async (imElement) => {
 
     const depthCanvas = document.getElementById('depth');
 
-    status_depth.textContent = 'Status: Done!';
-    await tf.browser.toPixels(depthMask, depthCanvas);
+    await tf.browser.toPixels(tf.image.resizeBilinear(depthMask,
+      [IMAGE_HEIGHT,IMAGE_WIDTH]), depthCanvas);
 
-    var x;
+    status_depth.textContent = 'Status: Done!';
+    //console.log("before: ", tf.memory());
+
+    /*var x;
     for (x of features) {
       x.dispose();
     }
@@ -255,8 +260,10 @@ const classifier_Demo = async (imElement) => {
       x.dispose();
     }
     //predictions.dispose()
-    depthPred.dispose()
-    depthMask.dispose()
+    depthPred.dispose();
+    depthMask.dispose();*/
+    tf.disposeVariables();
+    //console.log("after: ", tf.memory());
   };
 
   ClassiferWarmup();
