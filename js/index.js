@@ -168,15 +168,18 @@ const classifier_Demo = async (imElement) => {
     //console.log(output);
     // done to sort vals as numbers instead of strings
     output.sort(function(a, b){return b[1] - a[1]});
-    document.getElementById("classifier_out1").innerHTML = output[0];
-    document.getElementById("classifier_out2").innerHTML = output[1];
-    document.getElementById("classifier_out3").innerHTML = output[2];
+    document.getElementById("classifier_out1").innerHTML = output[0][0]+": "+(output[0][1]*100).toFixed(2)+"%";
+    document.getElementById("classifier_out2").innerHTML = output[1][0]+": "+(output[1][1]*100).toFixed(2)+"%";
+    document.getElementById("classifier_out3").innerHTML = output[2][0]+": "+(output[2][1]*100).toFixed(2)+"%";
+
+    status_classifier.textContent = 'Status: Done!';
 
     //console.log("before: ", tf.memory());
-    //predictions.dispose();
-    tf.disposeVariables();
+    normalised.dispose();
+    batched.dispose();
+    predictions.dispose();
+    //tf.disposeVariables();
     //console.log("after: ", tf.memory());
-    status_classifier.textContent = 'Status: Done!';
   };
 
 
@@ -220,8 +223,8 @@ const classifier_Demo = async (imElement) => {
     const scale = tf.scalar(255.);
     //const mean = tf.tensor3d([0.485, 0.456, 0.406], [1,1,3]);
     //const std = tf.tensor3d([0.229, 0.224, 0.225], [1,1,3]);
-    const normscale = tf.tensor3d([1., 1., -1.], [1,1,3]);
-    const normsub = tf.tensor3d([-1., -1., 1], [1,1,3]);
+    //const normscale = tf.tensor3d([1., 1., -1.], [1,1,3]);
+    //const normsub = tf.tensor3d([-1., -1., 1], [1,1,3]);
     const normalised = img.div(scale);//.sub(mean).div(std);
 
     const model_encoder = await tf.loadLayersModel('/assets/tfjs_encoder_quant/model.json');
@@ -239,10 +242,10 @@ const classifier_Demo = async (imElement) => {
     //const initShape = batched.shape.slice(2,4);
 
     const depthPred = predictions[3].squeeze(0).transpose([1,2,0]);
-    const MAX_D = depthPred.max();
-    const MIN_D = depthPred.min();
+    //const MAX_D = depthPred.max();
+    //const MIN_D = depthPred.min();
 
-    const depthMask = depthPred.sub(MIN_D).divNoNan(MAX_D.sub(MIN_D));
+    const depthMask = depthPred.sub(depthPred.min()).divNoNan(depthPred.max().sub(depthPred.min()));
 
     const depthCanvas = document.getElementById('depth');
 
@@ -252,17 +255,19 @@ const classifier_Demo = async (imElement) => {
     status_depth.textContent = 'Status: Done!';
     //console.log("before: ", tf.memory());
 
-    /*var x;
+    var x;
     for (x of features) {
       x.dispose();
     }
     for (x of predictions) {
       x.dispose();
     }
-    //predictions.dispose()
+
+    normalised.dispose();
+    batched.dispose();
     depthPred.dispose();
-    depthMask.dispose();*/
-    tf.disposeVariables();
+    depthMask.dispose();
+    //tf.disposeVariables();
     //console.log("after: ", tf.memory());
   };
 
