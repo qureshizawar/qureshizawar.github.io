@@ -1,7 +1,10 @@
 tf.setBackend('webgl');
-// Even though it is an FCN-model
-// smaller image size is preferrable for the demonstration purposes
-// You can set any image size that even divides 32
+
+let model_classifier;
+
+let model_depth_encoder;
+let model_depth_decoder;
+
 const IMAGE_HEIGHT = 224;
 const IMAGE_WIDTH = 384;
 
@@ -117,12 +120,12 @@ document.getElementById('btn0').onclick = function() {
 const ClassiferWarmup = async () => {
 
   status_classifier.textContent = 'Status: Loading...';
-  const model = await tf.loadGraphModel('/assets/tfjs_model/model.json');
+  model_classifier = await tf.loadGraphModel('/assets/tfjs_model/model.json');
 
   // Warmup the model. This isn't necessary, but makes the first prediction
   // faster. Call `dispose` to release the WebGL memory allocated for the return
   // value of `predict`.
-  //model.predict(tf.zeros([1, IMAGE_HEIGHT, IMAGE_HEIGHT, 3])).dispose();
+  //model_classifier.predict(tf.zeros([1, IMAGE_HEIGHT, IMAGE_HEIGHT, 3])).dispose();
 
   // Make a prediction through the locally hosted inpimg0.jpg.
   const inpElement = document.getElementById('inpimg0');
@@ -149,12 +152,12 @@ const classifier_Demo = async (imElement) => {
     const mean = tf.tensor3d([0.485, 0.456, 0.406], [1,1,3]);
     const std = tf.tensor3d([0.229, 0.224, 0.225], [1,1,3]);
     const normalised = img.div(scale).sub(mean).div(std);
-    const model = await tf.loadGraphModel('/assets/tfjs_model/model.json');
+    //const model = await tf.loadGraphModel('/assets/tfjs_model/model.json');
     status_classifier.textContent = 'Status: Model loaded! running inference';
     //const batched = normalised.transpose([2,0,1]).expandDims();
     const batched = normalised.transpose([0,1,2]).expandDims();
 
-    const predictions = model.predict(batched);
+    const predictions = model_classifier.predict(batched);
 
     var output = [];
 
@@ -186,8 +189,8 @@ const classifier_Demo = async (imElement) => {
   const DepthWarmup = async () => {
 
     status_depth.textContent = 'Status: Loading...';
-    const model_encoder = await tf.loadLayersModel('/assets/tfjs_encoder_quant/model.json');
-    const model_decoder = await tf.loadLayersModel('/assets/tfjs_decoder_quant/model.json');
+    model_depth_encoder = await tf.loadLayersModel('/assets/tfjs_encoder_quant/model.json');
+    model_depth_decoder = await tf.loadLayersModel('/assets/tfjs_decoder_quant/model.json');
 
     // Warmup the model. This isn't necessary, but makes the first prediction
     // faster. Call `dispose` to release the WebGL memory allocated for the return
@@ -227,16 +230,16 @@ const classifier_Demo = async (imElement) => {
     //const normsub = tf.tensor3d([-1., -1., 1], [1,1,3]);
     const normalised = img.div(scale);//.sub(mean).div(std);
 
-    const model_encoder = await tf.loadLayersModel('/assets/tfjs_encoder_quant/model.json');
-    const model_decoder = await tf.loadLayersModel('/assets/tfjs_decoder_quant/model.json');
+    model_depth_encoder = await tf.loadLayersModel('/assets/tfjs_encoder_quant/model.json');
+    model_depth_decoder = await tf.loadLayersModel('/assets/tfjs_decoder_quant/model.json');
 
     status_depth.textContent = 'Status: Model loaded! running inference';
     const batched = normalised.transpose([2,0,1]).expandDims();
 
     //const predictions = model.predict(batched);
 
-    const features = model_encoder.predict(batched);
-    const predictions = model_decoder.predict(features);
+    const features = model_depth_encoder.predict(batched);
+    const predictions = model_depth_decoder.predict(features);
 
     //console.log(predictions);
     //const initShape = batched.shape.slice(2,4);
