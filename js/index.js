@@ -146,7 +146,11 @@ const ClassiferWarmup = async () => {
 const classifier_Demo = async (imElement) => {
     // const imElement = document.getElementById('inpimg');
     status_classifier.textContent = 'Status: Loading...';
-    const offset = 0; // label mask offset
+    // The first start time includes the time it takes to extract the image
+    // from the HTML and preprocess it, in additon to the predict() call.
+    //const startTime1 = performance.now();
+    const predictions = tf.tidy(() => {
+
     const img = tf.browser.fromPixels(imElement).toFloat();
     const scale = tf.scalar(255.);
     const mean = tf.tensor3d([0.485, 0.456, 0.406], [1,1,3]);
@@ -157,7 +161,11 @@ const classifier_Demo = async (imElement) => {
     //const batched = normalised.transpose([2,0,1]).expandDims();
     const batched = normalised.transpose([0,1,2]).expandDims();
 
-    const predictions = model_classifier.predict(batched);
+    //const predictions = model_classifier.predict(batched);
+    //startTime2 = performance.now();
+    return  model_classifier.predict(batched);
+
+    });
 
     var output = [];
 
@@ -175,11 +183,14 @@ const classifier_Demo = async (imElement) => {
     document.getElementById("classifier_out2").innerHTML = output[1][0]+": "+(output[1][1]*100).toFixed(2)+"%";
     document.getElementById("classifier_out3").innerHTML = output[2][0]+": "+(output[2][1]*100).toFixed(2)+"%";
 
+    /*const totalTime1 = performance.now() - startTime1;
+    const totalTime2 = performance.now() - startTime2;
+    status_classifier.textContent =  `Done in ${Math.floor(totalTime1)} ms ` +
+        `(not including preprocessing: ${Math.floor(totalTime2)} ms)`;*/
+
     status_classifier.textContent = 'Status: Done!';
 
     //console.log("before: ", tf.memory());
-    normalised.dispose();
-    batched.dispose();
     predictions.dispose();
     //tf.disposeVariables();
     //console.log("after: ", tf.memory());
@@ -219,8 +230,12 @@ const classifier_Demo = async (imElement) => {
     // const imElement = document.getElementById('inpimg');
 
     status_depth.textContent = 'Status: Loading...';
-    const offset = 1; // label mask offset
-    const img = tf.image.resizeBilinear(tf.browser.fromPixels(imElement).toFloat(),
+    // The first start time includes the time it takes to extract the image
+    // from the HTML and preprocess it, in additon to the predict() call.
+    //const startTime1 = performance.now();
+    const depthMask = tf.tidy(() => {
+
+    var img = tf.image.resizeBilinear(tf.browser.fromPixels(imElement).toFloat(),
       [Depth_IMAGE_HEIGHT,Depth_IMAGE_WIDTH]);
     //console.log(img);
     const scale = tf.scalar(255.);
@@ -228,47 +243,39 @@ const classifier_Demo = async (imElement) => {
     //const std = tf.tensor3d([0.229, 0.224, 0.225], [1,1,3]);
     //const normscale = tf.tensor3d([1., 1., -1.], [1,1,3]);
     //const normsub = tf.tensor3d([-1., -1., 1], [1,1,3]);
-    const normalised = img.div(scale);//.sub(mean).div(std);
-
-    model_depth_encoder = await tf.loadLayersModel('/assets/tfjs_encoder_quant/model.json');
-    model_depth_decoder = await tf.loadLayersModel('/assets/tfjs_decoder_quant/model.json');
+    img = img.div(scale);//.sub(mean).div(std);
 
     status_depth.textContent = 'Status: Model loaded! running inference';
-    const batched = normalised.transpose([2,0,1]).expandDims();
+    img = img.transpose([2,0,1]).expandDims();
 
-    //const predictions = model.predict(batched);
-
-    const features = model_depth_encoder.predict(batched);
-    const predictions = model_depth_decoder.predict(features);
+    //const features = model_depth_encoder.predict(batched);
+    const predictions = model_depth_decoder.predict(model_depth_encoder.predict(img));
 
     //console.log(predictions);
-    //const initShape = batched.shape.slice(2,4);
 
     const depthPred = predictions[3].squeeze(0).transpose([1,2,0]);
     //const MAX_D = depthPred.max();
     //const MIN_D = depthPred.min();
 
-    const depthMask = depthPred.sub(depthPred.min()).divNoNan(depthPred.max().sub(depthPred.min()));
+    //const depthMask = depthPred.sub(depthPred.min()).divNoNan(depthPred.max().sub(depthPred.min()));
+    //startTime2 = performance.now();
+    return depthPred.sub(depthPred.min()).divNoNan(depthPred.max().sub(depthPred.min()));
+
+    });
 
     const depthCanvas = document.getElementById('depth');
 
     await tf.browser.toPixels(tf.image.resizeBilinear(depthMask,
       [IMAGE_HEIGHT,IMAGE_WIDTH]), depthCanvas);
 
+    /*const totalTime1 = performance.now() - startTime1;
+    const totalTime2 = performance.now() - startTime2;
+    status_depth.textContent =  `Done in ${Math.floor(totalTime1)} ms ` +
+        `(not including preprocessing: ${Math.floor(totalTime2)} ms)`;*/
+
     status_depth.textContent = 'Status: Done!';
     //console.log("before: ", tf.memory());
 
-    var x;
-    for (x of features) {
-      x.dispose();
-    }
-    for (x of predictions) {
-      x.dispose();
-    }
-
-    normalised.dispose();
-    batched.dispose();
-    depthPred.dispose();
     depthMask.dispose();
     //tf.disposeVariables();
     //console.log("after: ", tf.memory());
