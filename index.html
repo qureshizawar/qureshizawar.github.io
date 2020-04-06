@@ -42,26 +42,27 @@
     margin-bottom: 20px;
   }
 
-  .collapsible {
+  .collapsible_tf {
     background-color: #3498db;
     color: white;
     cursor: pointer;
     padding: 18px;
     width: 100%;
-    border: none;
+    border: 0.05px;
+    border-style: solid;
     text-align: left;
     outline: none;
     font-size: 15px;
   }
 
-  .active, .collapsible:hover {
+  .active_tf, .collapsible_tf:hover {
     background-color: #217dbb;
   }
 
-  .content {
+  .content_tf {
     padding: 0px 18px;
-    max-height: 280;
-    overflow: auto;
+    display: none;
+    overflow: hidden;
     transition: max-height 0.2s ease-out;
     background-color: #f1f1f1;
   }
@@ -69,6 +70,13 @@
   .canvas {
     position: relative;
     border:1px;
+  }
+
+
+  #grad1 {
+  height: 10px;
+  background-color: white; /* For browsers that do not support gradients */
+  background-image: linear-gradient(to right, white , black); /* Standard syntax (must be last) */
   }
 
 </style>
@@ -318,8 +326,8 @@ development work </br>
     <div class="optional-section-block">
         <h4>Some models developed by me over the years, now available in your browser to try! (WIP)</h4>
 
-				<button class="collapsible">Image classifier</button>
-		    <div class="content">
+				<button class="collapsible_tf" title="Image classifier">Image classifier</button>
+            <div class="content_tf">
 
 		    <section>
 		      <p> MobileNet model used to create an image classifier for Nexar challenge which was trained using
@@ -346,8 +354,8 @@ development work </br>
 
 		    </div>
 
-				<button class="collapsible">Depth</button>
-		    <div class="content">
+				<button class="collapsible_tf" title="Depth">Depth</button>
+            <div class="content_tf">
 		        <section>
 							<p> Monocular depth estimation model trained using single camera views from the kitti dataset</p>
 

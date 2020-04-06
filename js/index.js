@@ -281,5 +281,26 @@ const classifier_Demo = async (imElement) => {
     //console.log("after: ", tf.memory());
   };
 
-  ClassiferWarmup();
-  DepthWarmup();
+var coll = document.getElementsByClassName("collapsible_tf");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("activeb");
+    var content_tf = this.nextElementSibling;
+    if (content_tf.style.display === "block") {
+      content_tf.style.display = "none";
+    } else {
+      content_tf.style.display = "block";
+      if (this.title == "Image classifier"){
+        ClassiferWarmup();
+      }
+      else if (this.title == "Depth"){
+        DepthWarmup();
+      }
+      /*else if (this.title == "Style"){
+        MaskWarmup();
+      }*/
+    }
+  });
+}
