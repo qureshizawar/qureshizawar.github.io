@@ -1,4 +1,5 @@
 tf.setBackend('webgl');
+tf.ENV.set('WEBGL_CONV_IM2COL', false);
 
 let model_classifier;
 
