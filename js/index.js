@@ -300,6 +300,12 @@ const classifier_Demo = async (imElement) => {
     //console.log("Call to classifier_Demo took " + (t1 - t0) + " milliseconds.");
   };
 
+  function custom_mgrid(rows, cols){
+    a = tf.tile(tf.range(0,rows).reshape([rows,1]),[1,cols]) // cols
+    b = tf.tile(tf.range(0,cols).expandDims(0),[rows,1]) // rows
+    return [a, b];
+  }
+
 
   const DepthWarmup = async () => {
 
@@ -330,6 +336,8 @@ const classifier_Demo = async (imElement) => {
     var depth_time = 0
 
     status_depth.textContent = 'Status: Loading image into model...';
+
+    in_img = tf.browser.fromPixels(imElement).toFloat();
 
     const depthMask = tf.tidy(() => {
     
@@ -366,14 +374,24 @@ const classifier_Demo = async (imElement) => {
     //await tf.browser.toPixels(tf.image.resizeBilinear(depthMask,
     //  [IMAGE_HEIGHT,IMAGE_WIDTH]), depthCanvas);
 
-    await tf.browser.toPixels(tf.image.resizeBilinear(depthMask,
-      [t_Height,t_Width]), depthCanvas);
+    const depthMask_resized = tf.image.resizeBilinear(depthMask, [t_Height,t_Width])
+
+    img_array =  in_img.arraySync()
+    depth_array = depthMask_resized.arraySync()
+
+    //const points = GenPointCloud(depthMask_resized)
+
+    await tf.browser.toPixels(depthMask_resized, depthCanvas);
 
     status_depth.textContent = "Status: Done! inference took "+ (depth_time.toFixed(1)) + " milliseconds.";
     //console.log("before: ", tf.memory());
 
     //tf.disposeVariables();
     //console.log("after: ", tf.memory());
+
+
+    const xy = custom_mgrid(img_array.length, img_array[0].length)
+    createPointCloud(xy[0].arraySync(),xy[1].arraySync(),depth_array,img_array);
   };
 
   const Load_style_model = async (style_type) => {
@@ -497,9 +515,9 @@ const classifier_Demo = async (imElement) => {
 
       //const out = tf.image.resizeNearestNeighbor(predictions[0],[512,512]).squeeze(0);
       const Sem_mask = tf.image.resizeBilinear(predictions,[segmentation_IMAGE_HEIGHT,
-                        segmentation_IMAGE_WIDTH], true).squeeze(0).argMax(2).expandDims(2);
+                        segmentation_IMAGE_WIDTH], true).squeeze(0).argMax(2);//.expandDims(2);
 
-      const Sem_mask_conc = Sem_mask.concat(Sem_mask.concat(Sem_mask,2),2)
+      const Sem_mask_conc = tf.stack([Sem_mask, Sem_mask, Sem_mask],2);
 
       if (output_type=='masked_style'){
         return tf.image.resizeBilinear(style_out,[segmentation_IMAGE_HEIGHT,

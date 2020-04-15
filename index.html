@@ -33,6 +33,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-load-image/2.12.2/load-image.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-load-image/2.12.2/load-image-scale.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-load-image/2.12.2/load-image-orientation.min.js"></script>
+
+    <script src="./js/three.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 </head>
 
 <style>
@@ -336,7 +339,7 @@
 
                 <button class="collapsible_tf" title="Depth">Depth</button>
             <div class="content_tf">
-                <section>
+                <section id="depth_sec">
                             <p> Monocular depth estimation model trained using single camera views from the kitti dataset</p>
 
                   <table  style="width: 100%;">
@@ -386,7 +389,15 @@
                   <img id="inpimg" src="/assets/demo_images/sample.png"  height="auto" width="100%" max-width= "400px"/>
                             <p class="section-head">Prediction:</p>
                   <canvas id="depth" class="canvas"></canvas>
+                  <p class="section-head">3D point cloud:</p>
                   <!--div id="grad1"></div-->
+
+                  <!--script type="module">
+                    import { createPointCloud } from './js/pointCloud.js';
+                    
+                    createPointCloud("./js/test10.csv")
+                    </script-->
+                    <canvas id="depth_canvas" class="canvas"></canvas>
                 </section>
             </div>
 
@@ -576,7 +587,8 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="js/scripts.min.js"></script>
-	<script src="js/index.js?v=4s"></script>
+  <script type="module" src="js/pointCloud.js"></script>
+	<script src="js/index.js?v=5"></script>
 </body>
 
 </html>
