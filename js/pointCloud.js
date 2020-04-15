@@ -70,13 +70,14 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
 
     renderer.setClearColorHex(0xEEEEEE, 1.0);
 
-    function normFOV(h,w){
-        return (1/(1+Math.pow(Math.E, 5-4*(w/h)))) + 0.5
+    function normFOV(w,h){
+        //return (1/(1+Math.pow(Math.E, 5-4*(w/h)))) + 0.5
+        return 120.3704 - 36.41975*(w/h) + 4.115226*Math.pow(w/h,2)
     }
     //console.log(w/h)
     //console.log(normFOV(h,w))
 
-    var camera = new THREE.PerspectiveCamera(45, w / h, 1, 10000);
+    var camera = new THREE.PerspectiveCamera(normFOV(w,h), w / h, 1, 10000);
     camera.position.z = 200;
     camera.position.x = 100;
     camera.position.y = 100;
