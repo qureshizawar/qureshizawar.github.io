@@ -35,10 +35,11 @@ const status_depth = document.getElementById('status_depth');
 
 var Warmup = true;
 
-document.getElementById("files0").addEventListener("change", function (evt) {
+function classifier_file(image) {
   status_classifier.textContent = 'Status: Fetching image...';
   //var tt = performance.now();
-  var image = evt.target.files[0]; // FileList object
+  //console.log(document.getElementById("files0"))
+  //var image = evt.target.files[0]; // FileList object
   if (window.File && window.FileReader && window.FileList && window.Blob) {
       var reader = new FileReader();
       // Closure to capture the file information.
@@ -70,6 +71,19 @@ document.getElementById("files0").addEventListener("change", function (evt) {
   } else {
       console.log('The File APIs are not fully supported in this browser.');
   }
+};
+
+document.getElementById("files0").addEventListener("change", function(evt){
+  classifier_file(evt.target.files[0]);
+});
+document.getElementById("classifier_files_btn").addEventListener("click", function(evt){
+  file = document.getElementById("files0").files[0];
+  if (file==null){
+    status_classifier.textContent = 'Status: File not found';
+  }
+  else{
+  classifier_file(file);
+  }
 });
 
 
@@ -99,10 +113,10 @@ document.getElementById('btn0').onclick = function() {
     };
 }
 
-document.getElementById("files").addEventListener("change", function (evt) {
+function depth_file(image) {
   status_depth.textContent = 'Status: Fetching image...';
   //var tt = performance.now();
-  var image = evt.target.files[0]; // FileList object
+  //var image = evt.target.files[0]; // FileList object
   if (window.File && window.FileReader && window.FileList && window.Blob) {
       var reader = new FileReader();
       // Closure to capture the file information.
@@ -134,6 +148,19 @@ document.getElementById("files").addEventListener("change", function (evt) {
   } else {
       console.log('The File APIs are not fully supported in this browser.');
   }
+};
+
+document.getElementById("files").addEventListener("change", function(evt){
+  depth_file(evt.target.files[0]);
+});
+document.getElementById("depth_files_btn").addEventListener("click", function(evt){
+  file = document.getElementById("files").files[0];
+  if (file==null){
+    status_depth.textContent = 'Status: File not found';
+  }
+  else{
+  depth_file(file);
+  }
 });
 
 document.getElementById('btn').onclick = function() {
@@ -163,10 +190,10 @@ document.getElementById('btn').onclick = function() {
 
 
 // see https://stackoverflow.com/questions/20600800/js-client-side-exif-orientation-rotate-and-mirror-jpeg-images
-document.getElementById("files_style").addEventListener("change", function (evt) {
+function style_file(image) {
   status_style.textContent = 'Status: Fetching image...';
   //var tt = performance.now();
-  var image = evt.target.files[0]; // FileList object
+  //var image = evt.target.files[0]; // FileList object
   if (window.File && window.FileReader && window.FileList && window.Blob) {
       var reader = new FileReader();
       // Closure to capture the file information.
@@ -197,6 +224,19 @@ document.getElementById("files_style").addEventListener("change", function (evt)
       reader.readAsDataURL(image);
   } else {
       console.log('The File APIs are not fully supported in this browser.');
+  }
+};
+
+document.getElementById("files_style").addEventListener("change", function(evt){
+  style_file(evt.target.files[0]);
+});
+document.getElementById("style_files_btn").addEventListener("click", function(evt){
+  file = document.getElementById("files_style").files[0];
+  if (file==null){
+    status_style.textContent = 'Status: File not found';
+  }
+  else{
+  style_file(file);
   }
 });
 
