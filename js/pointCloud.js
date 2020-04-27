@@ -138,10 +138,10 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
                   .range([-h/3,h/3]);                  
     var zScale = d3.scale.linear()
                   .domain(zExent)
-                  .range([-75,75]);
+                  .range([-100,100]);
 
-    var lineGeo = new THREE.Geometry();
-    /*lineGeo.vertices.push(
+    /*var lineGeo = new THREE.Geometry();
+    lineGeo.vertices.push(
         v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zCen)), v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zCen)),
         v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zCen)), v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zCen)),
         v(xScale(vpts.xCen), yScale(vpts.yCen), zScale(vpts.zMax)), v(xScale(vpts.xCen), yScale(vpts.yCen), zScale(vpts.zMin)),
@@ -176,7 +176,7 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
         v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zMin)), v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zMin)),
         v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMax))
 
-    );*/
+    );
     var lineMat = new THREE.LineBasicMaterial({
         color: 0x000000,
         lineWidth: 1
@@ -227,12 +227,14 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
 
     var titleZ = createText2D('Z ' + format(zExent[1]));
     titleZ.position.z = zScale(vpts.zMax) + 2;
-    scatterPlot.add(titleZ);
+    scatterPlot.add(titleZ);*/
+
+    //console.log(window.devicePixelRatio)
 
     var mat = new THREE.ParticleBasicMaterial({
         vertexColors: true,
         //color: 0x888888,
-        size: 1
+        size: 0.75 * window.devicePixelRatio
     });
 
     var pointCount = unfiltered.length;
@@ -245,6 +247,8 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
         var x = xScale(unfiltered[i].x);
         var y = yScale(unfiltered[i].y);
         var z = zScale(unfiltered[i].z);
+
+        //console.log(x,y,z,unfiltered[0].r, unfiltered[0].g, unfiltered[0].b)
 
         pointGeo.vertices.push(new THREE.Vector3(x, y, z));
         //console.log(pointGeo.vertices);
@@ -281,87 +285,6 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
     controls.maxDistance = 500;
 
     controls.maxPolarAngle = Math.PI / 2;
-
-    /*renderer.render(scene, camera);
-    var paused = false;
-    var last = new Date().getTime();
-    var down = false;
-    var sx = 0,
-        sy = 0;
-        
-    window.onmousedown = function(ev) {
-        down = true;
-        sx = ev.clientX;
-        sy = ev.clientY;
-    };
-    window.onmouseup = function() {
-        down = false;
-    };
-    window.onmousemove = function(ev) {
-        if (down) {
-            var dx = ev.clientX - sx;
-            var dy = ev.clientY - sy;
-            scatterPlot.rotation.y += dx * 0.01;
-            camera.position.y += dy;
-            sx += dx;
-            sy += dy;
-        }
-    }
-
-    window.ontouchstart = function(ev) {
-        console.log('touched!')
-        down = true;
-        sx = ev.clientX;
-        sy = ev.clientY;
-    };
-    window.ontouchend = function() {
-        console.log('untouched!')
-        down = false;
-    };
-    window.ontouchcancel = function() {
-        down = false;
-    };
-    window.ontouchmove = function(ev) {
-        if (down) {
-            var dx = ev.clientX - sx;
-            var dy = ev.clientY - sy;
-            scatterPlot.rotation.y += dx * 0.01;
-            camera.position.y += dy;
-            sx += dx;
-            sy += dy;
-        }
-    }
-    var animating = true;//false;
-    /*window.ondblclick = function() {
-        animating = !animating;
-    };*/
-
-    /*function animate(t) {
-        if (!paused) {
-            last = t;
-            if (animating) {
-                var v = pointGeo.vertices;
-                for (var i = 0; i < v.length; i++) {
-                    var u = v[i];
-                    //console.log(u)
-                    u.angle += u.speed * 0.01;
-                    u.x = Math.cos(u.angle) * u.radius;
-                    u.z = Math.sin(u.angle) * u.radius;
-                }
-                pointGeo.__dirtyVertices = true;
-            }
-            renderer.clear();
-            camera.lookAt(scene.position);
-            renderer.render(scene, camera);
-        }
-        window.requestAnimationFrame(animate, renderer.domElement);
-    };
-    animate(new Date().getTime());
-    onmessage = function(ev) {
-        paused = (ev.data == 'pause');
-    };*/
-
-    //})
 
     animate();
 
