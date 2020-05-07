@@ -135,7 +135,7 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
                   .range([-w/3,w/3]);
     var yScale = d3.scale.linear()
                   .domain(yExent)
-                  .range([-h/3,h/3]);                  
+                  .range([-h/3,h/3]);
     var zScale = d3.scale.linear()
                   .domain(zExent)
                   .range([-100,100]);
@@ -234,7 +234,7 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
     var mat = new THREE.ParticleBasicMaterial({
         vertexColors: true,
         //color: 0x888888,
-        size: 0.75 * window.devicePixelRatio
+        size: 0.85 * window.devicePixelRatio
     });
 
     var pointCount = unfiltered.length;
@@ -256,7 +256,7 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
         //pointGeo.vertices[i].radius = Math.sqrt(x * x + z * z);
         //pointGeo.vertices[i].speed = (z / 100) * (x / 100);
         /*pointGeo.colors.push(new THREE.Color().setRGB(
-          hexToRgb(colour(i)).r / 255, hexToRgb(colour(i)).g / 255, hexToRgb(colour(i)).b / 255 
+          hexToRgb(colour(i)).r / 255, hexToRgb(colour(i)).g / 255, hexToRgb(colour(i)).b / 255
         ));*/
         pointGeo.colors.push(new THREE.Color().setRGB(unfiltered[i].r/255, unfiltered[i].g/255, unfiltered[i].b/255
         ));
