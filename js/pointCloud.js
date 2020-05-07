@@ -1,4 +1,5 @@
 import { OrbitControls } from './OrbitControls.js';
+import * as THREE from 'https://unpkg.com/three/build/three.module.js'
 
 window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_array){
 
@@ -68,7 +69,7 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
     //console.log(depth_node.children)
     var depth_canvas_node = document.getElementById('depth_canvas');
 
-    renderer.setClearColorHex(0xEEEEEE, 1.0);
+    renderer.setClearColor(0xEEEEEE, 1.0);
 
     function normFOV(w,h){
         //return (1/(1+Math.pow(Math.E, 5-4*(w/h)))) + 0.5
@@ -77,12 +78,13 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
     //console.log(w/h)
     //console.log(normFOV(h,w))
 
+    var scene = new THREE.Scene();
+
     var camera = new THREE.PerspectiveCamera(normFOV(w,h), w / h, 1, 10000);
     camera.position.z = 200;
     camera.position.x = 100;
     camera.position.y = 100;
 
-    var scene = new THREE.Scene();
 
     var scatterPlot = new THREE.Object3D();
     scene.add(scatterPlot);
@@ -231,7 +233,7 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
 
     //console.log(window.devicePixelRatio)
 
-    var mat = new THREE.ParticleBasicMaterial({
+    var mat = new THREE.PointsMaterial({
         vertexColors: true,
         //color: 0x888888,
         size: 0.85 * window.devicePixelRatio
@@ -263,7 +265,7 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
 
     }
 
-    var points = new THREE.ParticleSystem(pointGeo, mat);
+    var points = new THREE.Points(pointGeo, mat);
     scatterPlot.add(points);
     //})
 
