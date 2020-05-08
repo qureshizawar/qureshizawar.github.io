@@ -1,8 +1,8 @@
 /*!
     Title: Dev Portfolio Template
-    Version: 1.2.2
-    Last Change: 03/25/2020
-    Author: Ryan Fitzgerald
+    Version: 1.2.2-a
+    Last Change: 04/25/2020
+    Authors: Ryan Fitzgerald Zawar Qureshi
     Repo: https://github.com/RyanFitzgerald/devportfolio-template
     Issues: https://github.com/RyanFitzgerald/devportfolio-template/issues
 
@@ -24,7 +24,8 @@
         9. Skills Styles
         10. Contact Styles
         11. Optional Section Styles
-        12. Media Queries
+        12. Demo Section Styles
+        13. Media Queries
 */
 
 /*
@@ -303,6 +304,21 @@ footer {
     &:hover {
         color: $base-color;
         background: #fff;
+        text-decoration: none;
+    }
+}
+
+.btn-rounded-blue {
+    display: inline-block;
+    color: $base-color;
+    padding: 15px 25px;
+    border: 3px solid $base-color;
+    border-radius: 30px;
+    @include transition();
+
+    &:hover {
+        color: #fff;
+        background: $base-color;
         text-decoration: none;
     }
 }
@@ -847,8 +863,56 @@ footer {
 }
 
 /*
+    ---------------------------------------
+    ----- 12. Demo Section Styles -----
+    ---------------------------------------
+*/
+
+.demo-section {
+    padding: 50px 15px;
+    text-align: center;
+    border-top: 1px solid $border;
+
+    h2 {
+        color: $heading;
+    }
+}
+
+.demo-section-block {
+    max-width: 900px;
+    margin: 0 auto 30px auto;
+    padding: 15px;
+    border: 1px solid $border;
+    background: #fff;
+    text-align: left;
+
+    h3 {
+        font-weight: 500;
+        margin: 0 0 15px 0;
+        color: $heading;
+    }
+
+    h4 {
+        color: $text;
+        clear: both;
+        font-weight: 500;
+        margin: 0 0 15px 0;
+    }
+
+    p, ul {
+        margin: 0 0 15px 0;
+        color: $text;
+        font-size: 0.9em;
+    }
+
+    ul {
+        padding: 0 0 0 15px;
+    }
+}
+
+/*
     -----------------------------
-    ----- 12. Media Queries -----
+    ----- 13. Media Queries -----
     -----------------------------
 */
 

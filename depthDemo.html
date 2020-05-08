@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-157023283-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'UA-157023283-1');
+  </script>
+
+  <meta charset="utf-8">
+  <!--meta http-equiv="X-UA-Compatible" content="IE=edge"!-->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Portfolio</title>
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.4.0/dist/tf.min.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900" rel="stylesheet">
+  <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/styles.css" rel="stylesheet">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.1.0/exif.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-load-image/2.12.2/load-image.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-load-image/2.12.2/load-image-scale.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-load-image/2.12.2/load-image-orientation.min.js"></script>
+
+  <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+
+<style>
+  .file-container {
+    margin-bottom: 20px;
+  }
+
+  .canvas {
+    position: relative;
+    border: 1px;
+  }
+
+  hr.solid {
+    border-top: 0.5px solid #999;
+  }
+
+  #grad1 {
+    height: 10px;
+    background-color: white;
+    /* For browsers that do not support gradients */
+    background-image: linear-gradient(to right, white, black);
+    /* Standard syntax (must be last) */
+  }
+</style>
+
+<body>
+  <div id="mobile-menu-open" class="shadow-large">
+    <i class="fa fa-bars" aria-hidden="true"></i>
+  </div>
+  <!-- End #mobile-menu-toggle -->
+  <header>
+    <div id="mobile-menu-close">
+      <span>Close</span> <i class="fa fa-times" aria-hidden="true"></i>
+    </div>
+    <ul id="menu" class="shadow">
+      <li>
+        <a class="no-scroll" href="/index.html">About Me</a>
+      </li>
+      <li>
+        <a class="no-scroll" href="/classifierDemo.html">Image classifier</a>
+      </li>
+      <li>
+        <a class="no-scroll" href="/depthDemo.html">Depth</a>
+      </li>
+      <li>
+        <a class="no-scroll" href="/styleDemo.html">Style</a>
+      </li>
+
+    </ul>
+  </header>
+
+  <div id="demo" class="demo-section background-alt">
+    <!--<div class="demo-section background-alt">-->
+    <h2 class="heading" style="padding:10px">Monocular Depth</h2>
+
+    <div class="demo-section-block shadow-large">
+      <h4>Some models developed by me over the years, now available in your
+        browser to try! Since these models run locally on device, any uploaded
+        pictures stay safely on the device. Please note that the first run would
+        be much slower than subsequent runs as Tensorflow loads the necessary
+        files. (WIP so there may be bugs!)
+      </h4>
+
+      <!--button class="collapsible_tf" title="Depth">Depth</button-->
+      <section id="depth_sec">
+        <p> Monocular depth estimation model trained using single camera views
+          from the kitti dataset</p>
+
+        <table style="width: 100%;">
+          <tbody>
+            <tr>
+              <td>
+                <p style="display: inline-block"> Depth quality: </p>
+                <div class="dropdown" style="display: inline-block">
+                  <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                    <t id="dropdown_depth_qual">medium</t>
+                    <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a id="depth_low" href="#">low</a></li>
+                    <li><a id="depth_medium" href="#">medium</a></li>
+                    <li><a id="depth_high" href="#">high</a></li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+
+            <table style="width: 100%;">
+              <tbody>
+                <tr>
+                  <td>
+                    <div id="file-container">
+                      <p style="display: inline-block"> Upload an image:</p>
+                      <input type="file" id="files" name="files" />
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <input type="button" id="depth_files_btn" value="Run" />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <form>
+                      <p style="display: inline-block"> Or enter URL: </p>
+                      <input type="text" value="" id="imagename" />
+                    </form>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <input type="button" id="btn" value="Run" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Solid divider -->
+            <hr class="solid">
+            </hr>
+
+            <p id="status_depth"></p>
+            <img id="inpimg" src="/assets/demo_images/sample.png" height="auto" width="100%" max-width="400px" />
+            <p class="section-head">Prediction:</p>
+            <canvas id="depth" class="canvas"></canvas>
+            <p class="section-head">3D point cloud:</p>
+            <!--div id="grad1"></div-->
+
+            <!--script type="module">
+                    import { createPointCloud } from './js/pointCloud.js';
+
+                    createPointCloud("./js/test10.csv")
+                    </script-->
+            <canvas id="depth_canvas" class="canvas"></canvas>
+      </section>
+    </div>
+
+  </div>
+  <!-- End .demo-section-block -->
+
+  <!-- End .demo-section -->
+
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-5 copyright">
+          <p>
+            Copyright &copy; 2020 Zawar Qureshi
+          </p>
+        </div>
+        <div class="col-sm-2 top">
+          <span id="to-top">
+            <i class="fa fa-chevron-up" aria-hidden="true"></i>
+          </span>
+        </div>
+        <div class="col-sm-5 social">
+          <ul>
+            <li>
+              <a href="https://github.com/qureshizawar" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+            </li>
+            <li>
+              <a href="https://stackoverflow.com/" target="_blank"><i class="fa fa-stack-overflow" aria-hidden="true"></i></a>
+            </li>
+            <li>
+              <a href="https://linkedin.com/in/zawarqureshi/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+            </li>
+            <li>
+              <a href="https://www.facebook.com/" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+            </li>
+            <li>
+              <a href="https://twitter.com/" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <!-- End footer -->
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="js/scripts.min.js"></script>
+  <script type="module" src="js/pointCloud.min.js"></script>
+  <script src="js/depthDemo.min.js"></script>
+</body>
+
+</html>
