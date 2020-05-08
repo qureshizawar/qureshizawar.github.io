@@ -23,15 +23,16 @@ const depth_high = document.getElementById('depth_high')
 
 function is_touch_device() {
   return 'ontouchstart' in window // works on most browsers
-      || 'onmsgesturechange' in window; // works on ie10
+    ||
+    'onmsgesturechange' in window; // works on ie10
 }
 //console.log(screen.width)
 //console.log((window.matchMedia('(max-device-width: 960px)').matches))
-if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').matches)){
-    Depth_IMAGE_HEIGHT = 192
-    Depth_IMAGE_WIDTH = 640
-    dropdown_depth_qual.textContent = depth_high.textContent;
-    //console.log("Desktop detected!")
+if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').matches)) {
+  Depth_IMAGE_HEIGHT = 192
+  Depth_IMAGE_WIDTH = 640
+  dropdown_depth_qual.textContent = depth_high.textContent;
+  //console.log("Desktop detected!")
 }
 
 function depth_file(image) {
@@ -51,7 +52,7 @@ function depth_file(image) {
           console.log("couldn't load image:", img);
         } else {
           window.EXIF.getData(img, function() {
-            console.log("done!");
+            //console.log("done!");
             var orientation = window.EXIF.getTag(this, "Orientation");
             var canvas = window.loadImage.scale(img, {
               orientation: orientation || 0,
@@ -116,7 +117,6 @@ function custom_mgrid(rows, cols) {
   b = tf.tile(tf.range(0, cols).expandDims(0), [rows, 1]) // rows
   return [a, b];
 }
-
 
 const DepthWarmup = async () => {
 

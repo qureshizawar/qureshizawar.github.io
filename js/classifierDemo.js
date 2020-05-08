@@ -7,12 +7,10 @@ tf.ENV.set('WEBGL_CONV_IM2COL', false);
 //tf.setBackend('cpu');
 //tf.enableProdMode();
 
-let model_classifier;
-
 var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
 
+let model_classifier;
 const status_classifier = document.getElementById('status_classifier');
-
 
 function classifier_file(image) {
   status_classifier.textContent = 'Status: Fetching image...';
@@ -67,7 +65,6 @@ document.getElementById("classifier_files_btn").addEventListener("click", functi
     classifier_file(file);
   }
 });
-
 
 document.getElementById('btn0').onclick = function() {
 

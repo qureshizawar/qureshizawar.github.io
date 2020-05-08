@@ -19,7 +19,6 @@ var style_IMAGE_WIDTH = 384
 
 var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
 
-
 const dropdown_seg_qual = document.getElementById('dropdown_seg_qual');
 const seg_low = document.getElementById('seg_low')
 const seg_medium = document.getElementById('seg_medium')
@@ -44,7 +43,6 @@ if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').mat
   dropdown_style_qual.textContent = style_vhigh.textContent;
   //console.log("Desktop detected!")
 }
-
 
 // see https://stackoverflow.com/questions/20600800/js-client-side-exif-orientation-rotate-and-mirror-jpeg-images
 function style_file(image) {
