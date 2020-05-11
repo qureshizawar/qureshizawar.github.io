@@ -40,6 +40,27 @@
 </head>
 
 <style>
+  img {
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+    object-position: left
+  }
+
+  /*video {
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+    object-position: left
+  }
+
+  canvas {
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+    object-position: left
+  }*/
+
   .file-container {
     margin-bottom: 20px;
   }
@@ -92,7 +113,7 @@
     <!--<div class="optional-section background-alt">-->
     <h2 class="heading" style="padding:10px">Image Classifier</h2>
 
-    <div class="demo-section-block shadow-large">
+    <div id='main' class="demo-section-block shadow-large">
       <h4>Some models developed by me over the years, now available in your
         browser to try! Since these models run locally on device, any uploaded
         pictures stay safely on the device. Please note that the first run would
@@ -104,6 +125,28 @@
         <p> MobileNet model used to create an image classifier for Nexar challenge which was trained using
           rear view images of different types of vehicles (cars, buses, etc.) </p>
 
+        <div id="info" style='display:none'>
+        </div>
+
+        <div>
+          image mode: <input type="checkbox" checked id="imagec" onclick="imagec()" />
+          video mode: <input type="checkbox" id="webcamc" onclick="webc()" />
+          use rear camera: <input type="checkbox" id="camMode" onclick="setmode()" />
+          <!--
+            show_fps: <input type="checkbox" id="show_fps" onclick="showfps()"/>
+          -->
+        </div>
+
+
+        <!-- Solid divider -->
+        <hr class="solid">
+        </hr>
+
+
+        <p id="status_classifier"></p>
+
+      </section>
+      <div id='mainImage' style='display:block'>
         <table style="width: 100%;">
           <tbody>
             <tr>
@@ -141,17 +184,24 @@
         <hr class="solid">
         </hr>
 
-        <p id="status_classifier"></p>
-        <div id="predictions0"></div>
-        <img id="inpimg0" src="/assets/demo_images/box_6109.jpg" width="224" height="224" />
-      </section>
-      <section>
+        <img id="inpimg0" src="/assets/demo_images/box_6109.jpg" height="auto" width="100%" max-width="400px">
+        </img>
+      </div>
+
+      <div id='mainVideo' style='display:none'>
+
+        <video id="video" playsinline style="display: none;">
+        </video>
+        <canvas id="output"></canvas>
+        <div id="fps" style='display:none'></div>
+
+      </div>
+      <div>
         <p class="section-head">Prediction:</p>
         <p id="classifier_out1"></p>
         <p id="classifier_out2"></p>
         <p id="classifier_out3"></p>
-      </section>
-
+      </div>
     </div>
 
 
@@ -202,7 +252,9 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="js/scripts.min.js"></script>
-  <script src="js/classifierDemo.min.js"></script>
+  <script type="text/javascript" src="node_modules/stats.js/build/stats.min.js"></script>
+  <script type="text/javascript" src="js/utils.js"></script>
+  <script src="js/classifierDemo.js"></script>
 </body>
 
 </html>
