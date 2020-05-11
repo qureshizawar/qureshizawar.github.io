@@ -15,6 +15,8 @@ const IMAGE_HEIGHT = 224;
 
 var mode = 'user' //'user'
 
+const mobile = isMobile();
+
 //const stats = new Stats();
 
 var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
@@ -27,8 +29,6 @@ const status_classifier = document.getElementById('status_classifier');
  *
  */
 async function setupCamera(mode) {
-  //console.log(navigator.mediaDevices);
-  //console.log(navigator.mediaDevices.getUserMedia);
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     throw new Error(
       'Browser API navigator.mediaDevices.getUserMedia not available');
@@ -38,7 +38,6 @@ async function setupCamera(mode) {
   video.width = videoWidth;
   video.height = videoHeight;
 
-  const mobile = isMobile();
   const stream = await navigator.mediaDevices.getUserMedia({
     'audio': false,
     'video': {
@@ -48,8 +47,6 @@ async function setupCamera(mode) {
     },
   });
   video.srcObject = stream;
-
-  //console.log(video.srcObject.getTracks())
 
   return new Promise((resolve) => {
     video.onloadedmetadata = () => {
@@ -221,7 +218,7 @@ const classifier_Demo = async (imElement) => {
 
   //var t1 = performance.now();
 
-  status_classifier.textContent = "Status: Done! inference took " + ((it1 - it0).toFixed(1)) + " milliseconds.";
+  status_classifier.textContent = "Status: Done! inference took " + ((it1 - it0).toFixed(1)) + " ms.";
 
   //console.log("before: ", tf.memory());
   //tf.disposeVariables();
@@ -232,35 +229,29 @@ const classifier_Demo = async (imElement) => {
 let request;
 
 /**
- * Feeds an image to posenet to estimate poses - this is where the magic
+ * Feeds an image to network to do inference - this is where the magic
  * happens. This function loops with a requestAnimationFrame method.
  */
-function detectPoseInRealTime(video) {
-  console.log("running detectPoseInRealTime!")
+function detectInRealTime(video) {
+  //console.log("running detectInRealTime!")
   const canvas = document.getElementById('output');
   const ctx = canvas.getContext('2d');
 
-  // since images are being fed from a webcam, we want to feed in the
-  // original image and then just flip the keypoints' x coordinates. If instead
-  // we flip the image, then correcting left-right keypoint pairs requires a
-  // permutation on all the keypoints.
   const flipHorizontal = mode == 'rear' ? false : true;
 
   canvas.width = videoWidth;
   canvas.height = videoHeight;
 
-  async function poseDetectionFrame() {
+  async function DetectionFrame() {
 
-    console.log("running poseDetectionFrame!")
+    //console.log("running DetectionFrame!")
 
     // Begin monitoring code for frames per second
     //stats.begin();
 
     ctx.clearRect(0, 0, videoWidth, videoHeight);
-    //console.log(video.onloadeddata)
     video.onloadeddata = () => {
       camloaded = true;
-      //console.log(video.srcObject)
     }
 
     if (camloaded) {
@@ -272,9 +263,7 @@ function detectPoseInRealTime(video) {
         ctx.translate(-videoWidth, 0);
       }
       /*else{
-        ctx.scale(1, 1);
-      }*/
-      ctx.scale(1, 1);
+        ctx.scale(1, 1);*/
       ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
       ctx.restore();
     }
@@ -284,29 +273,22 @@ function detectPoseInRealTime(video) {
       //document.getElementById('main').replaceChild(stats.dom, document.getElementById('fps'));
     }*/
 
-    //console.log(video)
-
     // End monitoring code for frames per second
     //stats.end();
 
-    request = requestAnimationFrame(poseDetectionFrame);
+    request = requestAnimationFrame(DetectionFrame);
 
   }
 
-  /*if (detect) {
-    prom = new Promise((resolve) => {
-      poseDetectionFrame();
-      resolve();
-    });*/
-  poseDetectionFrame();
+  DetectionFrame();
 }
 
 
 let video;
 
 /**
- * Kicks off the demo by loading the posenet model, finding and loading
- * available camera devices, and setting off the detectPoseInRealTime function.
+ * Kicks off the demo by loading the model, finding and loading
+ * available camera devices, and setting off the detectInRealTime function.
  */
 async function bindPage() {
   //toggleLoadingUI(true);
@@ -325,13 +307,40 @@ async function bindPage() {
     throw e;
   }
 
-
-  //console.log(video.srcObject.getTracks())
-
-  //setupGui([], net);
   //setupFPS();
-  detectPoseInRealTime(video);
+  detectInRealTime(video);
 }
+
+
+var filecheckBox = document.getElementById("fileinput");
+var urlcheckBox = document.getElementById("urlinput");
+var filecontainer = document.getElementById("file-container");
+var urlcontainer = document.getElementById("url-container");
+
+filecheckBox.addEventListener('click', function() {
+  if (filecheckBox.checked == true) {
+    urlcheckBox.checked = false;
+    filecontainer.style.display = "block";
+    urlcontainer.style.display = "none";
+  } else {
+    urlcheckBox.checked = true;
+    filecontainer.style.display = "none";
+    urlcontainer.style.display = "block";
+  }
+});
+
+urlcheckBox.addEventListener('click', function() {
+  if (urlcheckBox.checked == true) {
+    filecheckBox.checked = false;
+    filecontainer.style.display = "none";
+    urlcontainer.style.display = "block";
+  } else {
+    filecheckBox.checked = true;
+    filecontainer.style.display = "block";
+    urlcontainer.style.display = "none";
+
+  }
+});
 
 navigator.getUserMedia = navigator.getUserMedia ||
   navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
@@ -348,40 +357,21 @@ function showfps() {
   }
 }
 
-let prom;
-
 function setmode() {
+  if (document.getElementById("camMode").checked == true) {
+    mode = 'rear';
+  } else {
+    mode = 'user';
+  }
+
   if (document.getElementById("webcamc").checked == true) {
-    if (document.getElementById("camMode").checked == true) {
-      mode = 'rear';
+    video.srcObject.getTracks().forEach(function(track) {
+      track.stop();
+    });
 
-      video.srcObject.getTracks().forEach(function(track) {
-        track.stop();
-      });
-
-      cancelAnimationFrame(request);
-
-      console.log("camMode");
-
-      //video = loadVideo(mode);
-
-      /*prom.finally(() => {
-        console.log("promise complete!")
-        bindPage()
-        //webc()
-      });*/
-      bindPage()
-    } else {
-      mode = 'user';
-      video.srcObject.getTracks().forEach(function(track) {
-        track.stop();
-      });
-
-      cancelAnimationFrame(request);
-
-      console.log("camMode");
-      bindPage()
-    }
+    cancelAnimationFrame(request);
+    //console.log("camMode");
+    bindPage()
   }
 }
 
@@ -393,47 +383,37 @@ function webc() {
   var mainv = document.getElementById("mainVideo");
 
   if (videocheckBox.checked == true) {
-
+    document.getElementById("camswitch").style.display = "block";
+    //if (mobile){document.getElementById("camswitch").style.display = "block";}
     imagecheckBox.checked = false;
-    //var style = window.getComputedStyle(inpimg);
-    /*console.log(style);
-    console.log(style.getPropertyValue('width'));
-    console.log(style.getPropertyValue('height'));*/
 
-    t_Width = document.getElementById("main").clientWidth
-    t_Height = 300; //inpimg.clientHeight
+    t_Width = document.getElementById("mainopt").clientWidth
+    t_Height = 300;
     maini.style.display = "none";
+    document.getElementById("main").style.display = "block";
     mainv.style.display = "block";
 
     apectWidth = (4 / 3) * t_Height
-    videoWidth = t_Width > apectWidth ? apectWidth : t_Width //t_Width//860;//style.getPropertyValue('width');
-    videoHeight = t_Height //300;//style.getPropertyValue('height');
-
-    /*console.log(videoWidth);
-    console.log(videoHeight);*/
+    videoWidth = apectWidth > t_Width ? t_Width : apectWidth;
+    videoHeight = t_Height;
 
     camloaded = false;
-    //let video;
 
     bindPage();
-    /*prom = new Promise((resolve) => {
-      bindPage();
-      resolve();
-    });*/
-    //text.style.display = "block";
   } else {
-    //delete video;
-    console.log(video.srcObject.getTracks())
-    /*prom.finally( ()=> {
-      console.log("promise complete!")
-    });*/
+    //console.log(video.srcObject.getTracks())
 
+    document.getElementById("camswitch").style.display = "none";
     cancelAnimationFrame(request);
     video.srcObject.getTracks().forEach(function(track) {
       track.stop();
     });
-    console.log(video.srcObject.getTracks())
+
+    const ctx = document.getElementById('output').getContext('2d');
+    ctx.clearRect(0, 0, videoWidth, videoHeight);
+    //console.log(video.srcObject.getTracks())
     mainv.style.display = "none";
+    document.getElementById("main").style.display = "none";
   }
 }
 
@@ -446,22 +426,21 @@ function imagec() {
 
   if (imagecheckBox.checked == true) {
     if (videocheckBox.checked == true) {
-
+      document.getElementById("camswitch").style.display = "none";
       videocheckBox.checked = false;
       cancelAnimationFrame(request);
       video.srcObject.getTracks().forEach(function(track) {
         track.stop();
       });
     }
+    document.getElementById("main").style.display = "block";
     maini.style.display = "block";
     mainv.style.display = "none";
     inpimg.src = "/assets/demo_images/box_6109.jpg";
-    /*var style = window.getComputedStyle(inpimg);
-    console.log(style);
-    console.log(style.getPropertyValue('width'));*/
     ClassiferWarmup();
   } else {
     maini.style.display = "none";
+    document.getElementById("main").style.display = "none";
   }
 }
 

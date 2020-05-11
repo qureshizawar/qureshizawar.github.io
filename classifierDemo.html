@@ -81,6 +81,69 @@
     background-image: linear-gradient(to right, white, black);
     /* Standard syntax (must be last) */
   }
+
+  /* The switch - the box around the slider */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 17px;
+  }
+
+  /* Hide default HTML checkbox */
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* The slider */
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 13px;
+    width: 13px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  input:checked+.slider {
+    background-color: #2196F3;
+  }
+
+  input:focus+.slider {
+    box-shadow: 0 0 1px #2196F3;
+  }
+
+  input:checked+.slider:before {
+    -webkit-transform: translateX(13px);
+    -ms-transform: translateX(13px);
+    transform: translateX(13px);
+  }
+
+  /* Rounded sliders */
+  .slider.round {
+    border-radius: 17px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
+  }
 </style>
 
 <body>
@@ -113,7 +176,7 @@
     <!--<div class="optional-section background-alt">-->
     <h2 class="heading" style="padding:10px">Image Classifier</h2>
 
-    <div id='main' class="demo-section-block shadow-large">
+    <div class="demo-section-block shadow-large">
       <h4>Some models developed by me over the years, now available in your
         browser to try! Since these models run locally on device, any uploaded
         pictures stay safely on the device. Please note that the first run would
@@ -121,90 +184,129 @@
         files. (WIP so there may be bugs!)
       </h4>
 
-      <section>
-        <p> MobileNet model used to create an image classifier for Nexar challenge which was trained using
-          rear view images of different types of vehicles (cars, buses, etc.) </p>
+      <p> MobileNet model used to create an image classifier for Nexar challenge which was trained using
+        rear view images of different types of vehicles (cars, buses, etc.) </p>
 
-        <div id="info" style='display:none'>
-        </div>
+      <div id="info" style='display:none'>
+      </div>
 
-        <div>
-          image mode: <input type="checkbox" checked id="imagec" onclick="imagec()" />
-          video mode: <input type="checkbox" id="webcamc" onclick="webc()" />
-          use rear camera: <input type="checkbox" id="camMode" onclick="setmode()" />
-          <!--
-            show_fps: <input type="checkbox" id="show_fps" onclick="showfps()"/>
-          -->
-        </div>
+      <div id='mainopt'>
 
 
-        <!-- Solid divider -->
-        <hr class="solid">
-        </hr>
-
-
-        <p id="status_classifier"></p>
-
-      </section>
-      <div id='mainImage' style='display:block'>
-        <table style="width: 100%;">
+        <table style="width: 100%; max-width: 400px;">
           <tbody>
             <tr>
               <td>
-                <div id="file-container">
-                  <p style="display: inline-block"> Upload an image:</p>
-                  <input type="file" id="files0" name="files0" />
-                </div>
+                <p>image mode:</p>
+              </td>
+              <td>
+                <p>video mode:</p>
               </td>
             </tr>
             <tr>
               <td>
-                <input type="button" id="classifier_files_btn" value="Run" />
+                <label class="switch">
+                  <input type="checkbox" checked id="imagec" onclick="imagec()" />
+                  <span class="slider round"></span>
+                </label>
               </td>
-            </tr>
-
-            <tr>
               <td>
-                <form>
-                  <p style="display: inline-block"> Or enter URL: </p>
-                  <input type="text" value="" id="imagename0" />
-                </form>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <input type="button" id="btn0" value="Run" />
+                <label class="switch">
+                  <input type="checkbox" id="webcamc" onclick="webc()" />
+                  <span class="slider round"></span>
+                </label>
               </td>
             </tr>
           </tbody>
         </table>
 
-        <!-- Solid divider -->
-        <hr class="solid">
-        </hr>
-
-        <img id="inpimg0" src="/assets/demo_images/box_6109.jpg" height="auto" width="100%" max-width="400px">
-        </img>
+        <p id=camswitch style='display:none'>use rear camera:
+          <label class="switch">
+            <input type="checkbox" id="camMode" onclick="setmode()" />
+            <span class="slider round"></span>
+          </label>
+        </p>
+        <!--
+            show_fps: <input type="checkbox" id="show_fps" onclick="showfps()"/>
+          -->
       </div>
 
-      <div id='mainVideo' style='display:none'>
 
-        <video id="video" playsinline style="display: none;">
-        </video>
-        <canvas id="output"></canvas>
-        <div id="fps" style='display:none'></div>
+      <!-- Solid divider -->
+      <hr class="solid">
+      </hr>
 
+      <div id="main" style='display:block'>
+        <p id="status_classifier"></p>
+        <div id='mainImage' style='display:block'>
+
+          <table style="width: 100%; max-width: 400px;">
+            <tbody>
+              <tr>
+                <td>
+                  <p>Upload an image:</p>
+                </td>
+                <td>
+                  <p>Enter URL:</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label class="switch">
+                    <input type="checkbox" checked id="fileinput" />
+                    <span class="slider round"></span>
+                  </label>
+                </td>
+                <td>
+                  <label class="switch">
+                    <input type="checkbox" id="urlinput" />
+                    <span class="slider round"></span>
+                  </label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div id="file-container" style='display:block'>
+            <input type="file" style="padding-bottom:10px; padding-top:10px" id="files0" name="files0" accept=".jpg, .jpeg, .png" />
+            <div>
+              <input type="button" id="classifier_files_btn" value="Run" />
+            </div>
+          </div>
+          <div id="url-container" style='display:none'>
+            <form style="padding-bottom:10px; padding-top:10px">
+              <input type="text" value="" id="imagename0" />
+            </form>
+            <div>
+              <input type="button" id="btn0" value="Run" />
+            </div>
+          </div>
+
+          <!-- Solid divider -->
+          <hr class="solid">
+          </hr>
+
+          <img id="inpimg0" src="/assets/demo_images/box_6109.jpg" height="auto" width="100%" max-width="400px">
+          </img>
+        </div>
+
+        <div id='mainVideo' style='display:none'>
+
+          <video id="video" playsinline style="display: none;">
+          </video>
+          <canvas id="output"></canvas>
+          <div id="fps" style='display:none'></div>
+
+        </div>
+        <div>
+          <p class="section-head">Prediction:</p>
+          <p id="classifier_out1"></p>
+          <p id="classifier_out2"></p>
+          <p id="classifier_out3"></p>
+        </div>
       </div>
-      <div>
-        <p class="section-head">Prediction:</p>
-        <p id="classifier_out1"></p>
-        <p id="classifier_out2"></p>
-        <p id="classifier_out3"></p>
-      </div>
+
     </div>
-
-
 
 
   </div>
