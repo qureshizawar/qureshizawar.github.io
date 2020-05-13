@@ -23,7 +23,7 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.4.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.2/dist/tf.min.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900" rel="stylesheet">
   <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css">
   <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -40,110 +40,6 @@
 </head>
 
 <style>
-  img {
-    width: 100%;
-    height: 300px;
-    object-fit: contain;
-    object-position: left
-  }
-
-  /*video {
-    width: 100%;
-    height: 300px;
-    object-fit: contain;
-    object-position: left
-  }
-
-  canvas {
-    width: 100%;
-    height: 300px;
-    object-fit: contain;
-    object-position: left
-  }*/
-
-  .file-container {
-    margin-bottom: 20px;
-  }
-
-  .canvas {
-    position: relative;
-    border: 1px;
-  }
-
-  hr.solid {
-    border-top: 0.5px solid #999;
-  }
-
-  #grad1 {
-    height: 10px;
-    background-color: white;
-    /* For browsers that do not support gradients */
-    background-image: linear-gradient(to right, white, black);
-    /* Standard syntax (must be last) */
-  }
-
-  /* The switch - the box around the slider */
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 30px;
-    height: 17px;
-  }
-
-  /* Hide default HTML checkbox */
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  /* The slider */
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    -webkit-transition: .4s;
-    transition: .4s;
-  }
-
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 13px;
-    width: 13px;
-    left: 2px;
-    bottom: 2px;
-    background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
-  }
-
-  input:checked+.slider {
-    background-color: #2196F3;
-  }
-
-  input:focus+.slider {
-    box-shadow: 0 0 1px #2196F3;
-  }
-
-  input:checked+.slider:before {
-    -webkit-transform: translateX(13px);
-    -ms-transform: translateX(13px);
-    transform: translateX(13px);
-  }
-
-  /* Rounded sliders */
-  .slider.round {
-    border-radius: 17px;
-  }
-
-  .slider.round:before {
-    border-radius: 50%;
-  }
 </style>
 
 <body>
@@ -191,8 +87,6 @@
       </div>
 
       <div id='mainopt'>
-
-
         <table style="width: 100%; max-width: 400px;">
           <tbody>
             <tr>
@@ -354,9 +248,9 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="js/scripts.min.js"></script>
-  <script type="text/javascript" src="node_modules/stats.js/build/stats.min.js"></script>
-  <script type="text/javascript" src="js/utils.js"></script>
-  <script src="js/classifierDemo.js"></script>
+  <!--script type="text/javascript" src="node_modules/stats.js/build/stats.min.js"></script-->
+  <script type="text/javascript" src="js/utils.min.js"></script>
+  <script src="js/classifierDemo.min.js"></script>
 </body>
 
 </html>

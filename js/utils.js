@@ -1,5 +1,3 @@
-
-
 const color = 'aqua';
 const boundingBoxColor = 'red';
 const lineWidth = 2;
@@ -12,7 +10,7 @@ function isiOS() {
   return /iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
- function isMobile() {
+function isMobile() {
   return isAndroid() || isiOS();
 }
 
@@ -20,8 +18,8 @@ function isiOS() {
 /**
  * Toggles between the loading UI and the main canvas UI.
  */
- function toggleLoadingUI(
-    showLoadingUI, loadingDivId = 'loading', mainDivId = 'main') {
+function toggleLoadingUI(
+  showLoadingUI, loadingDivId = 'loading', mainDivId = 'main') {
   if (showLoadingUI) {
     document.getElementById(loadingDivId).style.display = 'block';
     document.getElementById(mainDivId).style.display = 'none';
@@ -31,14 +29,17 @@ function isiOS() {
   }
 }
 
-function toTuple({y, x}) {
+function toTuple({
+  y,
+  x
+}) {
   return [y, x];
 }
 
 /**
  * Converts an arary of pixel data into an ImageData object
  */
- async function renderToCanvas(a, ctx) {
+async function renderToCanvas(a, ctx) {
   const [height, width] = a.shape;
   const imageData = new ImageData(width, height);
 
@@ -60,7 +61,7 @@ function toTuple({y, x}) {
 /**
  * Draw an image on a canvas
  */
- function renderImageToCanvas(image, size, canvas) {
+function renderImageToCanvas(image, size, canvas) {
   canvas.width = size[0];
   canvas.height = size[1];
   const ctx = canvas.getContext('2d');

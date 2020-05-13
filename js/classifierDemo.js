@@ -1,14 +1,19 @@
 tf.setBackend('webgl')
 //let backend = new tf.webgl.MathBackendWebGL()
-tf.ENV.set('WEBGL_CONV_IM2COL', false);
+//tf.ENV.set('WEBGL_CONV_IM2COL', false);
+tf.ENV.set('WEBGL_PACK', false);  // This needs to be done otherwise things run very slow v1.0.4
+tf.webgl.forceHalfFloat()
+
+//tf.enableDebugMode()
+//tf.enableProdMode()
 
 //console.log(tf.ENV.features)
 //tf.ENV.set('BEFORE_PAGING_CONSTANT ', 1000);
 //tf.setBackend('cpu');
 //tf.enableProdMode();
 
-var videoWidth = 500;
-var videoHeight = 600;
+var videoWidth = 400;
+var videoHeight = 300;
 
 const IMAGE_WIDTH = 224;
 const IMAGE_HEIGHT = 224;
@@ -192,9 +197,9 @@ const classifier_Demo = async (imElement) => {
     const std = tf.tensor3d([0.229, 0.224, 0.225], [1, 1, 3]);
     const normalised = img.div(scale).sub(mean).div(std);
     status_classifier.textContent = 'Status: Model loaded! running inference';
-    it0 = performance.now();
     const batched = normalised.transpose([0, 1, 2]).expandDims();
 
+    it0 = performance.now();
     return model_classifier.predict(batched).arraySync();
   });
   it1 = performance.now();
@@ -255,6 +260,9 @@ function detectInRealTime(video) {
     }
 
     if (camloaded) {
+      //await tf.nextFrame();
+      /*const time = await tf.time(() => classifier_Demo(video));
+      console.log(`kernelMs: ${time.kernelMs}, wallTimeMs: ${time.wallMs}`);*/
       await classifier_Demo(video);
 
       ctx.save();
@@ -264,6 +272,7 @@ function detectInRealTime(video) {
       }
       /*else{
         ctx.scale(1, 1);*/
+        //console.log(video)
       ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
       ctx.restore();
     }
