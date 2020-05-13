@@ -1,7 +1,10 @@
 tf.setBackend('webgl')
 //let backend = new tf.webgl.MathBackendWebGL()
 tf.ENV.set('WEBGL_CONV_IM2COL', false);
+tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
+tf.webgl.forceHalfFloat()
 
+//tf.enableDebugMode()
 //console.log(tf.ENV.features)
 //tf.ENV.set('BEFORE_PAGING_CONSTANT ', 1000);
 //tf.setBackend('cpu');
@@ -17,6 +20,9 @@ var segmentation_IMAGE_WIDTH = 512
 var style_IMAGE_HEIGHT = 384
 var style_IMAGE_WIDTH = 384
 
+var output_HEIGHT = 300;
+var output_WIDTH = 400;
+
 var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
 
 const dropdown_seg_qual = document.getElementById('dropdown_seg_qual');
@@ -30,6 +36,10 @@ const style_medium = document.getElementById('style_medium')
 const style_high = document.getElementById('style_high')
 const style_vhigh = document.getElementById('style_vhigh')
 
+const mobile = isMobile();
+
+var mode = 'user' //'user'
+
 function is_touch_device() {
   return 'ontouchstart' in window // works on most browsers
     ||
@@ -42,6 +52,80 @@ if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').mat
   style_IMAGE_WIDTH = 512
   dropdown_style_qual.textContent = style_vhigh.textContent;
   //console.log("Desktop detected!")
+}
+
+function set_static_output_size(element) {
+  /*console.log("clientHeight", element.clientHeight)
+  console.log("clientWidth", element.clientWidth)
+  console.log("naturalHeight", element.naturalHeight)
+  console.log("naturalWidth", element.naturalWidth)*/
+  //too small
+  if (element.clientWidth > element.naturalWidth && element.clientHeight > element.naturalHeight) {
+    output_HEIGHT = element.clientHeight
+    output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
+    if (output_WIDTH > element.clientWidth) {
+      output_WIDTH = element.clientWidth
+      output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
+    }
+    //too big
+  } else if (element.clientWidth < element.naturalWidth && element.clientHeight < element.naturalHeight) {
+    output_WIDTH = element.clientWidth
+    output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
+    if (output_HEIGHT > element.clientHeight) {
+      output_HEIGHT = element.clientHeight
+      output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
+    }
+    //too long
+  } else if (element.clientWidth < element.naturalWidth) {
+    output_WIDTH = element.clientWidth
+    output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
+  } //too tall
+  else {
+    output_HEIGHT = element.clientHeight
+    output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
+  }
+  /*output_HEIGHT = element.clientHeight
+  output_WIDTH = element.clientWidth*/
+  /*console.log(output_HEIGHT);
+  console.log(output_WIDTH);*/
+}
+
+/**
+ * Loads a the camera to be used in the demo
+ *
+ */
+async function setupCamera(mode) {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    throw new Error(
+      'Browser API navigator.mediaDevices.getUserMedia not available');
+  }
+
+  const video = document.getElementById('video');
+  video.width = output_WIDTH;
+  video.height = output_HEIGHT;
+
+  const stream = await navigator.mediaDevices.getUserMedia({
+    'audio': false,
+    'video': {
+      facingMode: mode == 'rear' ? "environment" : 'user',
+      width: mobile ? undefined : output_WIDTH,
+      height: mobile ? undefined : output_HEIGHT,
+    },
+  });
+  video.srcObject = stream;
+
+  return new Promise((resolve) => {
+    video.onloadedmetadata = () => {
+      resolve(video);
+    };
+  });
+}
+
+async function loadVideo(mode) {
+  const video = await setupCamera(mode);
+  video.play();
+
+  return video;
 }
 
 // see https://stackoverflow.com/questions/20600800/js-client-side-exif-orientation-rotate-and-mirror-jpeg-images
@@ -71,10 +155,14 @@ function style_file(image) {
             //document.getElementById("container2").appendChild(canvas);
             // or using jquery $("#container").append(canvas);
             let img_out = document.getElementById('inpimg_style');
+            //console.log(img_out.clientHeight)
             img_out.src = canvas.toDataURL();
             //console.log('orientation took: ');
             //console.log(performance.now()-tt);
-            img_out.onload = () => style_Demo(img_out);
+            img_out.onload = () => {
+              set_static_output_size(img_out);
+              style_Demo(img_out);
+            };
           });
         }
       });
@@ -117,7 +205,10 @@ document.getElementById('btn_style').onclick = function() {
       img.src = e.target.result;
       //img.height = IMAGE_HEIGHT;
       //img.width = IMAGE_WIDTH;
-      img.onload = () => style_Demo(img);
+      img.onload = () => {
+        set_static_output_size(img);
+        style_Demo(img);
+      }
     };
   };
 }
@@ -150,16 +241,17 @@ const StyleWarmup = async () => {
   //console.log(tf.memory());
 
   // Make a prediction through the locally hosted inpimg_style.jpg.
-  let inpElement = document.getElementById('inpimg_style');
+  let img = document.getElementById('inpimg_style');
+  set_static_output_size(img);
   //inpElement.width = 300
   //inpElement.height = 300
   //inpElement.src = e.target.result;
-  if (inpElement.complete && inpElement.naturalHeight !== 0) {
-    style_Demo(inpElement);
-    inpElement.style.display = '';
+  if (img.complete && img.naturalHeight !== 0) {
+    style_Demo(img);
+    img.style.display = '';
   } else {
-    inpElement.onload = () => {
-      style_Demo(inpElement);
+    img.onload = () => {
+      style_Demo(img);
       inpElement.style.display = '';
     }
   }
@@ -263,8 +355,8 @@ const style_Demo = async (imElement) => {
 
   //console.log(`style_out: ${style_out.shape}`);
 
-  t_Width = document.getElementById('inpimg_style').clientWidth
-  t_Height = document.getElementById('inpimg_style').clientHeight
+  /*t_Width = document.getElementById('inpimg_style').clientWidth
+  t_Height = document.getElementById('inpimg_style').clientHeight*/
 
   const maskCanvas = document.getElementById('mask');
 
@@ -274,7 +366,7 @@ const style_Demo = async (imElement) => {
   //tf.browser.toPixels(tf.image.resizeBilinear(masked_style_comp,
   //  [IMAGE_HEIGHT,IMAGE_WIDTH]), maskCanvas);
   tf.browser.toPixels(tf.image.resizeBilinear(masked_style_comp,
-    [t_Height, t_Width]), maskCanvas);
+    [output_HEIGHT, output_WIDTH]), maskCanvas);
   //tf.browser.toPixels(style_out_norm, maskCanvas);
 
   var tbt1 = performance.now();
@@ -293,6 +385,220 @@ const style_Demo = async (imElement) => {
   //console.log("after: ", tf.memory());
   //console.log(tf.memory ());
 };
+
+let request;
+
+/**
+ * Feeds an image to network to do inference - this is where the magic
+ * happens. This function loops with a requestAnimationFrame method.
+ */
+function detectInRealTime(video) {
+  console.log("running detectInRealTime!")
+  const canvas = document.getElementById('output');
+  const ctx = canvas.getContext('2d');
+
+  const flipHorizontal = mode == 'rear' ? false : true;
+
+  canvas.width = output_WIDTH;
+  canvas.height = output_HEIGHT;
+
+  async function DetectionFrame() {
+
+    console.log("running DetectionFrame!")
+
+    // Begin monitoring code for frames per second
+    //stats.begin();
+    t0 = performance.now();
+
+    //ctx.clearRect(0, 0, output_WIDTH, output_HEIGHT);
+    video.onloadeddata = () => {
+      camloaded = true;
+    }
+
+    if (camloaded) {
+      //await classifier_Demo(video);
+      /*const time = await tf.time(() => style_Demo(video));
+      console.log(`kernelMs: ${time.kernelMs}, wallTimeMs: ${time.wallMs}`);*/
+
+      //await tf.nextFrame();
+      style_Demo(video);
+      //console.log(out)
+      //const outcanv = new ImageData(out, output_WIDTH, output_HEIGHT)
+      //console.log(outcanv)
+      //ctx.save();
+      /*if (flipHorizontal) {
+        ctx.scale(-1, 1);
+        ctx.translate(-output_WIDTH, 0);
+      }*/
+      /*else{
+        ctx.scale(1, 1);*/
+      //ctx.putImageData(outcanv, 0, 0);
+      //video.ImageData= outcanv
+      //ctx.drawImage(video, 0, 0, output_WIDTH, output_HEIGHT);
+      //ctx.restore();
+    }
+
+    /*if (document.getElementById("show_fps").checked) {
+      setupFPS();
+      //document.getElementById('main').replaceChild(stats.dom, document.getElementById('fps'));
+    }*/
+
+    // End monitoring code for frames per second
+    //stats.end();
+
+
+    console.log("DetectionFrame: ", performance.now() - t0)
+
+    request = requestAnimationFrame(DetectionFrame);
+
+  }
+
+  DetectionFrame();
+}
+
+var filecheckBox = document.getElementById("fileinput");
+var urlcheckBox = document.getElementById("urlinput");
+var filecontainer = document.getElementById("file-container");
+var urlcontainer = document.getElementById("url-container");
+
+filecheckBox.addEventListener('click', function() {
+  if (filecheckBox.checked == true) {
+    urlcheckBox.checked = false;
+    filecontainer.style.display = "block";
+    urlcontainer.style.display = "none";
+  } else {
+    urlcheckBox.checked = true;
+    filecontainer.style.display = "none";
+    urlcontainer.style.display = "block";
+  }
+});
+
+urlcheckBox.addEventListener('click', function() {
+  if (urlcheckBox.checked == true) {
+    filecheckBox.checked = false;
+    filecontainer.style.display = "none";
+    urlcontainer.style.display = "block";
+  } else {
+    filecheckBox.checked = true;
+    filecontainer.style.display = "block";
+    urlcontainer.style.display = "none";
+
+  }
+});
+
+let video;
+
+/**
+ * Kicks off the demo by loading the model, finding and loading
+ * available camera devices, and setting off the detectInRealTime function.
+ */
+async function bindPage() {
+  //toggleLoadingUI(true);
+  //toggleLoadingUI(false);
+
+  camloaded = false;
+
+
+  try {
+    video = await loadVideo(mode);
+  } catch (e) {
+    let info = document.getElementById('info');
+    info.textContent = 'this browser does not support video capture,' +
+      'or this device does not have a camera';
+    info.style.display = 'block';
+    throw e;
+  }
+
+  //setupFPS();
+  detectInRealTime(video);
+}
+
+function setmode() {
+  if (document.getElementById("camMode").checked == true) {
+    mode = 'rear';
+  } else {
+    mode = 'user';
+  }
+
+  if (document.getElementById("webcamc").checked == true) {
+    video.srcObject.getTracks().forEach(function(track) {
+      track.stop();
+    });
+
+    cancelAnimationFrame(request);
+    //console.log("camMode");
+    bindPage()
+  }
+}
+
+
+function webc() {
+  var imagecheckBox = document.getElementById("imagec");
+  var videocheckBox = document.getElementById("webcamc");
+  var maini = document.getElementById("mainImage");
+  var mainv = document.getElementById("mainVideo");
+
+  if (videocheckBox.checked == true) {
+    document.getElementById("camswitch").style.display = "block";
+    //if (mobile){document.getElementById("camswitch").style.display = "block";}
+    imagecheckBox.checked = false;
+
+    t_Width = document.getElementById("mainopt").clientWidth
+    t_Height = 300;
+    maini.style.display = "none";
+    document.getElementById("main").style.display = "block";
+    mainv.style.display = "block";
+
+    apectWidth = (4 / 3) * t_Height
+    output_WIDTH = apectWidth > t_Width ? t_Width : apectWidth;
+    output_HEIGHT = t_Height;
+
+    camloaded = false;
+
+    bindPage();
+  } else {
+    //console.log(video.srcObject.getTracks())
+
+    document.getElementById("camswitch").style.display = "none";
+    cancelAnimationFrame(request);
+    video.srcObject.getTracks().forEach(function(track) {
+      track.stop();
+    });
+
+    const ctx = document.getElementById('output').getContext('2d');
+    ctx.clearRect(0, 0, output_WIDTH, output_HEIGHT);
+    //console.log(video.srcObject.getTracks())
+    mainv.style.display = "none";
+    document.getElementById("main").style.display = "none";
+  }
+}
+
+function imagec() {
+  var imagecheckBox = document.getElementById("imagec");
+  var videocheckBox = document.getElementById("webcamc");
+  var maini = document.getElementById("mainImage");
+  var inpimg = document.getElementById("inpimg0");
+  var mainv = document.getElementById("mainVideo");
+
+  if (imagecheckBox.checked == true) {
+    if (videocheckBox.checked == true) {
+      document.getElementById("camswitch").style.display = "none";
+      videocheckBox.checked = false;
+      cancelAnimationFrame(request);
+      video.srcObject.getTracks().forEach(function(track) {
+        track.stop();
+      });
+    }
+    document.getElementById("main").style.display = "block";
+    maini.style.display = "block";
+    mainv.style.display = "none";
+    inpimg.src = "/assets/demo_images/box_6109.jpg";
+    ClassiferWarmup();
+  } else {
+    maini.style.display = "none";
+    document.getElementById("main").style.display = "none";
+  }
+}
 
 const dropdown_output = document.getElementById('dropdown_output');
 const style_only = document.getElementById('style_only')

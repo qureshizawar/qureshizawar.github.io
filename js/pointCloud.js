@@ -69,7 +69,7 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
   //console.log(renderer.domElement.attributes)
   //document.body.appendChild(renderer.domElement);
 
-  var depth_node = document.getElementById('depth_sec');
+  var depth_node = document.getElementById('mainImage');
   //console.log(depth_node.children)
   var depth_canvas_node = document.getElementById('depth_canvas');
 
@@ -246,7 +246,7 @@ window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_arr
   var mat = new THREE.PointsMaterial({
     vertexColors: true,
     //color: 0x888888,
-    size: 0.85 * window.devicePixelRatio
+    size: 0.90 * window.devicePixelRatio
   });
 
   var pointCount = unfiltered.length;

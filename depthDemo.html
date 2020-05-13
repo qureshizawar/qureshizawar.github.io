@@ -106,6 +106,10 @@
         <p> Monocular depth estimation model trained using single camera views
           from the kitti dataset</p>
 
+        <!-- Solid divider -->
+        <hr class="solid">
+        </hr>
+
         <table style="width: 100%;">
           <tbody>
             <tr>
@@ -124,58 +128,75 @@
                 </div>
               </td>
             </tr>
+          </tbody>
+        </table>
 
-            <table style="width: 100%;">
-              <tbody>
-                <tr>
-                  <td>
-                    <div id="file-container">
-                      <p style="display: inline-block"> Upload an image:</p>
-                      <input type="file" id="files" name="files" />
-                    </div>
-                  </td>
-                </tr>
+        <!-- Solid divider -->
+        <hr class="solid">
+        </hr>
 
-                <tr>
-                  <td>
-                    <input type="button" id="depth_files_btn" value="Run" />
-                  </td>
-                </tr>
+        <div id='mainImage' style='display:block'>
+                  <p id="status_depth"></p>
 
-                <tr>
-                  <td>
-                    <form>
-                      <p style="display: inline-block"> Or enter URL: </p>
-                      <input type="text" value="" id="imagename" />
-                    </form>
-                  </td>
-                </tr>
+          <table style="width: 100%; max-width: 400px;">
+            <tbody>
+              <tr>
+                <td>
+                  <p>Upload an image:</p>
+                </td>
+                <td>
+                  <p>Enter URL:</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label class="switch">
+                    <input type="checkbox" checked id="fileinput" />
+                    <span class="slider round"></span>
+                  </label>
+                </td>
+                <td>
+                  <label class="switch">
+                    <input type="checkbox" id="urlinput" />
+                    <span class="slider round"></span>
+                  </label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-                <tr>
-                  <td>
-                    <input type="button" id="btn" value="Run" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div id="file-container" style='display:block'>
+            <input type="file" style="padding-bottom:10px; padding-top:10px" id="files" name="files" accept=".jpg, .jpeg, .png" />
+            <div>
+              <input type="button" id="depth_files_btn" value="Run" />
+            </div>
+          </div>
+          <div id="url-container" style='display:none'>
+            <form style="padding-bottom:10px; padding-top:10px">
+              <input type="text" value="" id="imagename" />
+            </form>
+            <div>
+              <input type="button" id="btn" value="Run" />
+            </div>
+          </div>
 
-            <!-- Solid divider -->
-            <hr class="solid">
-            </hr>
+          <!-- Solid divider -->
+          <hr class="solid">
+          </hr>
 
-            <p id="status_depth"></p>
-            <img id="inpimg" src="/assets/demo_images/sample.png" height="auto" width="100%" max-width="400px" />
-            <p class="section-head">Prediction:</p>
-            <canvas id="depth" class="canvas"></canvas>
-            <p class="section-head">3D point cloud:</p>
-            <!--div id="grad1"></div-->
+          <img id="inpimg" src="/assets/demo_images/sample.png" height="auto" width="100%" max-width="400px" />
+          <p class="section-head">Prediction:</p>
+          <canvas id="depth" class="canvas"></canvas>
+          <p class="section-head">3D point cloud:</p>
+          <!--div id="grad1"></div-->
 
-            <!--script type="module">
+          <!--script type="module">
                     import { createPointCloud } from './js/pointCloud.js';
 
                     createPointCloud("./js/test10.csv")
                     </script-->
-            <canvas id="depth_canvas" class="canvas"></canvas>
+          <canvas id="depth_canvas" class="canvas"></canvas>
+        </div>
       </section>
     </div>
 
@@ -223,6 +244,7 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="js/scripts.min.js"></script>
+  <script type="text/javascript" src="js/utils.min.js"></script>
   <script type="module" src="js/pointCloud.min.js"></script>
   <script src="js/depthDemo.min.js"></script>
 </body>

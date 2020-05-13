@@ -23,7 +23,7 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.4.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.2/dist/tf.min.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900" rel="stylesheet">
   <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css">
   <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -39,7 +39,7 @@
 
 </head>
 
-<style>
+<!--style>
   .file-container {
     margin-bottom: 20px;
   }
@@ -67,7 +67,7 @@
     background-image: linear-gradient(to right, white, black);
     /* Standard syntax (must be last) */
   }
-</style>
+</style-->
 
 <body>
   <div id="mobile-menu-open" class="shadow-large">
@@ -110,6 +110,53 @@
         <p> Style transfer and semantic segmentation models trained on the PASCAL dataset for applying selective style
           to a person only (select masked style output to see it in action!)
         </p>
+
+        <div id="info" style='display:none'>
+        </div>
+
+        <div id='mainopt'>
+          <table style="width: 100%; max-width: 400px;">
+            <tbody>
+              <tr>
+                <td>
+                  <p style='display:none'>image mode:</p>
+                </td>
+                <td>
+                  <p style='display:none'>video mode:</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label class="switch" style='display:none'>
+                    <input type="checkbox" checked id="imagec" onclick="imagec()" />
+                    <span class="slider round"></span>
+                  </label>
+                </td>
+                <td>
+                  <label class="switch" style='display:none'>
+                    <input type="checkbox" id="webcamc" onclick="webc()" />
+                    <span class="slider round"></span>
+                  </label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p id=camswitch style='display:none'>use rear camera:
+            <label class="switch">
+              <input type="checkbox" id="camMode" onclick="setmode()" />
+              <span class="slider round"></span>
+            </label>
+          </p>
+          <!--
+              show_fps: <input type="checkbox" id="show_fps" onclick="showfps()"/>
+            -->
+        </div>
+
+
+        <!-- Solid divider -->
+        <hr class="solid">
+        </hr>
 
         <table style="width: 100%;">
           <tbody>
@@ -180,98 +227,120 @@
           </tbody>
         </table>
 
-        <table style="width: 100%;">
-          <tbody>
-            <tr>
-              <td>
-                <div id="file-container">
-                  <p style="display: inline-block"> Upload an image:</p>
-                  <input type="file" id="files_style" name="files_style" />
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <input type="button" id="style_files_btn" value="Run" />
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <form>
-                  <p style="display: inline-block"> Or enter URL: </p>
-                  <input type="text" value="" id="imagename_style" />
-                </form>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <input type="button" id="btn_style" value="Run" />
-              </td>
-            </tr>
-
-          </tbody>
-        </table>
-
         <!-- Solid divider -->
         <hr class="solid">
         </hr>
 
-        <p id="status_style"></p>
-        <img id="inpimg_style" src="/assets/demo_images/Oxford.jpg" height="auto" width="100%" max-width="400px" />
-        <p class="section-head">Prediction:</p>
-        <canvas id="mask" class="canvas"></canvas>
-      </section>
+        <div id="main" style='display:block'>
+          <p id="status_style"></p>
+          <div id='mainImage' style='display:block'>
+
+            <table style="width: 100%; max-width: 400px;">
+              <tbody>
+                <tr>
+                  <td>
+                    <p>Upload an image:</p>
+                  </td>
+                  <td>
+                    <p>Enter URL:</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <label class="switch">
+                      <input type="checkbox" checked id="fileinput" />
+                      <span class="slider round"></span>
+                    </label>
+                  </td>
+                  <td>
+                    <label class="switch">
+                      <input type="checkbox" id="urlinput" />
+                      <span class="slider round"></span>
+                    </label>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div id="file-container" style='display:block'>
+              <input type="file" style="padding-bottom:10px; padding-top:10px" id="files_style" name="files_style" accept=".jpg, .jpeg, .png" />
+              <div>
+                <input type="button" id="style_files_btn" value="Run" />
+              </div>
+            </div>
+            <div id="url-container" style='display:none'>
+              <form style="padding-bottom:10px; padding-top:10px">
+                <input type="text" value="" id="imagename_style" />
+              </form>
+              <div>
+                <input type="button" id="btn_style" value="Run" />
+              </div>
+            </div>
+
+            <!-- Solid divider -->
+            <hr class="solid">
+            </hr>
+            <img id="inpimg_style" src="/assets/demo_images/Oxford.jpg" />
+            <p class="section-head">Prediction:</p>
+            <canvas id="mask" class="canvas"></canvas>
+          </div>
+
+          <div id='mainVideo' style='display:none'>
+
+            <video id="video" playsinline style="display: none;">
+            </video>
+            <canvas id="output"></canvas>
+            <div id="fps" style='display:none'></div>
+
+          </div>
+
+        </div>
+        <!-- End .optional-section-block -->
+
     </div>
+    <!-- End .optional-section -->
 
-  </div>
-  <!-- End .optional-section-block -->
-
-  </div>
-  <!-- End .optional-section -->
-
-  <footer>
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-5 copyright">
-          <p>
-            Copyright &copy; 2020 Zawar Qureshi
-          </p>
-        </div>
-        <div class="col-sm-2 top">
-          <span id="to-top">
-            <i class="fa fa-chevron-up" aria-hidden="true"></i>
-          </span>
-        </div>
-        <div class="col-sm-5 social">
-          <ul>
-            <li>
-              <a href="https://github.com/qureshizawar" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
-            </li>
-            <li>
-              <a href="https://stackoverflow.com/" target="_blank"><i class="fa fa-stack-overflow" aria-hidden="true"></i></a>
-            </li>
-            <li>
-              <a href="https://linkedin.com/in/zawarqureshi/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
-            </li>
-            <li>
-              <a href="https://www.facebook.com/" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
-            </li>
-            <li>
-              <a href="https://twitter.com/" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
-            </li>
-          </ul>
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-5 copyright">
+            <p>
+              Copyright &copy; 2020 Zawar Qureshi
+            </p>
+          </div>
+          <div class="col-sm-2 top">
+            <span id="to-top">
+              <i class="fa fa-chevron-up" aria-hidden="true"></i>
+            </span>
+          </div>
+          <div class="col-sm-5 social">
+            <ul>
+              <li>
+                <a href="https://github.com/qureshizawar" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+              </li>
+              <li>
+                <a href="https://stackoverflow.com/" target="_blank"><i class="fa fa-stack-overflow" aria-hidden="true"></i></a>
+              </li>
+              <li>
+                <a href="https://linkedin.com/in/zawarqureshi/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+              </li>
+              <li>
+                <a href="https://www.facebook.com/" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+              </li>
+              <li>
+                <a href="https://twitter.com/" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
-  </footer>
-  <!-- End footer -->
+    </footer>
+    <!-- End footer -->
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-  <script src="js/scripts.min.js"></script>
-  <script src="js/styleDemo.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="js/scripts.min.js"></script>
+    <script type="text/javascript" src="js/utils.min.js"></script>
+    <script src="js/styleDemo.min.js"></script>
 </body>
 
 </html>

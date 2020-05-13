@@ -23,7 +23,7 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.4.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.2/dist/tf.min.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900" rel="stylesheet">
   <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css">
   <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -40,26 +40,6 @@
 </head>
 
 <style>
-  .file-container {
-    margin-bottom: 20px;
-  }
-
-  .canvas {
-    position: relative;
-    border: 1px;
-  }
-
-  hr.solid {
-    border-top: 0.5px solid #999;
-  }
-
-  #grad1 {
-    height: 10px;
-    background-color: white;
-    /* For browsers that do not support gradients */
-    background-image: linear-gradient(to right, white, black);
-    /* Standard syntax (must be last) */
-  }
 </style>
 
 <body>
@@ -100,61 +80,127 @@
         files. (WIP so there may be bugs!)
       </h4>
 
-      <section>
-        <p> MobileNet model used to create an image classifier for Nexar challenge which was trained using
-          rear view images of different types of vehicles (cars, buses, etc.) </p>
+      <p> MobileNet model used to create an image classifier for Nexar challenge which was trained using
+        rear view images of different types of vehicles (cars, buses, etc.) </p>
 
-        <table style="width: 100%;">
+      <div id="info" style='display:none'>
+      </div>
+
+      <div id='mainopt'>
+        <table style="width: 100%; max-width: 400px;">
           <tbody>
             <tr>
               <td>
-                <div id="file-container">
-                  <p style="display: inline-block"> Upload an image:</p>
-                  <input type="file" id="files0" name="files0" />
-                </div>
+                <p>image mode:</p>
+              </td>
+              <td>
+                <p>video mode:</p>
               </td>
             </tr>
             <tr>
               <td>
-                <input type="button" id="classifier_files_btn" value="Run" />
+                <label class="switch">
+                  <input type="checkbox" checked id="imagec" onclick="imagec()" />
+                  <span class="slider round"></span>
+                </label>
               </td>
-            </tr>
-
-            <tr>
               <td>
-                <form>
-                  <p style="display: inline-block"> Or enter URL: </p>
-                  <input type="text" value="" id="imagename0" />
-                </form>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <input type="button" id="btn0" value="Run" />
+                <label class="switch">
+                  <input type="checkbox" id="webcamc" onclick="webc()" />
+                  <span class="slider round"></span>
+                </label>
               </td>
             </tr>
           </tbody>
         </table>
 
-        <!-- Solid divider -->
-        <hr class="solid">
-        </hr>
+        <p id=camswitch style='display:none'>use rear camera:
+          <label class="switch">
+            <input type="checkbox" id="camMode" onclick="setmode()" />
+            <span class="slider round"></span>
+          </label>
+        </p>
+        <!--
+            show_fps: <input type="checkbox" id="show_fps" onclick="showfps()"/>
+          -->
+      </div>
 
+
+      <!-- Solid divider -->
+      <hr class="solid">
+      </hr>
+
+      <div id="main" style='display:block'>
         <p id="status_classifier"></p>
-        <div id="predictions0"></div>
-        <img id="inpimg0" src="/assets/demo_images/box_6109.jpg" width="224" height="224" />
-      </section>
-      <section>
-        <p class="section-head">Prediction:</p>
-        <p id="classifier_out1"></p>
-        <p id="classifier_out2"></p>
-        <p id="classifier_out3"></p>
-      </section>
+        <div id='mainImage' style='display:block'>
+
+          <table style="width: 100%; max-width: 400px;">
+            <tbody>
+              <tr>
+                <td>
+                  <p>Upload an image:</p>
+                </td>
+                <td>
+                  <p>Enter URL:</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label class="switch">
+                    <input type="checkbox" checked id="fileinput" />
+                    <span class="slider round"></span>
+                  </label>
+                </td>
+                <td>
+                  <label class="switch">
+                    <input type="checkbox" id="urlinput" />
+                    <span class="slider round"></span>
+                  </label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div id="file-container" style='display:block'>
+            <input type="file" style="padding-bottom:10px; padding-top:10px" id="files0" name="files0" accept=".jpg, .jpeg, .png" />
+            <div>
+              <input type="button" id="classifier_files_btn" value="Run" />
+            </div>
+          </div>
+          <div id="url-container" style='display:none'>
+            <form style="padding-bottom:10px; padding-top:10px">
+              <input type="text" value="" id="imagename0" />
+            </form>
+            <div>
+              <input type="button" id="btn0" value="Run" />
+            </div>
+          </div>
+
+          <!-- Solid divider -->
+          <hr class="solid">
+          </hr>
+
+          <img id="inpimg0" src="/assets/demo_images/box_6109.jpg" height="auto" width="100%" max-width="400px">
+          </img>
+        </div>
+
+        <div id='mainVideo' style='display:none'>
+
+          <video id="video" playsinline style="display: none;">
+          </video>
+          <canvas id="output"></canvas>
+          <div id="fps" style='display:none'></div>
+
+        </div>
+        <div>
+          <p class="section-head">Prediction:</p>
+          <p id="classifier_out1"></p>
+          <p id="classifier_out2"></p>
+          <p id="classifier_out3"></p>
+        </div>
+      </div>
 
     </div>
-
-
 
 
   </div>
@@ -202,6 +248,8 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="js/scripts.min.js"></script>
+  <!--script type="text/javascript" src="node_modules/stats.js/build/stats.min.js"></script-->
+  <script type="text/javascript" src="js/utils.min.js"></script>
   <script src="js/classifierDemo.min.js"></script>
 </body>
 
