@@ -199,10 +199,10 @@ const classifier_Demo = async (imElement) => {
     status_classifier.textContent = 'Status: Model loaded! running inference';
     const batched = normalised.transpose([0, 1, 2]).expandDims();
 
-    it0 = performance.now();
+    //it0 = performance.now();
     return model_classifier.predict(batched).arraySync();
   });
-  it1 = performance.now();
+  //it1 = performance.now();
   var output = [];
 
   //out = predictions.arraySync();
@@ -223,7 +223,8 @@ const classifier_Demo = async (imElement) => {
 
   //var t1 = performance.now();
 
-  status_classifier.textContent = "Status: Done! inference took " + ((it1 - it0).toFixed(1)) + " ms.";
+  status_classifier.textContent = "Status: Done!";
+  //status_classifier.textContent = "Status: Done! inference took " + ((it1 - it0).toFixed(1)) + " ms.";
 
   //console.log("before: ", tf.memory());
   //tf.disposeVariables();
