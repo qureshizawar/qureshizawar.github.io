@@ -264,8 +264,8 @@ const style_Demo = async (imElement) => {
 
   status_style.textContent = 'Status: Loading image into model...';
 
-  var seg_time = 0;
-  var style_time = 0;
+  //var seg_time = 0;
+  //var style_time = 0;
 
   //var t0 = performance.now();
   //var bt0 = performance.now();
@@ -293,10 +293,10 @@ const style_Demo = async (imElement) => {
 
     //console.log(tf.memory ());
 
-    var st0 = performance.now();
+    //var st0 = performance.now();
     const style = model_transformer.predict(style_in);
-    var st1 = performance.now();
-    style_time = (st1 - st0)
+    //var st1 = performance.now();
+    //style_time = (st1 - st0)
     //console.log("Call to style took " + style_time + " milliseconds.");
 
     //console.log(tf.memory ());
@@ -322,12 +322,12 @@ const style_Demo = async (imElement) => {
       const normalised = segmentation_img.div(scale);
       const segmentation_in = segmentation_img.div(scale).sub(mean).div(std).expandDims();
 
-      var sst0 = performance.now();
+      //var sst0 = performance.now();
       const features = model_sem_encoder.predict(segmentation_in);
       const input_feature = tf.image.resizeBilinear(features[4], [64, 64], true)
       const predictions = model_sem_decoder.predict(input_feature);
-      var sst1 = performance.now();
-      seg_time = (sst1 - sst0)
+      //var sst1 = performance.now();
+      //seg_time = (sst1 - sst0)
       //console.log("Call to seg took " + seg_time + " milliseconds.");
 
       //const out = tf.image.resizeNearestNeighbor(predictions[0],[512,512]).squeeze(0);
@@ -360,19 +360,20 @@ const style_Demo = async (imElement) => {
 
   const maskCanvas = document.getElementById('mask');
 
-  status_style.textContent = "Status: Done! inference took " + ((seg_time + style_time).toFixed(1)) + " milliseconds.";
+  status_style.textContent = "Status: Done!";
+  //status_style.textContent = "Status: Done! inference took " + ((seg_time + style_time).toFixed(1)) + " milliseconds.";
 
-  var tbt0 = performance.now();
+  //var tbt0 = performance.now();
   //tf.browser.toPixels(tf.image.resizeBilinear(masked_style_comp,
   //  [IMAGE_HEIGHT,IMAGE_WIDTH]), maskCanvas);
   tf.browser.toPixels(tf.image.resizeBilinear(masked_style_comp,
     [output_HEIGHT, output_WIDTH]), maskCanvas);
   //tf.browser.toPixels(style_out_norm, maskCanvas);
 
-  var tbt1 = performance.now();
+  //var tbt1 = performance.now();
   //console.log("Call to tb took " + (tbt1 - tbt0) + " milliseconds.");
 
-  var t1 = performance.now();
+  //var t1 = performance.now();
   //console.log("Call to mask_Demo took " + (t1 - t0) + " milliseconds.");
 
   masked_style_comp.dispose();
@@ -408,7 +409,7 @@ function detectInRealTime(video) {
 
     // Begin monitoring code for frames per second
     //stats.begin();
-    t0 = performance.now();
+    //t0 = performance.now();
 
     //ctx.clearRect(0, 0, output_WIDTH, output_HEIGHT);
     video.onloadeddata = () => {
@@ -447,7 +448,7 @@ function detectInRealTime(video) {
     //stats.end();
 
 
-    console.log("DetectionFrame: ", performance.now() - t0)
+    //console.log("DetectionFrame: ", performance.now() - t0)
 
     request = requestAnimationFrame(DetectionFrame);
 

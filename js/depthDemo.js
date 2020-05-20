@@ -218,11 +218,11 @@ const Depth_Demo = async (imElement) => {
 
     //const predictions = model.predict(batched);
 
-    var it0 = performance.now();
+    //var it0 = performance.now();
     const features = model_depth_encoder.predict(batched);
     const predictions = model_depth_decoder.predict(features);
-    var it1 = performance.now();
-    depth_time = (it1 - it0);
+    //var it1 = performance.now();
+    //depth_time = (it1 - it0);
 
     const depthPred = predictions[3].squeeze(0).transpose([1, 2, 0]);
 
@@ -252,7 +252,8 @@ const Depth_Demo = async (imElement) => {
 
   await tf.browser.toPixels(depthMask_resized, depthCanvas);
 
-  status_depth.textContent = "Status: Done! inference took " + (depth_time.toFixed(1)) + " milliseconds.";
+  status_depth.textContent = "Status: Done!";
+  //status_depth.textContent = "Status: Done! inference took " + (depth_time.toFixed(1)) + " milliseconds.";
   //console.log("before: ", tf.memory());
 
   //tf.disposeVariables();
