@@ -40,88 +40,24 @@ if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').mat
   //console.log("Desktop detected!")
 }
 
-function depth_file(image) {
-  status_depth.textContent = 'Status: Fetching image...';
-  //var tt = performance.now();
-  //var image = evt.target.files[0]; // FileList object
-  if (window.File && window.FileReader && window.FileList && window.Blob) {
-    var reader = new FileReader();
-    // Closure to capture the file information.
-    reader.addEventListener("load", function(e) {
-      const imageData = e.target.result;
-      //const imageElement = document.createElement("img");
-      //imageElement.setAttribute("src", imageData);
-      //document.getElementById("container1").appendChild(imageElement);
-      window.loadImage(imageData, function(img) {
-        if (img.type === "error") {
-          console.log("couldn't load image:", img);
-        } else {
-          window.EXIF.getData(img, function() {
-            //console.log("done!");
-            var orientation = window.EXIF.getTag(this, "Orientation");
-            var canvas = window.loadImage.scale(img, {
-              orientation: orientation || 0,
-              canvas: true
-            });
-            //document.getElementById("container2").appendChild(canvas);
-            // or using jquery $("#container").append(canvas);
-            let img_out = document.getElementById('inpimg');
-            img_out.src = canvas.toDataURL();
-            //console.log('orientation took: ');
-            //console.log(performance.now()-tt);
-            img_out.onload = () => {
-              set_static_output_size(img_out);
-              Depth_Demo(img_out);
-            }
-          });
-        }
-      });
-    });
-    reader.readAsDataURL(image);
-  } else {
-    console.log('The File APIs are not fully supported in this browser.');
-  }
-};
-
 document.getElementById("files").addEventListener("change", function(evt) {
-  depth_file(evt.target.files[0]);
+  file_infer(evt.target.files[0], document.getElementById('inpimg'),
+    status_depth, Depth_Demo);
 });
 document.getElementById("depth_files_btn").addEventListener("click", function(evt) {
   file = document.getElementById("files").files[0];
   if (file == null) {
     status_depth.textContent = 'Status: File not found';
   } else {
-    depth_file(file);
+    file_infer(file, document.getElementById('inpimg'),
+    status_depth, Depth_Demo);
   }
 });
 
-document.getElementById('btn').onclick = function() {
-  status_depth.textContent = 'Status: Fetching image...';
-  let url = new URL(document.getElementById('imagename').value);
-  //console.log(url)
-
-  var request = new XMLHttpRequest();
-  request.open('GET', cors_api_url + url, true);
-  request.responseType = 'blob';
-  request.send();
-
-  request.onload = function() {
-    var reader = new FileReader();
-    reader.readAsDataURL(request.response);
-    reader.onload = e => {
-      //console.log('DataURL:', e.target.result);
-      // Fill the image & call predict.
-      let img = document.getElementById('inpimg');
-      img.src = e.target.result;
-      //img.height = IMAGE_HEIGHT;
-      //img.width = IMAGE_WIDTH;
-      img.onload = () => {
-        set_static_output_size(img);
-        Depth_Demo(img);
-      }
-    };
-  };
-}
+document.getElementById("btn").addEventListener("click", function(evt) {
+  url_infer(document.getElementById('imagename'), document.getElementById('inpimg'),
+    status_depth, Depth_Demo);
+});
 
 function custom_mgrid(rows, cols) {
   a = tf.tile(tf.range(0, rows).reshape([rows, 1]), [1, cols]) // cols
@@ -156,17 +92,13 @@ const DepthWarmup = async () => {
 
 const Depth_Demo = async (imElement) => {
 
-  /*var canvas = document.createElement('canvas');
-  canvas.height = output_HEIGHT//imElement.height;
-  canvas.width = output_WIDTH//imElement.width;
-  var tmpctx = canvas.getContext('2d');
-  tmpctx.drawImage( imElement, 0, 0, output_WIDTH, output_HEIGHT );*/
-
   //var t0 = performance.now();
   var depth_time = 0
 
   status_depth.textContent = 'Status: Loading image into model...';
 
+  output_WIDTH = imElement.clientWidth;
+  output_HEIGHT = imElement.clientHeight;
   in_img = tf.browser.fromPixels(imElement).toFloat();
 
   const depthMask = tf.tidy(() => {

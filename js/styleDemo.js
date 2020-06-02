@@ -53,90 +53,24 @@ if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').mat
   //console.log("Desktop detected!")
 }
 
-// see https://stackoverflow.com/questions/20600800/js-client-side-exif-orientation-rotate-and-mirror-jpeg-images
-function style_file(image) {
-  status_style.textContent = 'Status: Fetching image...';
-  //var tt = performance.now();
-  //var image = evt.target.files[0]; // FileList object
-  if (window.File && window.FileReader && window.FileList && window.Blob) {
-    var reader = new FileReader();
-    // Closure to capture the file information.
-    reader.addEventListener("load", function(e) {
-      const imageData = e.target.result;
-      //const imageElement = document.createElement("img");
-      //imageElement.setAttribute("src", imageData);
-      //document.getElementById("container1").appendChild(imageElement);
-      window.loadImage(imageData, function(img) {
-        if (img.type === "error") {
-          console.log("couldn't load image:", img);
-        } else {
-          window.EXIF.getData(img, function() {
-            //console.log("done!");
-            var orientation = window.EXIF.getTag(this, "Orientation");
-            var canvas = window.loadImage.scale(img, {
-              orientation: orientation || 0,
-              canvas: true
-            });
-            //document.getElementById("container2").appendChild(canvas);
-            // or using jquery $("#container").append(canvas);
-            let img_out = document.getElementById('inpimg_style');
-            //console.log(img_out.clientHeight)
-            img_out.src = canvas.toDataURL();
-            //console.log('orientation took: ');
-            //console.log(performance.now()-tt);
-            img_out.onload = () => {
-              set_static_output_size(img_out);
-              style_Demo(img_out);
-            };
-          });
-        }
-      });
-    });
-    reader.readAsDataURL(image);
-  } else {
-    console.log('The File APIs are not fully supported in this browser.');
-  }
-};
-
 document.getElementById("files_style").addEventListener("change", function(evt) {
-  style_file(evt.target.files[0]);
+  file_infer(evt.target.files[0], document.getElementById('inpimg_style'),
+    status_style, style_Demo);
 });
 document.getElementById("style_files_btn").addEventListener("click", function(evt) {
   file = document.getElementById("files_style").files[0];
   if (file == null) {
     status_style.textContent = 'Status: File not found';
   } else {
-    style_file(file);
+    file_infer(file, document.getElementById('inpimg_style'),
+      status_style, style_Demo);
   }
 });
 
-document.getElementById('btn_style').onclick = function() {
-  status_style.textContent = 'Status: Fetching image...';
-  let url = new URL(document.getElementById('imagename_style').value);
-  //console.log(url)
-
-  var request = new XMLHttpRequest();
-  request.open('GET', cors_api_url + url, true);
-  request.responseType = 'blob';
-  request.send();
-
-  request.onload = function() {
-    var reader = new FileReader();
-    reader.readAsDataURL(request.response);
-    reader.onload = e => {
-      //console.log('DataURL:', e.target.result);
-      // Fill the image & call predict.
-      let img = document.getElementById('inpimg_style');
-      img.src = e.target.result;
-      //img.height = IMAGE_HEIGHT;
-      //img.width = IMAGE_WIDTH;
-      img.onload = () => {
-        set_static_output_size(img);
-        style_Demo(img);
-      }
-    };
-  };
-}
+document.getElementById("btn_style").addEventListener("click", function(evt) {
+  url_infer(document.getElementById('imagename_style'), document.getElementById('inpimg_style'),
+    status_style, classifier_Demo);
+});
 
 const Load_style_model = async (style_type) => {
 
@@ -187,7 +121,8 @@ const style_Demo = async (imElement) => {
   const masked_style_comp = tf.tidy(() => {
 
     //console.log(tf.memory ());
-
+    output_WIDTH = imElement.clientWidth;
+    output_HEIGHT = imElement.clientHeight;
     var img = tf.browser.fromPixels(imElement).toFloat(); //tf.image.resizeBilinear(tf.browser.fromPixels(imElement).toFloat(),
     //[512,512]);
 
