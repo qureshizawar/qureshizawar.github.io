@@ -68,3 +68,80 @@ function renderImageToCanvas(image, size, canvas) {
 
   ctx.drawImage(image, 0, 0);
 }
+
+/**
+ * Set the image size to match input element
+ */
+function set_static_output_size(element) {
+  /*console.log("clientHeight", element.clientHeight)
+  console.log("clientWidth", element.clientWidth)
+  console.log("naturalHeight", element.naturalHeight)
+  console.log("naturalWidth", element.naturalWidth)*/
+  //too small
+  if (element.clientWidth > element.naturalWidth && element.clientHeight > element.naturalHeight) {
+    output_HEIGHT = element.clientHeight
+    output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
+    if (output_WIDTH > element.clientWidth) {
+      output_WIDTH = element.clientWidth
+      output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
+    }
+    //too big
+  } else if (element.clientWidth < element.naturalWidth && element.clientHeight < element.naturalHeight) {
+    output_WIDTH = element.clientWidth
+    output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
+    if (output_HEIGHT > element.clientHeight) {
+      output_HEIGHT = element.clientHeight
+      output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
+    }
+    //too long
+  } else if (element.clientWidth < element.naturalWidth) {
+    output_WIDTH = element.clientWidth
+    output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
+  } //too tall
+  else {
+    output_HEIGHT = element.clientHeight
+    output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
+  }
+  /*output_HEIGHT = element.clientHeight
+  output_WIDTH = element.clientWidth*/
+  /*console.log(output_HEIGHT);
+  console.log(output_WIDTH);*/
+}
+
+/**
+ * Loads a the camera to be used in the demo
+ *
+ */
+async function setupCamera(mode) {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    throw new Error(
+      'Browser API navigator.mediaDevices.getUserMedia not available');
+  }
+
+  const video = document.getElementById('video');
+  video.width = videoWidth;
+  video.height = videoHeight;
+
+  const stream = await navigator.mediaDevices.getUserMedia({
+    'audio': false,
+    'video': {
+      facingMode: mode == 'rear' ? "environment" : 'user',
+      width: mobile ? undefined : videoWidth,
+      height: mobile ? undefined : videoHeight,
+    },
+  });
+  video.srcObject = stream;
+
+  return new Promise((resolve) => {
+    video.onloadedmetadata = () => {
+      resolve(video);
+    };
+  });
+}
+
+async function loadVideo(mode) {
+  const video = await setupCamera(mode);
+  video.play();
+
+  return video;
+}

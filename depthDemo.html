@@ -40,29 +40,6 @@
   <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 </head>
 
-<style>
-  .file-container {
-    margin-bottom: 20px;
-  }
-
-  .canvas {
-    position: relative;
-    border: 1px;
-  }
-
-  hr.solid {
-    border-top: 0.5px solid #999;
-  }
-
-  #grad1 {
-    height: 10px;
-    background-color: white;
-    /* For browsers that do not support gradients */
-    background-image: linear-gradient(to right, white, black);
-    /* Standard syntax (must be last) */
-  }
-</style>
-
 <body>
   <div id="mobile-menu-open" class="shadow-large">
     <i class="fa fa-bars" aria-hidden="true"></i>
@@ -183,17 +160,10 @@
           <hr class="solid">
           </hr>
 
-          <img id="inpimg" src="/assets/demo_images/sample.png" height="auto" width="100%" max-width="400px" />
+          <img class="inp_img" id="inpimg" src="/assets/demo_images/sample.png"/>
           <p class="section-head">Prediction:</p>
           <canvas id="depth" class="canvas"></canvas>
           <p class="section-head">3D point cloud:</p>
-          <!--div id="grad1"></div-->
-
-          <!--script type="module">
-                    import { createPointCloud } from './js/pointCloud.js';
-
-                    createPointCloud("./js/test10.csv")
-                    </script-->
           <canvas id="depth_canvas" class="canvas"></canvas>
         </div>
       </section>

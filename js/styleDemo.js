@@ -45,87 +45,12 @@ function is_touch_device() {
     ||
     'onmsgesturechange' in window; // works on ie10
 }
-//console.log(screen.width)
-//console.log((window.matchMedia('(max-device-width: 960px)').matches))
+
 if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').matches)) {
   style_IMAGE_HEIGHT = 512
   style_IMAGE_WIDTH = 512
   dropdown_style_qual.textContent = style_vhigh.textContent;
   //console.log("Desktop detected!")
-}
-
-function set_static_output_size(element) {
-  /*console.log("clientHeight", element.clientHeight)
-  console.log("clientWidth", element.clientWidth)
-  console.log("naturalHeight", element.naturalHeight)
-  console.log("naturalWidth", element.naturalWidth)*/
-  //too small
-  if (element.clientWidth > element.naturalWidth && element.clientHeight > element.naturalHeight) {
-    output_HEIGHT = element.clientHeight
-    output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
-    if (output_WIDTH > element.clientWidth) {
-      output_WIDTH = element.clientWidth
-      output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
-    }
-    //too big
-  } else if (element.clientWidth < element.naturalWidth && element.clientHeight < element.naturalHeight) {
-    output_WIDTH = element.clientWidth
-    output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
-    if (output_HEIGHT > element.clientHeight) {
-      output_HEIGHT = element.clientHeight
-      output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
-    }
-    //too long
-  } else if (element.clientWidth < element.naturalWidth) {
-    output_WIDTH = element.clientWidth
-    output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
-  } //too tall
-  else {
-    output_HEIGHT = element.clientHeight
-    output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
-  }
-  /*output_HEIGHT = element.clientHeight
-  output_WIDTH = element.clientWidth*/
-  /*console.log(output_HEIGHT);
-  console.log(output_WIDTH);*/
-}
-
-/**
- * Loads a the camera to be used in the demo
- *
- */
-async function setupCamera(mode) {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    throw new Error(
-      'Browser API navigator.mediaDevices.getUserMedia not available');
-  }
-
-  const video = document.getElementById('video');
-  video.width = output_WIDTH;
-  video.height = output_HEIGHT;
-
-  const stream = await navigator.mediaDevices.getUserMedia({
-    'audio': false,
-    'video': {
-      facingMode: mode == 'rear' ? "environment" : 'user',
-      width: mobile ? undefined : output_WIDTH,
-      height: mobile ? undefined : output_HEIGHT,
-    },
-  });
-  video.srcObject = stream;
-
-  return new Promise((resolve) => {
-    video.onloadedmetadata = () => {
-      resolve(video);
-    };
-  });
-}
-
-async function loadVideo(mode) {
-  const video = await setupCamera(mode);
-  video.play();
-
-  return video;
 }
 
 // see https://stackoverflow.com/questions/20600800/js-client-side-exif-orientation-rotate-and-mirror-jpeg-images
@@ -227,25 +152,14 @@ const StyleWarmup = async () => {
 
   status_style.textContent = 'Status: Loading...';
 
-  //console.log(tf.memory ());
-
   Load_style_model(style_type)
 
   model_sem_encoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_encoder_bi_quant/model.json');
   model_sem_decoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_decoder_pruned_quant/model.json');
 
-  //model_sem_decoder.summary();
-
-  //console.log(tf.memory());
-
-  //console.log(tf.memory());
-
   // Make a prediction through the locally hosted inpimg_style.jpg.
   let img = document.getElementById('inpimg_style');
   set_static_output_size(img);
-  //inpElement.width = 300
-  //inpElement.height = 300
-  //inpElement.src = e.target.result;
   if (img.complete && img.naturalHeight !== 0) {
     style_Demo(img);
     img.style.display = '';
@@ -303,13 +217,6 @@ const style_Demo = async (imElement) => {
 
     //var postt0 = performance.now();
 
-    //const ze = tf.zeros([512, 512, 3]);
-    //const on = tf.ones([512, 512, 3]);
-    //car=7 person=15
-    //const masked = normalised.where(Sem_mask_conc.equal(15), ze);
-    //const masked = on.where(Sem_mask_conc.equal(15), ze);
-    //const inv_masked = ze.where(Sem_mask_conc.equal(15), normalised);
-
     const style_out = style.squeeze(0).clipByValue(0, 255).div(scale);
 
     //var postt1 = performance.now();
@@ -353,11 +260,6 @@ const style_Demo = async (imElement) => {
 
   //console.log(tf.memory ());
 
-  //console.log(`style_out: ${style_out.shape}`);
-
-  /*t_Width = document.getElementById('inpimg_style').clientWidth
-  t_Height = document.getElementById('inpimg_style').clientHeight*/
-
   const maskCanvas = document.getElementById('mask');
 
   status_style.textContent = "Status: Done!";
@@ -377,12 +279,6 @@ const style_Demo = async (imElement) => {
   //console.log("Call to mask_Demo took " + (t1 - t0) + " milliseconds.");
 
   masked_style_comp.dispose();
-  /*
-  normalised.dispose();
-  batched.dispose();
-  depthPred.dispose();
-  depthMask.dispose();
-  //tf.disposeVariables();*/
   //console.log("after: ", tf.memory());
   //console.log(tf.memory ());
 };
@@ -423,20 +319,6 @@ function detectInRealTime(video) {
 
       //await tf.nextFrame();
       style_Demo(video);
-      //console.log(out)
-      //const outcanv = new ImageData(out, output_WIDTH, output_HEIGHT)
-      //console.log(outcanv)
-      //ctx.save();
-      /*if (flipHorizontal) {
-        ctx.scale(-1, 1);
-        ctx.translate(-output_WIDTH, 0);
-      }*/
-      /*else{
-        ctx.scale(1, 1);*/
-      //ctx.putImageData(outcanv, 0, 0);
-      //video.ImageData= outcanv
-      //ctx.drawImage(video, 0, 0, output_WIDTH, output_HEIGHT);
-      //ctx.restore();
     }
 
     /*if (document.getElementById("show_fps").checked) {

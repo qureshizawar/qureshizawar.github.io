@@ -40,42 +40,6 @@ if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').mat
   //console.log("Desktop detected!")
 }
 
-function set_static_output_size(element) {
-  /*console.log("clientHeight", element.clientHeight)
-  console.log("clientWidth", element.clientWidth)
-  console.log("naturalHeight", element.naturalHeight)
-  console.log("naturalWidth", element.naturalWidth)*/
-  //too small
-  if (element.clientWidth > element.naturalWidth && element.clientHeight > element.naturalHeight) {
-    output_HEIGHT = element.clientHeight
-    output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
-    if (output_WIDTH > element.clientWidth) {
-      output_WIDTH = element.clientWidth
-      output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
-    }
-    //too big
-  } else if (element.clientWidth < element.naturalWidth && element.clientHeight < element.naturalHeight) {
-    output_WIDTH = element.clientWidth
-    output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
-    if (output_HEIGHT > element.clientHeight) {
-      output_HEIGHT = element.clientHeight
-      output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
-    }
-    //too long
-  } else if (element.clientWidth < element.naturalWidth) {
-    output_WIDTH = element.clientWidth
-    output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
-  } //too tall
-  else {
-    output_HEIGHT = element.clientHeight
-    output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
-  }
-  /*output_HEIGHT = element.clientHeight
-  output_WIDTH = element.clientWidth*/
-  /*console.log(output_HEIGHT);
-  console.log(output_WIDTH);*/
-}
-
 function depth_file(image) {
   status_depth.textContent = 'Status: Fetching image...';
   //var tt = performance.now();

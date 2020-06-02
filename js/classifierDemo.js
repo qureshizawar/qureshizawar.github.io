@@ -30,44 +30,6 @@ let model_classifier;
 const status_classifier = document.getElementById('status_classifier');
 
 /**
- * Loads a the camera to be used in the demo
- *
- */
-async function setupCamera(mode) {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    throw new Error(
-      'Browser API navigator.mediaDevices.getUserMedia not available');
-  }
-
-  const video = document.getElementById('video');
-  video.width = videoWidth;
-  video.height = videoHeight;
-
-  const stream = await navigator.mediaDevices.getUserMedia({
-    'audio': false,
-    'video': {
-      facingMode: mode == 'rear' ? "environment" : 'user',
-      width: mobile ? undefined : videoWidth,
-      height: mobile ? undefined : videoHeight,
-    },
-  });
-  video.srcObject = stream;
-
-  return new Promise((resolve) => {
-    video.onloadedmetadata = () => {
-      resolve(video);
-    };
-  });
-}
-
-async function loadVideo(mode) {
-  const video = await setupCamera(mode);
-  video.play();
-
-  return video;
-}
-
-/**
  * Sets up a frames per second panel on the top-left of the window
  */
 /*function setupFPS() {
