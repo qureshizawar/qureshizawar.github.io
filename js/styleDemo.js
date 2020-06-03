@@ -199,11 +199,8 @@ const style_Demo = async (imElement) => {
   //status_style.textContent = "Status: Done! inference took " + ((seg_time + style_time).toFixed(1)) + " milliseconds.";
 
   //var tbt0 = performance.now();
-  //tf.browser.toPixels(tf.image.resizeBilinear(masked_style_comp,
-  //  [IMAGE_HEIGHT,IMAGE_WIDTH]), maskCanvas);
   tf.browser.toPixels(tf.image.resizeBilinear(masked_style_comp,
     [output_HEIGHT, output_WIDTH]), maskCanvas);
-  //tf.browser.toPixels(style_out_norm, maskCanvas);
 
   //var tbt1 = performance.now();
   //console.log("Call to tb took " + (tbt1 - tbt0) + " milliseconds.");
@@ -260,7 +257,6 @@ function detectInRealTime(video) {
 
     // End monitoring code for frames per second
     //stats.end();
-
 
     //console.log("DetectionFrame: ", performance.now() - t0)
 

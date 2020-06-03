@@ -85,7 +85,6 @@ const DepthWarmup = async () => {
   document.getElementById('file-container').style.display = '';
 };
 
-
 const Depth_Demo = async (imElement) => {
 
   //var t0 = performance.now();
@@ -101,14 +100,12 @@ const Depth_Demo = async (imElement) => {
 
     const img = tf.image.resizeBilinear(in_img,
       [Depth_IMAGE_HEIGHT, Depth_IMAGE_WIDTH]);
-    //console.log(img);
+
     const scale = tf.scalar(255.);
     const normalised = img.div(scale);
 
     status_depth.textContent = 'Status: Model loaded! running inference';
     const batched = normalised.transpose([2, 0, 1]).expandDims();
-
-    //const predictions = model.predict(batched);
 
     //var it0 = performance.now();
     const features = model_depth_encoder.predict(batched);
@@ -134,8 +131,6 @@ const Depth_Demo = async (imElement) => {
   img_array = tf.image.resizeBilinear(in_img, [output_HEIGHT, output_WIDTH]).arraySync()
   depth_array = depthMask_resized.arraySync()
 
-  //const points = GenPointCloud(depthMask_resized)
-
   await tf.browser.toPixels(depthMask_resized, depthCanvas);
 
   status_depth.textContent = "Status: Done!";
@@ -147,6 +142,10 @@ const Depth_Demo = async (imElement) => {
 
   const xy = custom_mgrid(img_array.length, img_array[0].length)
   createPointCloud(xy[0].arraySync(), xy[1].arraySync(), depth_array, img_array);
+
+  in_img.dispose();
+  depthMask.dispose();
+  depthMask_resized.dispose();
 };
 
 depth_low.onclick = function() {
