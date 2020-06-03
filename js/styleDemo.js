@@ -1,11 +1,9 @@
-tf.setBackend('webgl')
-//let backend = new tf.webgl.MathBackendWebGL()
+tf.setBackend('webgl');
 tf.ENV.set('WEBGL_CONV_IM2COL', false);
 tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
-tf.webgl.forceHalfFloat()
+tf.webgl.forceHalfFloat();
 
 //tf.enableDebugMode()
-//console.log(tf.ENV.features)
 //tf.ENV.set('BEFORE_PAGING_CONSTANT ', 1000);
 //tf.setBackend('cpu');
 //tf.enableProdMode();
@@ -69,7 +67,7 @@ document.getElementById("style_files_btn").addEventListener("click", function(ev
 
 document.getElementById("btn_style").addEventListener("click", function(evt) {
   url_infer(document.getElementById('imagename_style'), document.getElementById('inpimg_style'),
-    status_style, classifier_Demo);
+    status_style, style_Demo);
 });
 
 const Load_style_model = async (style_type) => {
@@ -248,7 +246,6 @@ function detectInRealTime(video) {
     }
 
     if (camloaded) {
-      //await classifier_Demo(video);
       /*const time = await tf.time(() => style_Demo(video));
       console.log(`kernelMs: ${time.kernelMs}, wallTimeMs: ${time.wallMs}`);*/
 
@@ -315,7 +312,6 @@ async function bindPage() {
   //toggleLoadingUI(false);
 
   camloaded = false;
-
 
   try {
     video = await loadVideo(mode);
@@ -464,8 +460,6 @@ madhubani.onclick = function() {
   dropdown_style.textContent = madhubani.textContent;
 }
 
-
-
 seg_low.onclick = function() {
   event.preventDefault();
   //console.log("btn pressed!")
@@ -487,7 +481,6 @@ seg_high.onclick = function() {
   segmentation_IMAGE_WIDTH = 512
   dropdown_seg_qual.textContent = seg_high.textContent;
 }
-
 
 style_low.onclick = function() {
   event.preventDefault();

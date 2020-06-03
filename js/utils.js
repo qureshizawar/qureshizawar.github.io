@@ -105,49 +105,65 @@ function set_static_output_size(element) {
   output_WIDTH = element.clientWidth*/
   /*console.log(output_HEIGHT);
   console.log(output_WIDTH);*/
-  return [output_WIDTH,output_HEIGHT];
+  return [output_WIDTH, output_HEIGHT];
 }
 
-// see https://stackoverflow.com/questions/20600800/js-client-side-exif-orientation-rotate-and-mirror-jpeg-images
 function file_infer(image, img_in, status, func) {
   //console.log("running file_infer!");
   status.textContent = 'Status: Fetching image...';
   //var tt = performance.now();
   if (window.File && window.FileReader && window.FileList && window.Blob) {
+
+    /*getImageUrl(image).then(url => {
+      img_in.src = url;
+      img_in.onload = () => func(img_in);
+    })*/
+
     var reader = new FileReader();
     // Closure to capture the file information.
     reader.addEventListener("load", function(e) {
+      img_in.src = e.target.result;
+      img_in.onload = () => func(img_in);
+    });
+    reader.readAsDataURL(image);
+
+    // see https://stackoverflow.com/questions/20600800/js-client-side-exif-orientation-rotate-and-mirror-jpeg-images
+    /*var reader = new FileReader();
+    // Closure to capture the file information.
+    reader.addEventListener("load", function(e) {
       const imageData = e.target.result;
-      window.loadImage(imageData, function(img) {
+      window.loadImage(imageData, function(img, data) {
         if (img.type === "error") {
           console.log("couldn't load image:", img);
         } else {
-          window.EXIF.getData(img, function() {
-            //console.log("done!");
-            var orientation = window.EXIF.getTag(this, "Orientation");
-            var canvas = window.loadImage.scale(img, {
-              orientation: orientation || 0,
-              canvas: true
-            });
-            //document.getElementById("container2").appendChild(canvas);
-            // or using jquery $("#container").append(canvas);
-            //let img_out = document.getElementById('inpimg0');
-            img_in.src = canvas.toDataURL();
-            //console.log('orientation took: ');
-            //console.log(performance.now()-tt);
-            img_in.onload = () => func(img_in);
+          //window.EXIF.getData(img, function() {
+          //console.log("done!");
+          var orientation = data.exif; //exif.get('Orientation') //window.EXIF.getTag(this, "Orientation");
+          var canvas = window.loadImage.scale(img, {
+            orientation: Number(orientation) || true,
+            canvas: true
           });
+          //console.log(orientation);
+          //document.getElementById("container2").appendChild(canvas);
+          // or using jquery $("#container").append(canvas);
+          //let img_out = document.getElementById('inpimg0');
+          img_in.src = canvas.toDataURL();
+          //console.log('orientation took: ');
+          //console.log(performance.now()-tt);
+          img_in.onload = () => func(img_in);
+          //});
         }
+      }, {
+        meta: true
       });
     });
-    reader.readAsDataURL(image);
+    reader.readAsDataURL(image);*/
   } else {
     console.log('The File APIs are not fully supported in this browser.');
   }
 };
 
-function url_infer(url_in, img_in, status, func){
-  //console.log("running url_infer!");
+function url_infer(url_in, img_in, status, func) {
   status.textContent = 'Status: Fetching image...';
 
   let url = new URL(url_in.value);
@@ -161,12 +177,8 @@ function url_infer(url_in, img_in, status, func){
     var reader = new FileReader();
     reader.readAsDataURL(request.response);
     reader.onload = e => {
-      //console.log('DataURL:', e.target.result);
-      // Fill the image & call predict.
-      //let img = document.getElementById('inpimg0');
+      // Fill the image & call func.
       img_in.src = e.target.result;
-      //img.height = IMAGE_HEIGHT;
-      //img.width = IMAGE_HEIGHT;
       img_in.onload = () => func(img_in);
     };
   };
@@ -209,3 +221,141 @@ async function loadVideo(mode) {
 
   return video;
 }
+
+// Based on: https://stackoverflow.com/a/46814952/283851
+// Based on: https://gist.github.com/mindplay-dk/72f47c1a570e870a375bd3dbcb9328fb
+/**
+ * Create a Base64 Image URL, with rotation applied to compensate for EXIF orientation, if needed.
+ *
+ * Optionally resize to a smaller maximum width - to improve performance for larger image thumbnails.
+ */
+function getImageUrl(file, maxWidth) {
+  return readOrientation(file).then(function(orientation) {
+    return applyRotation(file, orientation || 1, maxWidth || 999999);
+  });
+}
+/**
+ * @returns EXIF orientation value (or undefined)
+ */
+var readOrientation = function(file) {
+  return new Promise(function(resolve) {
+    var reader = new FileReader();
+    reader.onload = function() {
+      return resolve((function() {
+        var view = new DataView( /** @type {ArrayBuffer} */ (reader.result));
+        if (view.getUint16(0, false) != 0xFFD8) {
+          return;
+        }
+        var length = view.byteLength;
+        var offset = 2;
+        while (offset < length) {
+          var marker = view.getUint16(offset, false);
+          offset += 2;
+          if (marker == 0xFFE1) {
+            offset += 2;
+            if (view.getUint32(offset, false) != 0x45786966) {
+              return;
+            }
+            offset += 6;
+            var little = view.getUint16(offset, false) == 0x4949;
+            offset += view.getUint32(offset + 4, little);
+            var tags = view.getUint16(offset, little);
+            offset += 2;
+            for (var i = 0; i < tags; i++) {
+              if (view.getUint16(offset + (i * 12), little) == 0x0112) {
+                return view.getUint16(offset + (i * 12) + 8, little);
+              }
+            }
+          } else if ((marker & 0xFF00) != 0xFF00) {
+            break;
+          } else {
+            offset += view.getUint16(offset, false);
+          }
+        }
+      })());
+    };
+    reader.readAsArrayBuffer(file.slice(0, 64 * 1024));
+  });
+};
+/**
+ * @returns Base64 Image URL (with rotation applied to compensate for orientation, if any)
+ */
+var applyRotation = function(file, orientation, maxWidth) {
+  return new Promise(function(resolve) {
+    var reader = new FileReader();
+    reader.onload = function() {
+      var url = reader.result;
+      var image = new Image();
+      image.onload = function() {
+        var canvas = document.createElement("canvas");
+        var context = canvas.getContext("2d");
+        var width = image.width,
+          height = image.height;
+        var _a = orientation >= 5 && orientation <= 8 ?
+          [height, width] :
+          [width, height],
+          outputWidth = _a[0],
+          outputHeight = _a[1];
+        var scale = outputWidth > maxWidth ? maxWidth / outputWidth : 1;
+        width = Math.floor(width * scale);
+        height = Math.floor(height * scale);
+        // to rotate rectangular image, we need enough space so square canvas is used
+        var wh = Math.max(width, height);
+        // set proper canvas dimensions before transform & export
+        canvas.width = wh;
+        canvas.height = wh;
+        // for some transformations output image will be aligned to the right or bottom of square canvas
+        var rightAligned = false;
+        var bottomAligned = false;
+        // transform context before drawing image
+        switch (orientation) {
+          case 2:
+            context.transform(-1, 0, 0, 1, wh, 0);
+            rightAligned = true;
+            break;
+          case 3:
+            context.transform(-1, 0, 0, -1, wh, wh);
+            rightAligned = true;
+            bottomAligned = true;
+            break;
+          case 4:
+            context.transform(1, 0, 0, -1, 0, wh);
+            bottomAligned = true;
+            break;
+          case 5:
+            context.transform(0, 1, 1, 0, 0, 0);
+            break;
+          case 6:
+            context.transform(0, 1, -1, 0, wh, 0);
+            rightAligned = true;
+            break;
+          case 7:
+            context.transform(0, -1, -1, 0, wh, wh);
+            rightAligned = true;
+            bottomAligned = true;
+            break;
+          case 8:
+            context.transform(0, -1, 1, 0, 0, wh);
+            bottomAligned = true;
+            break;
+          default:
+            break;
+        }
+        // draw image
+        context.drawImage(image, 0, 0, width, height);
+        // copy rotated image to output dimensions and export it
+        var canvas2 = document.createElement("canvas");
+        canvas2.width = Math.floor(outputWidth * scale);
+        canvas2.height = Math.floor(outputHeight * scale);
+        var ctx2 = canvas2.getContext("2d");
+        var sx = rightAligned ? canvas.width - canvas2.width : 0;
+        var sy = bottomAligned ? canvas.height - canvas2.height : 0;
+        ctx2.drawImage(canvas, sx, sy, canvas2.width, canvas2.height, 0, 0, canvas2.width, canvas2.height);
+        // export base64
+        resolve(canvas2.toDataURL("image/jpeg"));
+      };
+      image.src = url;
+    };
+    reader.readAsDataURL(file);
+  });
+};

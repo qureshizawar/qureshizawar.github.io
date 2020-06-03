@@ -1,13 +1,9 @@
-tf.setBackend('webgl')
-//let backend = new tf.webgl.MathBackendWebGL()
+tf.setBackend('webgl');
 //tf.ENV.set('WEBGL_CONV_IM2COL', false);
 tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
-tf.webgl.forceHalfFloat()
+tf.webgl.forceHalfFloat();
 
 //tf.enableDebugMode()
-//tf.enableProdMode()
-
-//console.log(tf.ENV.features)
 //tf.ENV.set('BEFORE_PAGING_CONSTANT ', 1000);
 //tf.setBackend('cpu');
 //tf.enableProdMode();
@@ -207,8 +203,6 @@ async function bindPage() {
   //toggleLoadingUI(false);
 
   camloaded = false;
-
-
   try {
     video = await loadVideo(mode);
   } catch (e) {

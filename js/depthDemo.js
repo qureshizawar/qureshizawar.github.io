@@ -1,10 +1,8 @@
-tf.setBackend('webgl')
-//let backend = new tf.webgl.MathBackendWebGL()
+tf.setBackend('webgl');
 tf.ENV.set('WEBGL_CONV_IM2COL', false);
 tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
-tf.webgl.forceHalfFloat()
+tf.webgl.forceHalfFloat();
 
-//console.log(tf.ENV.features)
 //tf.ENV.set('BEFORE_PAGING_CONSTANT ', 1000);
 //tf.setBackend('cpu');
 //tf.enableProdMode();
@@ -12,8 +10,8 @@ tf.webgl.forceHalfFloat()
 let model_depth_encoder;
 let model_depth_decoder;
 
-var Depth_IMAGE_HEIGHT = 192
-var Depth_IMAGE_WIDTH = 320
+var Depth_IMAGE_HEIGHT = 192;
+var Depth_IMAGE_WIDTH = 320;
 
 var output_HEIGHT = 300;
 var output_WIDTH = 400;
@@ -22,22 +20,20 @@ var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
 const status_depth = document.getElementById('status_depth');
 
 const dropdown_depth_qual = document.getElementById('dropdown_depth_qual');
-const depth_low = document.getElementById('depth_low')
-const depth_medium = document.getElementById('depth_medium')
-const depth_high = document.getElementById('depth_high')
+const depth_low = document.getElementById('depth_low');
+const depth_medium = document.getElementById('depth_medium');
+const depth_high = document.getElementById('depth_high');
 
 function is_touch_device() {
   return 'ontouchstart' in window // works on most browsers
     ||
     'onmsgesturechange' in window; // works on ie10
 }
-//console.log(screen.width)
-//console.log((window.matchMedia('(max-device-width: 960px)').matches))
+
 if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').matches)) {
   Depth_IMAGE_HEIGHT = 192
   Depth_IMAGE_WIDTH = 640
   dropdown_depth_qual.textContent = depth_high.textContent;
-  //console.log("Desktop detected!")
 }
 
 document.getElementById("files").addEventListener("change", function(evt) {
@@ -50,7 +46,7 @@ document.getElementById("depth_files_btn").addEventListener("click", function(ev
     status_depth.textContent = 'Status: File not found';
   } else {
     file_infer(file, document.getElementById('inpimg'),
-    status_depth, Depth_Demo);
+      status_depth, Depth_Demo);
   }
 });
 
@@ -60,8 +56,8 @@ document.getElementById("btn").addEventListener("click", function(evt) {
 });
 
 function custom_mgrid(rows, cols) {
-  a = tf.tile(tf.range(0, rows).reshape([rows, 1]), [1, cols]) // cols
-  b = tf.tile(tf.range(0, cols).expandDims(0), [rows, 1]) // rows
+  a = tf.tile(tf.range(0, rows).reshape([rows, 1]), [1, cols]); // cols
+  b = tf.tile(tf.range(0, cols).expandDims(0), [rows, 1]); // rows
   return [a, b];
 }
 
@@ -93,7 +89,7 @@ const DepthWarmup = async () => {
 const Depth_Demo = async (imElement) => {
 
   //var t0 = performance.now();
-  var depth_time = 0
+  var depth_time = 0;
 
   status_depth.textContent = 'Status: Loading image into model...';
 
@@ -129,14 +125,9 @@ const Depth_Demo = async (imElement) => {
   const depthCanvas = document.getElementById('depth');
   depthCanvas.width = output_WIDTH;
   depthCanvas.height = output_HEIGHT;
-  /*t_Width = document.getElementById('inpimg').clientWidth
-  t_Height = document.getElementById('inpimg').clientHeight*/
 
   //var t1 = performance.now();
   //console.log("Call to depth took " + (t1 - t0) + " milliseconds.");
-
-  //await tf.browser.toPixels(tf.image.resizeBilinear(depthMask,
-  //  [IMAGE_HEIGHT,IMAGE_WIDTH]), depthCanvas);
 
   const depthMask_resized = tf.image.resizeBilinear(depthMask, [output_HEIGHT, output_WIDTH])
 
@@ -159,25 +150,6 @@ const Depth_Demo = async (imElement) => {
   const xy = custom_mgrid(img_array.length, img_array[0].length)
   createPointCloud(xy[0].arraySync(), xy[1].arraySync(), depth_array, img_array);
 };
-
-/*var coll = document.getElementsByClassName("collapsible_tf");
-var i;
-
-for (i = 0; i < coll.length; i++) {
-  coll[i].addEventListener("click", function() {
-    this.classList.toggle("activeb");
-    var content_tf = this.nextElementSibling;
-    if (content_tf.style.display === "block") {
-      content_tf.style.display = "none";
-    } else {
-      content_tf.style.display = "block";
-      if (this.title == "Depth") {
-        DepthWarmup();
-      }
-    }
-  });
-}*/
-
 
 depth_low.onclick = function() {
   event.preventDefault();
