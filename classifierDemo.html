@@ -23,20 +23,13 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.2/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900" rel="stylesheet">
   <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css">
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="css/styles.css" rel="stylesheet">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.1.0/exif.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-load-image/2.12.2/load-image.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-load-image/2.12.2/load-image-scale.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-load-image/2.12.2/load-image-orientation.min.js"></script>
-
 </head>
 
 <style>
@@ -78,9 +71,9 @@
       </h4>
 
       <p> Since this model runs locally on device, any uploaded pictures stay safely
-      on the device. Please note that the first run would
-      be much slower than subsequent runs as Tensorflow loads the necessary
-      files. (WIP so there may be bugs!) </p>
+        on the device. Please note that the first run would
+        be much slower than subsequent runs as Tensorflow loads the necessary
+        files. (WIP so there may be bugs!) </p>
 
       <div id="info" style='display:none'>
       </div>
@@ -179,7 +172,7 @@
           <hr class="solid">
           </hr>
 
-          <img id="inpimg0" src="/assets/demo_images/box_6109.jpg" height="auto" width="100%" max-width="400px">
+          <img class="inp_img" id="inpimg0" src="/assets/demo_images/box_6109.jpg">
           </img>
         </div>
 
@@ -197,6 +190,35 @@
           <p id="classifier_out2"></p>
           <p id="classifier_out3"></p>
         </div>
+      </div>
+
+      <!-- Solid divider -->
+      <hr class="solid">
+      </hr>
+
+      <div>
+        <h5>
+          Credits
+        </h5>
+        <p>
+          This demo was put together by <a href="https://github.com/qureshizawar">Zawar Qureshi</a>
+          but could not have been done without the following:
+        </p>
+        <ul>
+          <li>
+            Authors of <a href="https://arxiv.org/abs/1704.04861">the MobileNet-v1 paper</a>.
+          </li>
+          <li>
+            The <a href="https://github.com/nerox8664/onnx2keras">onnx2keras package</a>.
+          </li>
+          <li>
+            The <a href="https://js.tensorflow.org">TensorFlow.js library</a>.
+          </li>
+        </ul>
+        <p>
+          I'd love to hear from people interested
+          in making tools/apps using these models!
+        </p>
       </div>
 
     </div>
@@ -245,9 +267,7 @@
   </footer>
   <!-- End footer -->
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="js/scripts.min.js"></script>
-  <!--script type="text/javascript" src="node_modules/stats.js/build/stats.min.js"></script-->
   <script type="text/javascript" src="js/utils.min.js"></script>
   <script src="js/classifierDemo.min.js"></script>
 </body>

@@ -23,51 +23,14 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.2/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900" rel="stylesheet">
   <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css">
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="css/styles.css" rel="stylesheet">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.1.0/exif.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-load-image/2.12.2/load-image.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-load-image/2.12.2/load-image-scale.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-load-image/2.12.2/load-image-orientation.min.js"></script>
-
 </head>
-
-<!--style>
-  .file-container {
-    margin-bottom: 20px;
-  }
-
-  .content_dm {
-    padding: 0px 18px;
-    display: inline-block;
-    overflow: hidden;
-    background-color: #f1f1f1;
-  }
-
-  .canvas {
-    position: relative;
-    border: 1px;
-  }
-
-  hr.solid {
-    border-top: 0.5px solid #999;
-  }
-
-  #grad1 {
-    height: 10px;
-    background-color: white;
-    /* For browsers that do not support gradients */
-    background-image: linear-gradient(to right, white, black);
-    /* Standard syntax (must be last) */
-  }
-</style-->
 
 <body>
   <div id="mobile-menu-open" class="shadow-large">
@@ -105,9 +68,9 @@
       </h4>
       <section>
         <p> Since this model runs locally on device, any uploaded pictures stay safely
-        on the device. Please note that the first run would
-        be much slower than subsequent runs as Tensorflow loads the necessary
-        files. (WIP so there may be bugs!) </p>
+          on the device. Please note that the first run would
+          be much slower than subsequent runs as Tensorflow loads the necessary
+          files. (WIP so there may be bugs!) </p>
 
         <div id="info" style='display:none'>
         </div>
@@ -278,7 +241,7 @@
             <!-- Solid divider -->
             <hr class="solid">
             </hr>
-            <img id="inpimg_style" src="/assets/demo_images/Oxford.jpg" />
+            <img class="inp_img" id="inpimg_style" src="/assets/demo_images/Oxford.jpg" />
             <p class="section-head">Prediction:</p>
             <canvas id="mask" class="canvas"></canvas>
           </div>
@@ -290,6 +253,38 @@
             <canvas id="output"></canvas>
             <div id="fps" style='display:none'></div>
 
+          </div>
+
+          <!-- Solid divider -->
+          <hr class="solid">
+          </hr>
+
+          <div>
+            <h5>
+              Credits
+            </h5>
+            <p>
+              This demo was put together by <a href="https://github.com/qureshizawar">Zawar Qureshi</a>
+              but could not have been done without the following:
+            </p>
+            <ul>
+              <li>
+                Authors of <a href="https://arxiv.org/abs/1603.08155">the Real-Time Style Transfer paper</a>.
+              </li>
+              <li>
+                Authors of <a href="https://arxiv.org/abs/1612.01105">the PSP net paper</a>.
+              </li>
+              <li>
+                The <a href="https://github.com/nerox8664/onnx2keras">onnx2keras package</a>.
+              </li>
+              <li>
+                The <a href="https://js.tensorflow.org">TensorFlow.js library</a>.
+              </li>
+            </ul>
+            <p>
+              I'd love to hear from people interested
+              in making tools/apps using these models!
+            </p>
           </div>
 
         </div>
@@ -334,8 +329,6 @@
       </div>
     </footer>
     <!-- End footer -->
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="js/scripts.min.js"></script>
     <script type="text/javascript" src="js/utils.min.js"></script>
     <script src="js/styleDemo.min.js"></script>

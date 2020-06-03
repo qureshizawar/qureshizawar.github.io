@@ -1,11 +1,9 @@
-tf.setBackend('webgl')
-//let backend = new tf.webgl.MathBackendWebGL()
+tf.setBackend('webgl');
 tf.ENV.set('WEBGL_CONV_IM2COL', false);
 tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
-tf.webgl.forceHalfFloat()
+tf.webgl.forceHalfFloat();
 
 //tf.enableDebugMode()
-//console.log(tf.ENV.features)
 //tf.ENV.set('BEFORE_PAGING_CONSTANT ', 1000);
 //tf.setBackend('cpu');
 //tf.enableProdMode();
@@ -45,8 +43,7 @@ function is_touch_device() {
     ||
     'onmsgesturechange' in window; // works on ie10
 }
-//console.log(screen.width)
-//console.log((window.matchMedia('(max-device-width: 960px)').matches))
+
 if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').matches)) {
   style_IMAGE_HEIGHT = 512
   style_IMAGE_WIDTH = 512
@@ -54,164 +51,24 @@ if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').mat
   //console.log("Desktop detected!")
 }
 
-function set_static_output_size(element) {
-  /*console.log("clientHeight", element.clientHeight)
-  console.log("clientWidth", element.clientWidth)
-  console.log("naturalHeight", element.naturalHeight)
-  console.log("naturalWidth", element.naturalWidth)*/
-  //too small
-  if (element.clientWidth > element.naturalWidth && element.clientHeight > element.naturalHeight) {
-    output_HEIGHT = element.clientHeight
-    output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
-    if (output_WIDTH > element.clientWidth) {
-      output_WIDTH = element.clientWidth
-      output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
-    }
-    //too big
-  } else if (element.clientWidth < element.naturalWidth && element.clientHeight < element.naturalHeight) {
-    output_WIDTH = element.clientWidth
-    output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
-    if (output_HEIGHT > element.clientHeight) {
-      output_HEIGHT = element.clientHeight
-      output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
-    }
-    //too long
-  } else if (element.clientWidth < element.naturalWidth) {
-    output_WIDTH = element.clientWidth
-    output_HEIGHT = Math.round((element.naturalHeight / element.naturalWidth) * output_WIDTH);
-  } //too tall
-  else {
-    output_HEIGHT = element.clientHeight
-    output_WIDTH = Math.round((element.naturalWidth / element.naturalHeight) * output_HEIGHT);
-  }
-  /*output_HEIGHT = element.clientHeight
-  output_WIDTH = element.clientWidth*/
-  /*console.log(output_HEIGHT);
-  console.log(output_WIDTH);*/
-}
-
-/**
- * Loads a the camera to be used in the demo
- *
- */
-async function setupCamera(mode) {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    throw new Error(
-      'Browser API navigator.mediaDevices.getUserMedia not available');
-  }
-
-  const video = document.getElementById('video');
-  video.width = output_WIDTH;
-  video.height = output_HEIGHT;
-
-  const stream = await navigator.mediaDevices.getUserMedia({
-    'audio': false,
-    'video': {
-      facingMode: mode == 'rear' ? "environment" : 'user',
-      width: mobile ? undefined : output_WIDTH,
-      height: mobile ? undefined : output_HEIGHT,
-    },
-  });
-  video.srcObject = stream;
-
-  return new Promise((resolve) => {
-    video.onloadedmetadata = () => {
-      resolve(video);
-    };
-  });
-}
-
-async function loadVideo(mode) {
-  const video = await setupCamera(mode);
-  video.play();
-
-  return video;
-}
-
-// see https://stackoverflow.com/questions/20600800/js-client-side-exif-orientation-rotate-and-mirror-jpeg-images
-function style_file(image) {
-  status_style.textContent = 'Status: Fetching image...';
-  //var tt = performance.now();
-  //var image = evt.target.files[0]; // FileList object
-  if (window.File && window.FileReader && window.FileList && window.Blob) {
-    var reader = new FileReader();
-    // Closure to capture the file information.
-    reader.addEventListener("load", function(e) {
-      const imageData = e.target.result;
-      //const imageElement = document.createElement("img");
-      //imageElement.setAttribute("src", imageData);
-      //document.getElementById("container1").appendChild(imageElement);
-      window.loadImage(imageData, function(img) {
-        if (img.type === "error") {
-          console.log("couldn't load image:", img);
-        } else {
-          window.EXIF.getData(img, function() {
-            //console.log("done!");
-            var orientation = window.EXIF.getTag(this, "Orientation");
-            var canvas = window.loadImage.scale(img, {
-              orientation: orientation || 0,
-              canvas: true
-            });
-            //document.getElementById("container2").appendChild(canvas);
-            // or using jquery $("#container").append(canvas);
-            let img_out = document.getElementById('inpimg_style');
-            //console.log(img_out.clientHeight)
-            img_out.src = canvas.toDataURL();
-            //console.log('orientation took: ');
-            //console.log(performance.now()-tt);
-            img_out.onload = () => {
-              set_static_output_size(img_out);
-              style_Demo(img_out);
-            };
-          });
-        }
-      });
-    });
-    reader.readAsDataURL(image);
-  } else {
-    console.log('The File APIs are not fully supported in this browser.');
-  }
-};
-
 document.getElementById("files_style").addEventListener("change", function(evt) {
-  style_file(evt.target.files[0]);
+  file_infer(evt.target.files[0], document.getElementById('inpimg_style'),
+    status_style, style_Demo);
 });
 document.getElementById("style_files_btn").addEventListener("click", function(evt) {
   file = document.getElementById("files_style").files[0];
   if (file == null) {
     status_style.textContent = 'Status: File not found';
   } else {
-    style_file(file);
+    file_infer(file, document.getElementById('inpimg_style'),
+      status_style, style_Demo);
   }
 });
 
-document.getElementById('btn_style').onclick = function() {
-  status_style.textContent = 'Status: Fetching image...';
-  let url = new URL(document.getElementById('imagename_style').value);
-  //console.log(url)
-
-  var request = new XMLHttpRequest();
-  request.open('GET', cors_api_url + url, true);
-  request.responseType = 'blob';
-  request.send();
-
-  request.onload = function() {
-    var reader = new FileReader();
-    reader.readAsDataURL(request.response);
-    reader.onload = e => {
-      //console.log('DataURL:', e.target.result);
-      // Fill the image & call predict.
-      let img = document.getElementById('inpimg_style');
-      img.src = e.target.result;
-      //img.height = IMAGE_HEIGHT;
-      //img.width = IMAGE_WIDTH;
-      img.onload = () => {
-        set_static_output_size(img);
-        style_Demo(img);
-      }
-    };
-  };
-}
+document.getElementById("btn_style").addEventListener("click", function(evt) {
+  url_infer(document.getElementById('imagename_style'), document.getElementById('inpimg_style'),
+    status_style, style_Demo);
+});
 
 const Load_style_model = async (style_type) => {
 
@@ -227,25 +84,14 @@ const StyleWarmup = async () => {
 
   status_style.textContent = 'Status: Loading...';
 
-  //console.log(tf.memory ());
-
   Load_style_model(style_type)
 
   model_sem_encoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_encoder_bi_quant/model.json');
   model_sem_decoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_decoder_pruned_quant/model.json');
 
-  //model_sem_decoder.summary();
-
-  //console.log(tf.memory());
-
-  //console.log(tf.memory());
-
   // Make a prediction through the locally hosted inpimg_style.jpg.
   let img = document.getElementById('inpimg_style');
   set_static_output_size(img);
-  //inpElement.width = 300
-  //inpElement.height = 300
-  //inpElement.src = e.target.result;
   if (img.complete && img.naturalHeight !== 0) {
     style_Demo(img);
     img.style.display = '';
@@ -273,7 +119,8 @@ const style_Demo = async (imElement) => {
   const masked_style_comp = tf.tidy(() => {
 
     //console.log(tf.memory ());
-
+    output_WIDTH = imElement.clientWidth;
+    output_HEIGHT = imElement.clientHeight;
     var img = tf.browser.fromPixels(imElement).toFloat(); //tf.image.resizeBilinear(tf.browser.fromPixels(imElement).toFloat(),
     //[512,512]);
 
@@ -302,13 +149,6 @@ const style_Demo = async (imElement) => {
     //console.log(tf.memory ());
 
     //var postt0 = performance.now();
-
-    //const ze = tf.zeros([512, 512, 3]);
-    //const on = tf.ones([512, 512, 3]);
-    //car=7 person=15
-    //const masked = normalised.where(Sem_mask_conc.equal(15), ze);
-    //const masked = on.where(Sem_mask_conc.equal(15), ze);
-    //const inv_masked = ze.where(Sem_mask_conc.equal(15), normalised);
 
     const style_out = style.squeeze(0).clipByValue(0, 255).div(scale);
 
@@ -353,22 +193,14 @@ const style_Demo = async (imElement) => {
 
   //console.log(tf.memory ());
 
-  //console.log(`style_out: ${style_out.shape}`);
-
-  /*t_Width = document.getElementById('inpimg_style').clientWidth
-  t_Height = document.getElementById('inpimg_style').clientHeight*/
-
   const maskCanvas = document.getElementById('mask');
 
   status_style.textContent = "Status: Done!";
   //status_style.textContent = "Status: Done! inference took " + ((seg_time + style_time).toFixed(1)) + " milliseconds.";
 
   //var tbt0 = performance.now();
-  //tf.browser.toPixels(tf.image.resizeBilinear(masked_style_comp,
-  //  [IMAGE_HEIGHT,IMAGE_WIDTH]), maskCanvas);
   tf.browser.toPixels(tf.image.resizeBilinear(masked_style_comp,
     [output_HEIGHT, output_WIDTH]), maskCanvas);
-  //tf.browser.toPixels(style_out_norm, maskCanvas);
 
   //var tbt1 = performance.now();
   //console.log("Call to tb took " + (tbt1 - tbt0) + " milliseconds.");
@@ -377,12 +209,6 @@ const style_Demo = async (imElement) => {
   //console.log("Call to mask_Demo took " + (t1 - t0) + " milliseconds.");
 
   masked_style_comp.dispose();
-  /*
-  normalised.dispose();
-  batched.dispose();
-  depthPred.dispose();
-  depthMask.dispose();
-  //tf.disposeVariables();*/
   //console.log("after: ", tf.memory());
   //console.log(tf.memory ());
 };
@@ -417,26 +243,11 @@ function detectInRealTime(video) {
     }
 
     if (camloaded) {
-      //await classifier_Demo(video);
       /*const time = await tf.time(() => style_Demo(video));
       console.log(`kernelMs: ${time.kernelMs}, wallTimeMs: ${time.wallMs}`);*/
 
       //await tf.nextFrame();
       style_Demo(video);
-      //console.log(out)
-      //const outcanv = new ImageData(out, output_WIDTH, output_HEIGHT)
-      //console.log(outcanv)
-      //ctx.save();
-      /*if (flipHorizontal) {
-        ctx.scale(-1, 1);
-        ctx.translate(-output_WIDTH, 0);
-      }*/
-      /*else{
-        ctx.scale(1, 1);*/
-      //ctx.putImageData(outcanv, 0, 0);
-      //video.ImageData= outcanv
-      //ctx.drawImage(video, 0, 0, output_WIDTH, output_HEIGHT);
-      //ctx.restore();
     }
 
     /*if (document.getElementById("show_fps").checked) {
@@ -446,7 +257,6 @@ function detectInRealTime(video) {
 
     // End monitoring code for frames per second
     //stats.end();
-
 
     //console.log("DetectionFrame: ", performance.now() - t0)
 
@@ -498,7 +308,6 @@ async function bindPage() {
   //toggleLoadingUI(false);
 
   camloaded = false;
-
 
   try {
     video = await loadVideo(mode);
@@ -647,8 +456,6 @@ madhubani.onclick = function() {
   dropdown_style.textContent = madhubani.textContent;
 }
 
-
-
 seg_low.onclick = function() {
   event.preventDefault();
   //console.log("btn pressed!")
@@ -670,7 +477,6 @@ seg_high.onclick = function() {
   segmentation_IMAGE_WIDTH = 512
   dropdown_seg_qual.textContent = seg_high.textContent;
 }
-
 
 style_low.onclick = function() {
   event.preventDefault();
