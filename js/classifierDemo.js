@@ -1,5 +1,5 @@
 tf.setBackend('webgl');
-//tf.ENV.set('WEBGL_CONV_IM2COL', false);
+tf.ENV.set('WEBGL_CONV_IM2COL', false);
 tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
 tf.webgl.forceHalfFloat();
 
@@ -217,7 +217,6 @@ async function bindPage() {
   detectInRealTime(video);
 }
 
-
 var filecheckBox = document.getElementById("fileinput");
 var urlcheckBox = document.getElementById("urlinput");
 var filecontainer = document.getElementById("file-container");
@@ -290,7 +289,9 @@ function webc() {
 
   if (videocheckBox.checked == true) {
     //document.getElementById("camswitch").style.display = "block";
-    if (mobile){document.getElementById("camswitch").style.display = "block";}
+    if (mobile) {
+      document.getElementById("camswitch").style.display = "block";
+    }
     imagecheckBox.checked = false;
 
     t_Width = document.getElementById("mainopt").clientWidth

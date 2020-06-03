@@ -99,7 +99,7 @@ const Depth_Demo = async (imElement) => {
 
   const depthMask = tf.tidy(() => {
 
-    const img = tf.image.resizeBilinear(tf.browser.fromPixels(imElement).toFloat(),
+    const img = tf.image.resizeBilinear(in_img,
       [Depth_IMAGE_HEIGHT, Depth_IMAGE_WIDTH]);
     //console.log(img);
     const scale = tf.scalar(255.);
@@ -131,7 +131,6 @@ const Depth_Demo = async (imElement) => {
 
   const depthMask_resized = tf.image.resizeBilinear(depthMask, [output_HEIGHT, output_WIDTH])
 
-  //img_array = await tmpctx.getImageData(0,0,output_WIDTH,output_HEIGHT);//in_img.arraySync()
   img_array = tf.image.resizeBilinear(in_img, [output_HEIGHT, output_WIDTH]).arraySync()
   depth_array = depthMask_resized.arraySync()
 
@@ -145,7 +144,6 @@ const Depth_Demo = async (imElement) => {
 
   //tf.disposeVariables();
   //console.log("after: ", tf.memory());
-
 
   const xy = custom_mgrid(img_array.length, img_array[0].length)
   createPointCloud(xy[0].arraySync(), xy[1].arraySync(), depth_array, img_array);

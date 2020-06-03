@@ -291,9 +291,7 @@ var applyRotation = function(file, orientation, maxWidth) {
         var context = canvas.getContext("2d");
         var width = image.width,
           height = image.height;
-        var _a = orientation >= 5 && orientation <= 8 ?
-          [height, width] :
-          [width, height],
+        var _a = orientation >= 5 && orientation <= 8 ? [height, width] : [width, height],
           outputWidth = _a[0],
           outputHeight = _a[1];
         var scale = outputWidth > maxWidth ? maxWidth / outputWidth : 1;
