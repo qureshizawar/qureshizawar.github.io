@@ -23,7 +23,14 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.7.0/dist/tf.min.js"></script>
+
+  <!-- Import @tensorflow/tfjs or @tensorflow/tfjs-core -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> -->
+
+  <!-- Adds the WASM backend to the global backend registry -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.js"></script> -->
   <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900" rel="stylesheet">
   <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css">
   <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -81,21 +88,21 @@
             <tbody>
               <tr>
                 <td>
-                  <p style='display:none'>image mode:</p>
+                  <p style='display:block'>image mode:</p>
                 </td>
                 <td>
-                  <p style='display:none'>video mode:</p>
+                  <p style='display:block'>video mode:</p>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <label class="switch" style='display:none'>
+                  <label class="switch" style='display:block'>
                     <input type="checkbox" checked id="imagec" onclick="imagec()" />
                     <span class="slider round"></span>
                   </label>
                 </td>
                 <td>
-                  <label class="switch" style='display:none'>
+                  <label class="switch" style='display:block'>
                     <input type="checkbox" id="webcamc" onclick="webc()" />
                     <span class="slider round"></span>
                   </label>
@@ -251,45 +258,111 @@
 
             <video id="video" playsinline style="display: none;">
             </video>
-            <canvas id="output"></canvas>
+            <!-- <video id="video" autoplay</video> -->
+            <canvas id="output" class="canvas"></canvas>
             <div id="fps" style='display:none'></div>
 
           </div>
 
-          <!-- Solid divider -->
-          <hr class="solid">
-          </hr>
 
-          <div>
-            <h5>
-              Credits
-            </h5>
-            <p>
-              This demo was put together by <a href="https://github.com/qureshizawar">Zawar Qureshi</a>
-              but could not have been done without the following:
-            </p>
-            <ul>
-              <li>
-                Authors of <a href="https://arxiv.org/abs/1603.08155">the Real-Time Style Transfer paper</a>.
-              </li>
-              <li>
-                Authors of <a href="https://arxiv.org/abs/1612.01105">the PSP net paper</a>.
-              </li>
-              <li>
-                The <a href="https://github.com/nerox8664/onnx2keras">onnx2keras package</a>.
-              </li>
-              <li>
-                The <a href="https://js.tensorflow.org">TensorFlow.js library</a>.
-              </li>
-            </ul>
-            <p>
-              I'd love to hear from people interested
-              in making tools/apps using these models!
-            </p>
-          </div>
+
 
         </div>
         <!-- End .optional-section-block -->
+
+    </div>
+    <!-- End .optional-section -->
+
+    <div class="demo-section-block shadow-large">
+      <div id="main2" style='display:block'>
+
+
+
+        <div>
+          <h5>
+            Details
+          </h5>
+          <p>
+            I started with the style transfer model described in <a href="https://arxiv.org/abs/1603.08155">the Real-Time Style Transfer paper</a>,
+            which proved too slow/computationally expensive for low power and edge devices.
+          </p>
+          <p> To bring down the computational cost, I first replaced the convolutional layers with separable filters (as in MobileNet achitectures).
+            To further bring down the cost and tune
+            the models; model achitecture search and pruning (as described in this <a href="https://arxiv.org/abs/1804.03294">paper</a>) was employed.
+            Finally, all the layers in the models that could be fused were fused to give the final optimised model.
+          </p>
+          <p>
+            This allowed for significant reduction in model parameters (as shown in the table below) making realtime inference on low power devices
+            feasible. All models were trained and optimised in Pytorch and then converted for deployment on TensorFlow.js.
+          </p>
+
+          <table class="table_2" style="width:100%; font-size:min(2.5vw, 20px)">
+            <tr style="border: 1px solid black">
+              <th>Model</th>
+              <th>Prams.</th>
+              <th>FLOPs</th>
+              <th>size</th>
+              <th>size(quantised)</th>
+            </tr>
+            <tr style="border: 1px solid black">
+              <td>Original</td>
+              <td>~1.68M</td>
+              <td>~6.39G @ 384x216</td>
+              <td>6.4MB</td>
+              <td>1.6MB</td>
+            </tr>
+            <tr style="border: 1px solid black">
+              <td>Separable</td>
+              <td>~211.07K</td>
+              <td>~335M @ 384x216</td>
+              <td>886KB</td>
+              <td>221KB</td>
+            </tr>
+            <tr style="border: 1px solid black">
+              <td>Optimised</td>
+              <td>~22.2K</td>
+              <td>~185M @ 384x216</td>
+              <td>87KB</td>
+              <td>21.75KB</td>
+            </tr>
+          </table>
+
+        </div>
+
+        <!-- Solid divider -->
+        <hr class="solid">
+        </hr>
+
+        <div>
+          <h5>
+            Credits
+          </h5>
+          <p>
+            This demo was put together by <a href="https://github.com/qureshizawar">Zawar Qureshi</a>
+            but could not have been done without the following:
+          </p>
+          <ul>
+            <li>
+              Authors of <a href="https://arxiv.org/abs/1603.08155">the Real-Time Style Transfer paper</a>.
+            </li>
+            <li>
+              Authors of <a href="https://arxiv.org/abs/1612.01105">the PSP net paper</a>.
+            </li>
+            <li>
+              The <a href="https://github.com/nerox8664/onnx2keras">onnx2keras package</a>.
+            </li>
+            <li>
+              The <a href="https://js.tensorflow.org">TensorFlow.js library</a>.
+            </li>
+          </ul>
+          <p>
+            I'd love to hear from people interested
+            in making tools/apps using these models!
+          </p>
+        </div>
+
+      </div>
+      <!-- End .optional-section-block -->
 
     </div>
     <!-- End .optional-section -->
@@ -332,7 +405,8 @@
     <!-- End footer -->
     <script src="js/scripts.min.js"></script>
     <script type="text/javascript" src="js/utils.min.js"></script>
-    <script src="js/styleDemo.min.js"></script>
+    <!-- <script src="js/styleDemo.min.js"></script> -->
+    <script src="js/styleDemo.js"></script>
 </body>
 
 </html>

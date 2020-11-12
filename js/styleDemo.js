@@ -1,25 +1,69 @@
 tf.setBackend('webgl');
-tf.ENV.set('WEBGL_CONV_IM2COL', false);
-tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
-tf.webgl.forceHalfFloat();
+// tf.ENV.set('WEBGL_CONV_IM2COL', false);
+// tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
+// tf.webgl.forceHalfFloat();
 
 //tf.enableDebugMode()
 //tf.ENV.set('BEFORE_PAGING_CONSTANT ', 1000);
 //tf.setBackend('cpu');
 //tf.enableProdMode();
 
+class MirrorPad extends tf.layers.Layer {
+   static className = 'MirrorPad';
+
+   constructor(config) {
+     super(config);
+   // config.mode = 'reflect'
+   // console.log(config)
+   // console.log("config.padding: ", config.padding)
+   this.pad0 = config.padding[0]
+   this.pad1 = config.padding[1]
+   }
+   call(inputs, kwargs) {
+        // console.log(inputs)
+        // console.log("this.pad0: ", this.pad0)
+        // console.log("this.pad1: ", this.pad1)
+        // let input = inputs;
+        // if (Array.isArray(input)) {
+        //     input = input[0];
+        // }
+        return inputs[0].mirrorPad([[0,0], this.pad0,
+        this.pad1, [0,0]], 'reflect')
+    }
+}
+
+tf.serialization.registerClass(MirrorPad);
+
 let model_sem_encoder;
 let model_sem_decoder;
+let blur_kernel;
 let model_transformer;
 
 var segmentation_IMAGE_HEIGHT = 512
 var segmentation_IMAGE_WIDTH = 512
 
-var style_IMAGE_HEIGHT = 384
-var style_IMAGE_WIDTH = 384
+// var style_IMAGE_HEIGHT = 384
+// var style_IMAGE_WIDTH = 384
+// const ratio = 0.75
+const ratio = 0.5625
+// const ratio = 1
+// var style_IMAGE_WIDTH = 64
+// var style_IMAGE_HEIGHT = Math.floor(style_IMAGE_WIDTH*(3/4))
+var style_IMAGE_HEIGHT = 512
+var style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT*ratio)
 
-var output_HEIGHT = 300;
-var output_WIDTH = 400;
+var output_HEIGHT = 512;
+var output_WIDTH = Math.floor(output_HEIGHT*ratio);
+
+var videoHeight = 512;
+var videoWidth = Math.floor(videoHeight*0.75);
+// var videoWidth = Math.floor(videoHeight*ratio);
+
+var de_canvas = document.getElementById('mask');
+
+const mean = tf.tensor3d([0.485, 0.456, 0.406], [1, 1, 3]);
+const std = tf.tensor3d([0.229, 0.224, 0.225], [1, 1, 3]);
+const scale = tf.scalar(255.);
 
 var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
 
@@ -45,8 +89,10 @@ function is_touch_device() {
 }
 
 if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').matches)) {
-  style_IMAGE_HEIGHT = 512
-  style_IMAGE_WIDTH = 512
+  // style_IMAGE_HEIGHT = 128//512
+  // style_IMAGE_WIDTH = 128//512
+  var style_IMAGE_HEIGHT = 512
+  var style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT*ratio)
   dropdown_style_qual.textContent = style_vhigh.textContent;
   //console.log("Desktop detected!")
 }
@@ -74,8 +120,13 @@ const Load_style_model = async (style_type) => {
 
   if (style_type == 'madhubani') {
     model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite_madhubani/model.json');
+    // model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite/model.json');
+      // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmadhubani4_pruned/model.json');
   } else {
-    model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite/model.json');
+      // model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite/model.json');
+        model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic_pruned/model.json');
+          // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic_pruned_test/model.json');
+        // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic3_pruned/model.json');
   }
 
 }
@@ -88,16 +139,19 @@ const StyleWarmup = async () => {
 
   model_sem_encoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_encoder_bi_quant/model.json');
   model_sem_decoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_decoder_pruned_quant/model.json');
+  blur_kernel = await tf.loadLayersModel('/assets/gaus_21_1/model.json');
 
   // Make a prediction through the locally hosted inpimg_style.jpg.
   let img = document.getElementById('inpimg_style');
   set_static_output_size(img);
   if (img.complete && img.naturalHeight !== 0) {
     style_Demo(img);
+    // style_Demo_RT(img);
     img.style.display = '';
   } else {
     img.onload = () => {
       style_Demo(img);
+      // style_Demo_RT(img);
       inpElement.style.display = '';
     }
   }
@@ -110,28 +164,37 @@ const style_Demo = async (imElement) => {
 
   status_style.textContent = 'Status: Loading image into model...';
 
-  //var seg_time = 0;
-  //var style_time = 0;
+  var seg_time = 0;
+  var style_time = 0;
 
   //var t0 = performance.now();
   //var bt0 = performance.now();
 
+  // console.log(style_IMAGE_HEIGHT, style_IMAGE_WIDTH);
+
+    var tbt0 = performance.now();
+
   const masked_style_comp = tf.tidy(() => {
 
     //console.log(tf.memory ());
-    output_WIDTH = imElement.clientWidth;
-    output_HEIGHT = imElement.clientHeight;
+    // output_WIDTH = imElement.clientWidth;
+    // output_HEIGHT = imElement.clientHeight;
     var img = tf.browser.fromPixels(imElement).toFloat(); //tf.image.resizeBilinear(tf.browser.fromPixels(imElement).toFloat(),
     //[512,512]);
 
+    console.log(img.shape)
+    output_HEIGHT = img.shape[0];
+    output_WIDTH = img.shape[1];
+    console.log(output_HEIGHT,output_WIDTH)
+    console.log(style_IMAGE_HEIGHT, style_IMAGE_WIDTH)
+
     const style_in = tf.image.resizeBilinear(img, [style_IMAGE_HEIGHT, style_IMAGE_WIDTH], true).expandDims();
+    // const style_in = tf.image.resizeNearestNeighbor(img, [style_IMAGE_HEIGHT, style_IMAGE_WIDTH], true).expandDims();
+    // const style_in = img.expandDims();
+    // console.log(style_in.shape)
     //var img = tf.browser.fromPixels(imElement).toFloat();
 
     //console.log(tf.memory ());
-
-    const mean = tf.tensor3d([0.485, 0.456, 0.406], [1, 1, 3]);
-    const std = tf.tensor3d([0.229, 0.224, 0.225], [1, 1, 3]);
-    const scale = tf.scalar(255.);
 
     status_style.textContent = 'Status: Model loaded! running inference';
 
@@ -140,52 +203,63 @@ const style_Demo = async (imElement) => {
 
     //console.log(tf.memory ());
 
-    //var st0 = performance.now();
-    const style = model_transformer.predict(style_in);
-    //var st1 = performance.now();
-    //style_time = (st1 - st0)
-    //console.log("Call to style took " + style_time + " milliseconds.");
+    // var st0 = performance.now();
+     const style = model_transformer.predict(style_in);
 
     //console.log(tf.memory ());
 
     //var postt0 = performance.now();
 
-    const style_out = style.squeeze(0).clipByValue(0, 255).div(scale);
+   const style_out = style.squeeze(0).clipByValue(0, 255).div(scale);
+   // const style_out = style_in.squeeze(0).clipByValue(0, 255).div(scale);
+
+   // var st1 = performance.now();
+   // style_time = (st1 - st0)
+   // console.log("Call to style took " + style_time + " milliseconds.");
 
     //var postt1 = performance.now();
     //console.log("Call to post took " + (postt1 - postt0) + " milliseconds.");
 
-    if (output_type == 'style_only') {
-      return style_out
-    } else {
-      const segmentation_img = tf.image.resizeBilinear(img, [segmentation_IMAGE_HEIGHT, segmentation_IMAGE_WIDTH], true)
-      const normalised = segmentation_img.div(scale);
-      const segmentation_in = segmentation_img.div(scale).sub(mean).div(std).expandDims();
 
-      //var sst0 = performance.now();
+    const resized_style = tf.image.resizeBilinear(style_out, [output_HEIGHT,
+      output_WIDTH], true)
+
+    if (output_type == 'style_only') {
+      // return style_out
+      return resized_style
+    }
+    else {
+      const segmentation_img = tf.image.resizeBilinear(img, [segmentation_IMAGE_HEIGHT, segmentation_IMAGE_WIDTH], true)
+      const segmentation_in = segmentation_img.div(scale).sub(mean).div(std).expandDims();
+      const ones = tf.ones([output_HEIGHT,output_WIDTH])
+      // const ones = tf.onesLike(img)
+      // var sst0 = performance.now();
       const features = model_sem_encoder.predict(segmentation_in);
       const input_feature = tf.image.resizeBilinear(features[4], [64, 64], true)
       const predictions = model_sem_decoder.predict(input_feature);
-      //var sst1 = performance.now();
-      //seg_time = (sst1 - sst0)
-      //console.log("Call to seg took " + seg_time + " milliseconds.");
+      // var sst1 = performance.now();
+      // seg_time = (sst1 - sst0)
+      // console.log("Call to seg took " + seg_time + " milliseconds.");
 
       //const out = tf.image.resizeNearestNeighbor(predictions[0],[512,512]).squeeze(0);
-      const Sem_mask = tf.image.resizeBilinear(predictions, [segmentation_IMAGE_HEIGHT,
-        segmentation_IMAGE_WIDTH
+      const Sem_mask = tf.image.resizeBilinear(predictions, [output_HEIGHT,
+        output_WIDTH
       ], true).squeeze(0).argMax(2); //.expandDims(2);
 
-      const Sem_mask_conc = tf.stack([Sem_mask, Sem_mask, Sem_mask], 2);
+      const mask = ones.where(Sem_mask.equal(15),0).expandDims(0).expandDims(3)
+      // console.log(mask.shape)
+      const blur_mask = blur_kernel.predict(mask).squeeze(0).squeeze(2);
+      const blur_mask_neg = blur_mask.sub(1).abs()
+      // console.log(blur_mask.shape)
+      const mask_stacked = tf.stack([blur_mask, blur_mask, blur_mask], 2);
+      const mask_stacked_neg = tf.stack([blur_mask_neg, blur_mask_neg, blur_mask_neg], 2);
+      // console.log(mask_stacked.shape)
 
       if (output_type == 'masked_style') {
-        return tf.image.resizeBilinear(style_out, [segmentation_IMAGE_HEIGHT,
-          segmentation_IMAGE_WIDTH
-        ], true).where(Sem_mask_conc.equal(15), normalised);
-      } else if (output_type == 'masked_style_inverted') {
-        return normalised.where(Sem_mask_conc.equal(15),
-          tf.image.resizeBilinear(style_out, [segmentation_IMAGE_HEIGHT,
-            segmentation_IMAGE_WIDTH
-          ], true));
+        return resized_style.mul(mask_stacked).add(img.div(scale).mul(mask_stacked_neg))
+      }
+      else {
+        return img.div(scale).mul(mask_stacked).add(resized_style.mul(mask_stacked_neg))
       }
     }
 
@@ -193,24 +267,69 @@ const style_Demo = async (imElement) => {
 
   //console.log(tf.memory ());
 
-  const maskCanvas = document.getElementById('mask');
+  // const maskCanvas = document.getElementById('mask');
+  // const maskCanvas = document.getElementById('mask');
+
+  await tf.browser.toPixels(masked_style_comp, de_canvas);
+
+  var tbt1 = performance.now();
+  console.log(style_type);
+  console.log("Call to tb took " + (tbt1 - tbt0) + " milliseconds.");
+
 
   status_style.textContent = "Status: Done!";
-  //status_style.textContent = "Status: Done! inference took " + ((seg_time + style_time).toFixed(1)) + " milliseconds.";
-
-  //var tbt0 = performance.now();
-  tf.browser.toPixels(tf.image.resizeBilinear(masked_style_comp,
-    [output_HEIGHT, output_WIDTH]), maskCanvas);
-
-  //var tbt1 = performance.now();
-  //console.log("Call to tb took " + (tbt1 - tbt0) + " milliseconds.");
+  // status_style.textContent = "Status: Done! inference took " + ((seg_time + style_time).toFixed(1)) + " milliseconds.";
 
   //var t1 = performance.now();
-  //console.log("Call to mask_Demo took " + (t1 - t0) + " milliseconds.");
+  // console.log("Call to mask_Demo took " + (t1 - t0) + " milliseconds.");
 
   masked_style_comp.dispose();
   //console.log("after: ", tf.memory());
   //console.log(tf.memory ());
+};
+
+const style_Demo_RT = async (imElement) => {
+  // output_WIDTH = imElement.clientWidth;
+  // output_HEIGHT = imElement.clientHeight;
+  // console.log(output_WIDTH,output_HEIGHT);
+
+  const masked_style_comp = tf.tidy(() => {
+
+    //console.log(tf.memory ());
+    var img = tf.browser.fromPixels(imElement).toFloat(); //tf.image.resizeBilinear(tf.browser.fromPixels(imElement).toFloat(),
+    //[512,512]);
+
+    const style_in = tf.image.resizeBilinear(img, [style_IMAGE_HEIGHT, style_IMAGE_WIDTH], true).expandDims();
+    // const style_in = tf.image.resizeNearestNeighbor(img, [style_IMAGE_HEIGHT, style_IMAGE_WIDTH], true).expandDims();
+    // const style_in = img.expandDims();
+    // console.log(img.shape)
+    //var img = tf.browser.fromPixels(imElement).toFloat();
+
+     const style = model_transformer.predict(style_in);
+
+   const style_out = style.squeeze(0).clipByValue(0, 255).div(scale);
+   // const style_out = style_in.squeeze(0).clipByValue(0, 255).div(scale);
+   // const style_out = style_in.toInt();
+
+   // style_out = tf.image.resizeBilinear(style_out,
+   //   [output_HEIGHT, output_WIDTH])
+
+      return style_out
+
+  });
+
+  var tbt0 = performance.now();
+
+  await tf.browser.toPixels(tf.image.resizeBilinear(masked_style_comp,
+    [output_HEIGHT, output_WIDTH]), de_canvas);
+  // await tf.browser.toPixels(tf.image.resizeNearestNeighbor(masked_style_comp,
+  //   [output_HEIGHT, output_WIDTH]), de_canvas);
+  // await tf.browser.toPixels(masked_style_comp, de_canvas);
+
+  var tbt1 = performance.now();
+  console.log("Call to tb took " + (tbt1 - tbt0) + " milliseconds.");
+
+  masked_style_comp.dispose();
 };
 
 let request;
@@ -220,24 +339,30 @@ let request;
  * happens. This function loops with a requestAnimationFrame method.
  */
 function detectInRealTime(video) {
-  console.log("running detectInRealTime!")
-  const canvas = document.getElementById('output');
-  const ctx = canvas.getContext('2d');
+  // console.log("running detectInRealTime!")
+  // const canvas = document.getElementById('output');
+  de_canvas = document.getElementById('output');
 
   const flipHorizontal = mode == 'rear' ? false : true;
 
-  canvas.width = output_WIDTH;
-  canvas.height = output_HEIGHT;
+  de_canvas.width = output_WIDTH;
+  de_canvas.height = output_HEIGHT;
+
+  console.log(de_canvas.width, de_canvas.height)
+    console.log(de_canvas)
+  const ctx = de_canvas.getContext('2d');
+  console.log(ctx);
+  ctx.save();
 
   async function DetectionFrame() {
 
-    console.log("running DetectionFrame!")
+    // console.log("running DetectionFrame!")
 
     // Begin monitoring code for frames per second
     //stats.begin();
     //t0 = performance.now();
 
-    //ctx.clearRect(0, 0, output_WIDTH, output_HEIGHT);
+    // ctx.clearRect(0, 0, output_WIDTH, output_HEIGHT);
     video.onloadeddata = () => {
       camloaded = true;
     }
@@ -247,7 +372,10 @@ function detectInRealTime(video) {
       console.log(`kernelMs: ${time.kernelMs}, wallTimeMs: ${time.wallMs}`);*/
 
       //await tf.nextFrame();
-      style_Demo(video);
+      // style_Demo(video);
+      // console.log(video)
+      style_Demo_RT(video);
+
     }
 
     /*if (document.getElementById("show_fps").checked) {
@@ -319,6 +447,12 @@ async function bindPage() {
     throw e;
   }
 
+  console.log(video)
+
+  console.log("##############################")
+  console.log(video.srcObject.getVideoTracks()[0].getSettings())
+  console.log("##############################")
+
   //setupFPS();
   detectInRealTime(video);
 }
@@ -354,17 +488,24 @@ function webc() {
     imagecheckBox.checked = false;
 
     t_Width = document.getElementById("mainopt").clientWidth
-    t_Height = 300;
+    t_Height = 384;
     maini.style.display = "none";
     document.getElementById("main").style.display = "block";
     mainv.style.display = "block";
 
-    apectWidth = (4 / 3) * t_Height
+    // // apectWidth = (4 / 3) * t_Height
+    apectWidth = 0.75 * t_Height
     output_WIDTH = apectWidth > t_Width ? t_Width : apectWidth;
     output_HEIGHT = t_Height;
 
-    camloaded = false;
+    console.log(output_WIDTH, output_HEIGHT)
+    // videoHeight = 256;
+    // videoWidth = Math.floor(videoHeight*ratio);
 
+    // output_WIDTH = videoWidth
+    // output_HEIGHT = videoHeight;
+
+    camloaded = false;
     bindPage();
   } else {
     //console.log(video.srcObject.getTracks())
@@ -387,7 +528,6 @@ function imagec() {
   var imagecheckBox = document.getElementById("imagec");
   var videocheckBox = document.getElementById("webcamc");
   var maini = document.getElementById("mainImage");
-  var inpimg = document.getElementById("inpimg0");
   var mainv = document.getElementById("mainVideo");
 
   if (imagecheckBox.checked == true) {
@@ -402,8 +542,6 @@ function imagec() {
     document.getElementById("main").style.display = "block";
     maini.style.display = "block";
     mainv.style.display = "none";
-    inpimg.src = "/assets/demo_images/box_6109.jpg";
-    ClassiferWarmup();
   } else {
     maini.style.display = "none";
     document.getElementById("main").style.display = "none";
@@ -481,30 +619,32 @@ seg_high.onclick = function() {
 style_low.onclick = function() {
   event.preventDefault();
   //console.log("btn pressed!")
-  style_IMAGE_HEIGHT = 192 //128
-  style_IMAGE_WIDTH = 192 //128
+  style_IMAGE_HEIGHT = 192
+  style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT*ratio)
   dropdown_style_qual.textContent = style_low.textContent;
 }
 style_medium.onclick = function() {
   event.preventDefault();
   //console.log("btn pressed!")
   style_IMAGE_HEIGHT = 256
-  style_IMAGE_WIDTH = 256
+  style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT*ratio)
   dropdown_style_qual.textContent = style_medium.textContent;
 }
 style_high.onclick = function() {
   event.preventDefault();
-  //console.log("btn pressed!")
-  style_IMAGE_HEIGHT = 384 //512
-  style_IMAGE_WIDTH = 384 //512
+  // console.log("btn pressed!")
+  style_IMAGE_HEIGHT = 384
+  style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT*ratio)
   dropdown_style_qual.textContent = style_high.textContent;
 }
 style_vhigh.onclick = function() {
   event.preventDefault();
-  //console.log("btn pressed!")
+  // console.log("btn pressed!")
   style_IMAGE_HEIGHT = 512
-  style_IMAGE_WIDTH = 512
+  style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT*ratio)
   dropdown_style_qual.textContent = style_vhigh.textContent;
 }
 
 StyleWarmup();
+
+// tf.setBackend('wasm').then(() => StyleWarmup());
