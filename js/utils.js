@@ -195,17 +195,21 @@ async function setupCamera(mode) {
   }
 
   const video = document.getElementById('video');
-  video.width = videoWidth;
-  video.height = videoHeight;
+  // video.width = videoWidth;
+  // video.height = videoHeight;
 
   const stream = await navigator.mediaDevices.getUserMedia({
     'audio': false,
     'video': {
       facingMode: mode == 'rear' ? "environment" : 'user',
-      width: mobile ? undefined : videoWidth,
-      height: mobile ? undefined : videoHeight,
+      // width: mobile ? undefined : videoWidth,
+      // height: mobile ? undefined : videoHeight,
+      // width: {ideal : videoWidth},
+      // height: {ideal : videoHeight},
+      frameRate: { ideal: 30, max: 35 },
     },
   });
+
   video.srcObject = stream;
 
   return new Promise((resolve) => {

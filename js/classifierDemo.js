@@ -1,7 +1,7 @@
 tf.setBackend('webgl');
-tf.ENV.set('WEBGL_CONV_IM2COL', false);
-tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
-tf.webgl.forceHalfFloat();
+// tf.ENV.set('WEBGL_CONV_IM2COL', false);
+// tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
+// tf.webgl.forceHalfFloat();
 
 //tf.enableDebugMode()
 //tf.ENV.set('BEFORE_PAGING_CONSTANT ', 1000);
@@ -82,7 +82,7 @@ const ClassiferWarmup = async () => {
 
 const classifier_Demo = async (imElement) => {
 
-  //var t0 = performance.now();
+  var t0 = performance.now();
 
   status_classifier.textContent = 'Status: Loading image into model...';
 
@@ -119,7 +119,7 @@ const classifier_Demo = async (imElement) => {
   document.getElementById("classifier_out2").innerHTML = output[1][0] + ": " + (output[1][1] * 100).toFixed(2) + "%";
   document.getElementById("classifier_out3").innerHTML = output[2][0] + ": " + (output[2][1] * 100).toFixed(2) + "%";
 
-  //var t1 = performance.now();
+  var t1 = performance.now();
 
   status_classifier.textContent = "Status: Done!";
   //status_classifier.textContent = "Status: Done! inference took " + ((it1 - it0).toFixed(1)) + " ms.";
@@ -127,7 +127,7 @@ const classifier_Demo = async (imElement) => {
   //console.log("before: ", tf.memory());
   //tf.disposeVariables();
   //console.log("after: ", tf.memory());
-  //console.log("Call to classifier_Demo took " + (t1 - t0) + " milliseconds.");
+  console.log("Call to classifier_Demo took " + (t1 - t0) + " milliseconds.");
 };
 
 let request;
@@ -146,6 +146,9 @@ function detectInRealTime(video) {
   canvas.width = videoWidth;
   canvas.height = videoHeight;
 
+
+  console.log(canvas.width,canvas.height);
+
   async function DetectionFrame() {
 
     //console.log("running DetectionFrame!")
@@ -162,6 +165,7 @@ function detectInRealTime(video) {
       //await tf.nextFrame();
       /*const time = await tf.time(() => classifier_Demo(video));
       console.log(`kernelMs: ${time.kernelMs}, wallTimeMs: ${time.wallMs}`);*/
+      console.log(video);
       await classifier_Demo(video);
 
       ctx.save();
@@ -352,3 +356,4 @@ function imagec() {
 }
 
 ClassiferWarmup();
+// tf.setBackend('wasm').then(() => ClassiferWarmup());
