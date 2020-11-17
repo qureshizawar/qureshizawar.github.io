@@ -71,58 +71,28 @@
 
   <div id="demo" class="optional-section background-alt">
     <!--<div class="optional-section background-alt">-->
-    <h2 class="heading" style="padding:10px">Style</h2>
+    <h2 class="heading" style="padding:10px">Profile</h2>
 
     <div class="demo-section-block shadow-large">
-      <h4>Style transfer and semantic segmentation models trained on the PASCAL dataset for applying selective style
-        to a person only (select masked style output to see it in action!)
+      <h4>Stylise your profile picture using ML!
       </h4>
       <section>
-        <p> Since this model runs locally on device, any uploaded pictures stay safely
-          on the device. Please note that the first run would
+        <p> Examples: </p>
+
+        <p></p>
+        <img style="display: inline-block" class="ex_img" src="assets/demo_images/ZQ_profile_c3.png" />
+        <img style="display: inline-block" class="ex_img" src="assets/demo_images/blur_bg.jpg" />
+        <img style="display: inline-block" class="ex_img" src="assets/demo_images/masked__blur_bg.jpg" />
+        <img style="display: inline-block" class="ex_img" src="assets/demo_images/masked_bg.jpg" />
+
+        <p></p>
+
+        <p> Since these models run locally on device, any uploaded pictures stay safely
+          on the device. Please note that the first run after new settings would
           be much slower than subsequent runs as Tensorflow loads the necessary
           files. (WIP so there may be bugs!) </p>
 
         <div id="info" style='display:none'>
-        </div>
-
-        <div id='mainopt'>
-          <table style="width: 100%; max-width: 400px;">
-            <tbody>
-              <tr>
-                <td>
-                  <p style='display:block'>image mode:</p>
-                </td>
-                <td>
-                  <p style='display:block'>video mode:</p>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label class="switch" style='display:block'>
-                    <input type="checkbox" checked id="imagec" onclick="imagec()" />
-                    <span class="slider round"></span>
-                  </label>
-                </td>
-                <td>
-                  <label class="switch" style='display:block'>
-                    <input type="checkbox" id="webcamc" onclick="webc()" />
-                    <span class="slider round"></span>
-                  </label>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <p id=camswitch style='display:none'>use rear camera:
-            <label class="switch">
-              <input type="checkbox" id="camMode" onclick="setmode()" />
-              <span class="slider round"></span>
-            </label>
-          </p>
-          <!--
-              show_fps: <input type="checkbox" id="show_fps" onclick="showfps()"/>
-            -->
         </div>
 
 
@@ -130,34 +100,37 @@
         <hr class="solid">
         </hr>
 
+        <p>Settings:</p>
         <table style="width: 100%;">
           <tbody>
-            <!-- <tr>
+            <tr>
               <td>
                 <p style="display: inline-block"> Output: </p>
                 <div class="dropdown" style="display: inline-block">
                   <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                    <t id="dropdown_output">style only</t>
+                    <t id="dropdown_output">Style whole image</t>
                     <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
-                    <li><a id="style_only" href="#">style only</a></li>
+                    <li><a id="masked_background" href="#">No style</a></li>
+                    <li><a id="style_only" href="#">Style whole image</a></li>
                     <li><a id="masked_style" href="#">Style person only</a></li>
                     <li><a id="masked_style_inverted" href="#">Style background only</a></li>
+                    <!--li><a id="all" href="#">all</a></li-->
                   </ul>
                 </div>
               </td>
-            </tr> -->
+            </tr>
             <td>
               <p style="display: inline-block"> Style: </p>
               <div class="dropdown" style="display: inline-block">
                 <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                  <t id="dropdown_style">mosaic_small</t>
+                  <t id="dropdown_style">mosaic</t>
                   <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
                   <li><a id="mosaic_small" href="#" onclick="load_style('mosaic_small')">mosaic_small</a></li>
-                    <li><a id="mosaic" href="#" onclick="load_style('mosaic')">mosaic</a></li>
+                  <li><a id="mosaic" href="#" onclick="load_style('mosaic')">mosaic</a></li>
                   <li><a id="madhubani" href="#" onclick="load_style('madhubani')">madhubani</a></li>
                 </ul>
               </div>
@@ -182,6 +155,7 @@
             </tr>
             <tr>
               <td>
+                <!-- <p style="display: none"> Mask quality: </p> -->
                 <p style="display: inline-block"> Mask quality: </p>
                 <div class="dropdown" style="display: inline-block">
                   <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
@@ -204,9 +178,119 @@
         </hr>
 
         <div id="main" style='display:block'>
-          <p id="status_style"></p>
           <div id='mainImage' style='display:block'>
+            <table style="width: 100%; max-width: 300px;">
+              <tbody>
 
+                <tr>
+                  <td>
+                    <p>Blur background:</p>
+                  </td>
+                  <td>
+                    <label class="switch">
+                      <input type="checkbox" id="blur_bg" />
+                      <span class="slider round"></span>
+                    </label>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <p>Use different background:</p>
+                  </td>
+                  <td>
+                    <label class="switch">
+                      <input type="checkbox" checked id="bg_use" />
+                      <span class="slider round"></span>
+                    </label>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div id="bg_table" style='display:block'>
+              <table style="width: 100%; max-width: 400px;">
+                <tbody>
+                  <!-- <tr>
+                  <td>
+                    <p>Use different background:</p>
+                  </td>
+                  <td>
+                    <label class="switch">
+                      <input type="checkbox" checked id="bg_use" />
+                      <span class="slider round"></span>
+                    </label>
+                  </td>
+                </tr> -->
+                  <tr>
+
+                    <td>
+                      <p> Select an image:</p>
+                    </td>
+                    <td>
+                      <p>Upload an image:</p>
+                    </td>
+                    <td>
+                      <p>Enter URL:</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <label class="switch">
+                        <input type="checkbox" checked id="bg_selectinput" />
+                        <span class="slider round"></span>
+                      </label>
+                    </td>
+                    <td>
+                      <label class="switch">
+                        <input type="checkbox" id="bg_fileinput" />
+                        <span class="slider round"></span>
+                      </label>
+                    </td>
+                    <td>
+                      <label class="switch">
+                        <input type="checkbox" id="bg_urlinput" />
+                        <span class="slider round"></span>
+                      </label>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div id="bg_file-container" style='display:none'>
+                <input type="file" style="padding-bottom:10px; padding-top:10px" id="bg_files" name="bg_files" accept=".jpg, .jpeg, .png" />
+              </div>
+              <div id="bg_url-container" style='display:none'>
+                <form style="padding-bottom:10px; padding-top:10px">
+                  <input type="text" value="" id="bg_imagename" />
+                </form>
+              </div>
+              <div>
+                <input type="button" style='display:none' id="bg_url" value="Load" />
+              </div>
+
+              <div class="dropdown" id="dropdown_bg" style="display: block">
+                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                  <t id="bg_dropdown_out">abstract</t>
+                  <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a id="white" href="#" onclick="bg_load('white')">white</a></li>
+                  <li><a id="abstract" href="#" onclick="bg_load('abstract')">abstract</a></li>
+                  <li><a id="floral" href="#" onclick="bg_load('floral')">floral</a></li>
+                  <li><a id="floral_patchwork" href="#" onclick="bg_load('floral_patchwork')">floral patchwork</a></li>
+                  <li><a id="canvas_art" href="#" onclick="bg_load('canvas_art')">canvas art</a></li>
+                </ul>
+              </div>
+
+              <p></p>
+              <img class="inp_img" id="bg_img" src="assets/demo_images/abstract.jpg" />
+            </div>
+
+            <!-- Solid divider -->
+            <hr class="solid">
+            </hr>
+
+            <p> Target: </p>
             <table style="width: 100%; max-width: 400px;">
               <tbody>
                 <tr>
@@ -249,26 +333,20 @@
               </div>
             </div>
 
+
+            <p></p>
+            <img class="inp_img" id="inpimg_style" src="/assets/demo_images/ZQ_profile_c3.png" />
+
             <!-- Solid divider -->
             <hr class="solid">
             </hr>
-            <img class="inp_img" id="inpimg_style" src="/assets/demo_images/Oxford.jpg" />
-            <p class="section-head">Prediction:</p>
+
+            <p id="status_style"></p>
+            <p class="section-head">Output:</p>
             <canvas id="mask" class="canvas"></canvas>
+            <p></p>
+            <a id="download" download="profile.jpg" href="" onclick="download_img(this);" style='display:none; width: 100%; max-width: 400px;'>Download image</a>
           </div>
-
-          <div id='mainVideo' style='display:none'>
-
-            <video id="video" playsinline style="display: none;">
-            </video>
-            <!-- <video id="video" autoplay</video> -->
-            <canvas id="output" class="canvas"></canvas>
-            <div id="fps" style='display:none'></div>
-
-          </div>
-
-
-
 
         </div>
         <!-- End .optional-section-block -->
@@ -279,56 +357,17 @@
     <div class="demo-section-block shadow-large">
       <div id="main2" style='display:block'>
 
-
-
         <div>
           <h5>
             Details
           </h5>
           <p>
-            I started with the style transfer model described in <a href="https://arxiv.org/abs/1603.08155">the Real-Time Style Transfer paper</a>,
-            which proved too slow/computationally expensive for low power and edge devices.
+            This demo combines style transfer models (for more details please see <a href="/styleDemo.html">here</a>) and a semantic segmentation model
+            to extract people out of an image. The semantic segmentation model was mostly trained on open datasets and lightly pruned to give the final model.
           </p>
-          <p> To bring down the computational cost, I first replaced the convolutional layers with separable filters (as in MobileNet achitectures).
-            To further bring down the cost and tune
-            the models; model achitecture search and pruning (as described in this <a href="https://arxiv.org/abs/1804.03294">paper</a>) was employed.
-            Finally, all the layers in the models that could be fused were fused to give the final optimised model.
+          <p> All models were trained and optimised in Pytorch and then converted for deployment on TensorFlow.js.
+            For deployment, all the layers in the models that could be fused were fused to give the final optimised model.
           </p>
-          <p>
-            This allowed for significant reduction in model parameters (as shown in the table below) making realtime inference on low power devices
-            feasible. All models were trained and optimised in Pytorch and then converted for deployment on TensorFlow.js.
-          </p>
-
-          <table class="table_2" style="width:100%; font-size:min(2.5vw, 20px)">
-            <tr style="border: 1px solid black">
-              <th>Model</th>
-              <th>Prams.</th>
-              <th>FLOPs</th>
-              <th>size</th>
-              <th>size(quantised)</th>
-            </tr>
-            <tr style="border: 1px solid black">
-              <td>Original</td>
-              <td>~1.68M</td>
-              <td>~6.39G @ 384x216</td>
-              <td>6.4MB</td>
-              <td>1.6MB</td>
-            </tr>
-            <tr style="border: 1px solid black">
-              <td>Separable</td>
-              <td>~211.07K</td>
-              <td>~335M @ 384x216</td>
-              <td>886KB</td>
-              <td>221KB</td>
-            </tr>
-            <tr style="border: 1px solid black">
-              <td>Optimised</td>
-              <td>~22.2K</td>
-              <td>~185M @ 384x216</td>
-              <td>87KB</td>
-              <td>21.75KB</td>
-            </tr>
-          </table>
 
         </div>
 
@@ -407,9 +446,10 @@
     </footer>
     <!-- End footer -->
     <script src="js/scripts.min.js"></script>
-    <script type="text/javascript" src="js/utils.min.js"></script>
+    <!-- <script type="text/javascript" src="js/utils.min.js"></script> -->
+    <script type="text/javascript" src="js/utils.js"></script>
     <!-- <script src="js/styleDemo.min.js"></script> -->
-    <script src="js/styleDemo.js"></script>
+    <script src="js/profileDemo.js"></script>
 </body>
 
 </html>
