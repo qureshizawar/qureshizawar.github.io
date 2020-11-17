@@ -34,9 +34,9 @@ class MirrorPad extends tf.layers.Layer {
 
 tf.serialization.registerClass(MirrorPad);
 
-let model_sem_encoder;
-let model_sem_decoder;
-let blur_kernel;
+// let model_sem_encoder;
+// let model_sem_decoder;
+// let blur_kernel;
 let model_transformer;
 
 var segmentation_IMAGE_HEIGHT = 512
@@ -67,10 +67,10 @@ const scale = tf.scalar(255.);
 
 var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
 
-const dropdown_seg_qual = document.getElementById('dropdown_seg_qual');
-const seg_low = document.getElementById('seg_low')
-const seg_medium = document.getElementById('seg_medium')
-const seg_high = document.getElementById('seg_high')
+// const dropdown_seg_qual = document.getElementById('dropdown_seg_qual');
+// const seg_low = document.getElementById('seg_low')
+// const seg_medium = document.getElementById('seg_medium')
+// const seg_high = document.getElementById('seg_high')
 
 const dropdown_style_qual = document.getElementById('dropdown_style_qual');
 const style_low = document.getElementById('style_low')
@@ -79,6 +79,9 @@ const style_high = document.getElementById('style_high')
 const style_vhigh = document.getElementById('style_vhigh')
 
 const mobile = isMobile();
+
+
+var style_type = 'mosaic_small'
 
 var mode = 'user' //'user'
 
@@ -118,15 +121,22 @@ document.getElementById("btn_style").addEventListener("click", function(evt) {
 
 const Load_style_model = async (style_type) => {
 
+  if (model_transformer) {
+    console.log("disposing model")
+    model_transformer.dispose();
+
+  }
+
   if (style_type == 'madhubani') {
-    model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite_madhubani/model.json');
+    // model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite_madhubani/model.json');
+    model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmadhubani4_pruned/model.json');
+  } else if (style_type == 'mosaic_small') {
     // model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite/model.json');
-      // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmadhubani4_pruned/model.json');
+    // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic_pruned/model.json');
+    // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic_pruned_test/model.json');
+    model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic5_pruned/model.json');
   } else {
-      // model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite/model.json');
-        model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic_pruned/model.json');
-          // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic_pruned_test/model.json');
-        // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic3_pruned/model.json');
+    model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite/model.json');
   }
 
 }
@@ -135,11 +145,12 @@ const StyleWarmup = async () => {
 
   status_style.textContent = 'Status: Loading...';
 
-  Load_style_model(style_type)
+  await Load_style_model(style_type)
 
-  model_sem_encoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_encoder_bi_quant/model.json');
-  model_sem_decoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_decoder_pruned_quant/model.json');
-  blur_kernel = await tf.loadLayersModel('/assets/gaus_21_1/model.json');
+  // model_sem_encoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_encoder_bi_quant/model.json');
+  // model_sem_decoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_decoder_pruned_quant/model.json');
+  // blur_kernel = await tf.loadLayersModel('/assets/gaus_21_1/model.json');
+  // blur_kernel = await tf.loadLayersModel('/asssets/gaus_61/model.json');
 
   // Make a prediction through the locally hosted inpimg_style.jpg.
   let img = document.getElementById('inpimg_style');
@@ -224,44 +235,8 @@ const style_Demo = async (imElement) => {
     const resized_style = tf.image.resizeBilinear(style_out, [output_HEIGHT,
       output_WIDTH], true)
 
-    if (output_type == 'style_only') {
       // return style_out
       return resized_style
-    }
-    else {
-      const segmentation_img = tf.image.resizeBilinear(img, [segmentation_IMAGE_HEIGHT, segmentation_IMAGE_WIDTH], true)
-      const segmentation_in = segmentation_img.div(scale).sub(mean).div(std).expandDims();
-      const ones = tf.ones([output_HEIGHT,output_WIDTH])
-      // const ones = tf.onesLike(img)
-      // var sst0 = performance.now();
-      const features = model_sem_encoder.predict(segmentation_in);
-      const input_feature = tf.image.resizeBilinear(features[4], [64, 64], true)
-      const predictions = model_sem_decoder.predict(input_feature);
-      // var sst1 = performance.now();
-      // seg_time = (sst1 - sst0)
-      // console.log("Call to seg took " + seg_time + " milliseconds.");
-
-      //const out = tf.image.resizeNearestNeighbor(predictions[0],[512,512]).squeeze(0);
-      const Sem_mask = tf.image.resizeBilinear(predictions, [output_HEIGHT,
-        output_WIDTH
-      ], true).squeeze(0).argMax(2); //.expandDims(2);
-
-      const mask = ones.where(Sem_mask.equal(15),0).expandDims(0).expandDims(3)
-      // console.log(mask.shape)
-      const blur_mask = blur_kernel.predict(mask).squeeze(0).squeeze(2);
-      const blur_mask_neg = blur_mask.sub(1).abs()
-      // console.log(blur_mask.shape)
-      const mask_stacked = tf.stack([blur_mask, blur_mask, blur_mask], 2);
-      const mask_stacked_neg = tf.stack([blur_mask_neg, blur_mask_neg, blur_mask_neg], 2);
-      // console.log(mask_stacked.shape)
-
-      if (output_type == 'masked_style') {
-        return resized_style.mul(mask_stacked).add(img.div(scale).mul(mask_stacked_neg))
-      }
-      else {
-        return img.div(scale).mul(mask_stacked).add(resized_style.mul(mask_stacked_neg))
-      }
-    }
 
   });
 
@@ -548,73 +523,66 @@ function imagec() {
   }
 }
 
-const dropdown_output = document.getElementById('dropdown_output');
-const style_only = document.getElementById('style_only')
-const masked_style = document.getElementById('masked_style')
-const masked_style_inverted = document.getElementById('masked_style_inverted')
+// const dropdown_output = document.getElementById('dropdown_output');
+// const style_only = document.getElementById('style_only')
+// const masked_style = document.getElementById('masked_style')
+// const masked_style_inverted = document.getElementById('masked_style_inverted')
 //const all = document.getElementById('all')
-var output_type = 'style_only'
+// var output_type = 'style_only'
+//
+// style_only.onclick = function() {
+//   event.preventDefault();
+//   //console.log("btn pressed!")
+//   output_type = 'style_only'
+//   dropdown_output.textContent = style_only.textContent;
+// }
+// masked_style.onclick = function() {
+//   event.preventDefault();
+//   //console.log("btn pressed!")
+//   output_type = 'masked_style'
+//   dropdown_output.textContent = masked_style.textContent;
+// }
+// masked_style_inverted.onclick = function() {
+//   event.preventDefault();
+//   //console.log("btn pressed!")
+//   output_type = 'masked_style_inverted'
+//   dropdown_output.textContent = masked_style_inverted.textContent;
+// }
+//
+// // const dropdown_style = document.getElementById('dropdown_style');
+// const mosaic = document.getElementById('mosaic')
+// const madhubani = document.getElementById('madhubani')
 
-style_only.onclick = function() {
+function load_style(style) {
   event.preventDefault();
-  //console.log("btn pressed!")
-  output_type = 'style_only'
-  dropdown_output.textContent = style_only.textContent;
-}
-masked_style.onclick = function() {
-  event.preventDefault();
-  //console.log("btn pressed!")
-  output_type = 'masked_style'
-  dropdown_output.textContent = masked_style.textContent;
-}
-masked_style_inverted.onclick = function() {
-  event.preventDefault();
-  //console.log("btn pressed!")
-  output_type = 'masked_style_inverted'
-  dropdown_output.textContent = masked_style_inverted.textContent;
-}
+  document.getElementById('dropdown_style').textContent =
+    document.getElementById(style).textContent;
+    style_type = style
+    Load_style_model(style_type)
 
-const dropdown_style = document.getElementById('dropdown_style');
-const mosaic = document.getElementById('mosaic')
-const madhubani = document.getElementById('madhubani')
-var style_type = 'mosaic'
-
-mosaic.onclick = function() {
-  event.preventDefault();
-  //console.log("btn pressed!")
-  style_type = 'mosaic'
-  Load_style_model(style_type)
-  dropdown_style.textContent = mosaic.textContent;
-}
-madhubani.onclick = function() {
-  event.preventDefault();
-  //console.log("btn pressed!")
-  style_type = 'madhubani'
-  Load_style_model(style_type)
-  dropdown_style.textContent = madhubani.textContent;
 }
 
-seg_low.onclick = function() {
-  event.preventDefault();
-  //console.log("btn pressed!")
-  segmentation_IMAGE_HEIGHT = 128
-  segmentation_IMAGE_WIDTH = 128
-  dropdown_seg_qual.textContent = seg_low.textContent;
-}
-seg_medium.onclick = function() {
-  event.preventDefault();
-  //console.log("btn pressed!")
-  segmentation_IMAGE_HEIGHT = 256
-  segmentation_IMAGE_WIDTH = 256
-  dropdown_seg_qual.textContent = seg_medium.textContent;
-}
-seg_high.onclick = function() {
-  event.preventDefault();
-  //console.log("btn pressed!")
-  segmentation_IMAGE_HEIGHT = 512
-  segmentation_IMAGE_WIDTH = 512
-  dropdown_seg_qual.textContent = seg_high.textContent;
-}
+// seg_low.onclick = function() {
+//   event.preventDefault();
+//   //console.log("btn pressed!")
+//   segmentation_IMAGE_HEIGHT = 128
+//   segmentation_IMAGE_WIDTH = 128
+//   dropdown_seg_qual.textContent = seg_low.textContent;
+// }
+// seg_medium.onclick = function() {
+//   event.preventDefault();
+//   //console.log("btn pressed!")
+//   segmentation_IMAGE_HEIGHT = 256
+//   segmentation_IMAGE_WIDTH = 256
+//   dropdown_seg_qual.textContent = seg_medium.textContent;
+// }
+// seg_high.onclick = function() {
+//   event.preventDefault();
+//   //console.log("btn pressed!")
+//   segmentation_IMAGE_HEIGHT = 512
+//   segmentation_IMAGE_WIDTH = 512
+//   dropdown_seg_qual.textContent = seg_high.textContent;
+// }
 
 style_low.onclick = function() {
   event.preventDefault();

@@ -108,6 +108,44 @@ function set_static_output_size(element) {
   return [output_WIDTH, output_HEIGHT];
 }
 
+function file_load(image, img_in, status) {
+  //console.log("running file_infer!");
+  status.textContent = 'Status: Fetching image...';
+  //var tt = performance.now();
+  if (window.File && window.FileReader && window.FileList && window.Blob) {
+    var reader = new FileReader();
+    // Closure to capture the file information.
+    reader.addEventListener("load", function(e) {
+      img_in.src = e.target.result;
+      // img_in.onload = () => func(img_in);
+    });
+    reader.readAsDataURL(image);
+  } else {
+    console.log('The File APIs are not fully supported in this browser.');
+  }
+};
+
+function url_load(url_in, img_in, status) {
+  status.textContent = 'Status: Fetching image...';
+
+  let url = new URL(url_in.value);
+
+  var request = new XMLHttpRequest();
+  request.open('GET', cors_api_url + url, true);
+  request.responseType = 'blob';
+  request.send();
+
+  request.onload = function() {
+    var reader = new FileReader();
+    reader.readAsDataURL(request.response);
+    reader.onload = e => {
+      // Fill the image & call func.
+      img_in.src = e.target.result;
+      // img_in.onload = () => func(img_in);
+    };
+  };
+}
+
 function file_infer(image, img_in, status, func) {
   //console.log("running file_infer!");
   status.textContent = 'Status: Fetching image...';
