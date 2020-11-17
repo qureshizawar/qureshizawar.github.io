@@ -58,9 +58,7 @@ var output_WIDTH = Math.floor(output_HEIGHT*ratio);
 var videoHeight = 512;
 var videoWidth = Math.floor(videoHeight*0.75);
 // var videoWidth = Math.floor(videoHeight*ratio);
-
 var de_canvas = document.getElementById('mask');
-
 const mean = tf.tensor3d([0.485, 0.456, 0.406], [1, 1, 3]);
 const std = tf.tensor3d([0.229, 0.224, 0.225], [1, 1, 3]);
 const scale = tf.scalar(255.);
@@ -135,8 +133,12 @@ const Load_style_model = async (style_type) => {
     // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic_pruned/model.json');
     // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic_pruned_test/model.json');
     model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic5_pruned/model.json');
+
   } else {
-    model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite/model.json');
+      // model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite/model.json');
+        model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic_pruned/model.json');
+          // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic_pruned_test/model.json');
+        // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic3_pruned/model.json');
   }
 
 }
@@ -235,8 +237,10 @@ const style_Demo = async (imElement) => {
     const resized_style = tf.image.resizeBilinear(style_out, [output_HEIGHT,
       output_WIDTH], true)
 
+
       // return style_out
       return resized_style
+
 
   });
 
@@ -247,9 +251,11 @@ const style_Demo = async (imElement) => {
 
   await tf.browser.toPixels(masked_style_comp, de_canvas);
 
+
   var tbt1 = performance.now();
   console.log(style_type);
   console.log("Call to tb took " + (tbt1 - tbt0) + " milliseconds.");
+
 
 
   status_style.textContent = "Status: Done!";
