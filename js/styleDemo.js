@@ -1,7 +1,7 @@
 tf.setBackend('webgl');
-// tf.ENV.set('WEBGL_CONV_IM2COL', false);
-// tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
-// tf.webgl.forceHalfFloat();
+tf.ENV.set('WEBGL_CONV_IM2COL', false);
+tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
+tf.ENV.set('WEBGL_FORCE_F16_TEXTURES', true);
 
 //tf.enableDebugMode()
 //tf.ENV.set('BEFORE_PAGING_CONSTANT ', 1000);
