@@ -11,6 +11,7 @@ tf.enableProdMode();
 // console.log(tf.env())
 
 
+
 let model_sem_encoder;
 let model_sem_decoder;
 let blur_kernel;
@@ -489,7 +490,6 @@ bg_blurcheckBox.addEventListener('click', function() {
     blur_bg = false
   }
 });
-
 bg_usecheckBox.addEventListener('click', function() {
   if (bg_usecheckBox.checked == true) {
     document.getElementById("bg_table").style.display = "block";
