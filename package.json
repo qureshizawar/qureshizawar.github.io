@@ -28,5 +28,8 @@
     "gulp-terser": "^1.2.0",
     "gulp-uglify": "^3.0.2",
     "gulp-wait": "0.0.2"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs": "^2.7.0"
   }
 }

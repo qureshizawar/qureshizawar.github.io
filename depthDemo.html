@@ -69,13 +69,12 @@
     <h2 class="heading" style="padding:10px">Monocular Depth</h2>
 
     <div class="demo-section-block shadow-large">
-      <h4>Monocular depth estimation model trained using single camera views
-        from the kitti dataset
-      </h4>
+      <h3>Monocular depth estimation using a single image
+      </h3>
 
       <!--button class="collapsible_tf" title="Depth">Depth</button-->
       <section id="depth_sec">
-        <p> Since this model runs locally on device, any uploaded pictures stay safely
+        <p><b>Note:</b> Since these models runs locally on device, any uploaded pictures stay safely
           on the device. Please note that the first run would
           be much slower than subsequent runs as Tensorflow loads the necessary
           files. (WIP so there may be bugs!) </p>
@@ -83,7 +82,7 @@
         <!-- Solid divider -->
         <hr class="solid">
         </hr>
-
+        <h3>Settings:</h3>
         <table style="width: 100%;">
           <tbody>
             <tr>
@@ -124,11 +123,14 @@
         </hr>
 
         <div id='mainImage' style='display:block'>
-          <p id="status_depth"></p>
+          <h3 id="status_depth"></h3>
 
           <table style="width: 100%; max-width: 400px;">
             <tbody>
               <tr>
+                <td>
+                  <p> Select an image:</p>
+                </td>
                 <td>
                   <p>Upload an image:</p>
                 </td>
@@ -139,7 +141,13 @@
               <tr>
                 <td>
                   <label class="switch">
-                    <input type="checkbox" checked id="fileinput" />
+                    <input type="checkbox" checked id="selectinput" />
+                    <span class="slider round"></span>
+                  </label>
+                </td>
+                <td>
+                  <label class="switch">
+                    <input type="checkbox" id="fileinput" />
                     <span class="slider round"></span>
                   </label>
                 </td>
@@ -153,7 +161,7 @@
             </tbody>
           </table>
 
-          <div id="file-container" style='display:block'>
+          <div id="file-container" style='display:none'>
             <input type="file" style="padding-bottom:10px; padding-top:10px" id="files" name="files" accept=".jpg, .jpeg, .png" />
             <div>
               <input type="button" id="depth_files_btn" value="Run" />
@@ -168,11 +176,29 @@
             </div>
           </div>
 
+
+          <div id="dropdown_input" style="display: block">
+          <div class="dropdown" >
+            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+              <t id="dropdown_input_out">outdoors</t>
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a id="inp_outdoors" href="#" onclick="inp_load('inp_outdoors')">outdoors</a></li>
+              <li><a id="inp_indoors" href="#" onclick="inp_load('inp_indoors')">indoors</a></li>
+            </ul>
+          </div>
+          <p></p>
+            <input type="button" id="select_files_btn" value="Run" style="display: block" />
+          </div>
+
+
           <!-- Solid divider -->
           <hr class="solid">
           </hr>
 
-          <img class="inp_img" id="inpimg" src="/assets/demo_images/sample.png" />
+          <img class="inp_img" id="inpimg" src="/assets/demo_images/inp_outdoors.png" />
+          <!-- <img class="inp_img" id="inpimg" /> -->
           <p class="section-head">Prediction:</p>
           <canvas id="depth" class="canvas"></canvas>
           <p class="section-head">3D point cloud:</p>
@@ -180,85 +206,149 @@
         </div>
       </section>
 
-      <!-- Solid divider -->
-      <hr class="solid">
-      </hr>
-
-      <div>
-        <h5>
-          Credits
-        </h5>
-        <p>
-          This demo was put together by <a href="https://github.com/qureshizawar">Zawar Qureshi</a>
-          but could not have been done without the following:
-        </p>
-        <ul>
-          <li>
-            Authors of <a href="https://arxiv.org/abs/1806.01260">the Monodepth2 paper</a>.
-          </li>
-          <li>
-            The <a href="https://threejs.org/">threejs library</a>.
-          </li>
-          <li>
-            The <a href="https://github.com/nerox8664/onnx2keras">onnx2keras package</a>.
-          </li>
-          <li>
-            The <a href="https://js.tensorflow.org">TensorFlow.js library</a>.
-          </li>
-        </ul>
-        <p>
-          I'd love to hear from people interested
-          in making tools/apps using these models!
-        </p>
-      </div>
-
     </div>
+    <!-- End .optional-section-block -->
 
-  </div>
-  <!-- End .demo-section-block -->
+    <!-- </div> -->
+    <!-- End .optional-section -->
 
-  <!-- End .demo-section -->
+    <div class="demo-section-block shadow-large">
+      <div id="main2" style='display:block'>
 
-  <footer>
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-5 copyright">
+        <div>
+          <h3>
+            Details
+          </h3>
           <p>
-            Copyright &copy; 2020 Zawar Qureshi
+            This demo uses a <b>Monocular depth estimation</b>
+            model (<b>encoder decoder achitecture</b> based on this <a href="https://arxiv.org/abs/1806.01260">paper</a>) which is trained using a sequence of single camera views.
           </p>
+          <p>
+            The training is fully <b>self-supervised</b>, I mostly use open datasets but augment them with data collected by myself and from other sources.
+            Since I sometimes do not have the <b>camera intrinsics</b> (a vital requirement for training) for the image sequences I am using, I also use a
+            part of the model to predict the camera intrinsics (using ideas based on this <a href="https://arxiv.org/abs/1904.04998">paper</a>)
+          </p>
+          <p>
+            The output of the model is then converted to a 3D point cloud using the <b> three.js </b> library. Please note, at the moment only single images
+            are used for inference, therefore, the currently deployed models cannot predict camera intrinsics (intrinsics prediction coming soon!)
+            hence the 3D point cloud is only very approximate.
+          </p>
+          <p> All models were trained and optimised in <b>Pytorch</b> and then converted for deployment on <b>TensorFlow.js</b>.
+            For deployment, all the layers in the models that could be <b>fused</b> were fused to give the final optimised model.
+          </p>
+
         </div>
-        <div class="col-sm-2 top">
-          <span id="to-top">
-            <i class="fa fa-chevron-up" aria-hidden="true"></i>
-          </span>
-        </div>
-        <div class="col-sm-5 social">
+
+
+        <!-- Solid divider -->
+        <hr class="solid">
+        </hr>
+
+        <div>
+          <h3>
+            Currently working on
+          </h3>
           <ul>
             <li>
-              <a href="https://github.com/qureshizawar" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+              Deploying models for prediction of camera intrinsics from any video/image sequence
             </li>
             <li>
-              <a href="https://stackoverflow.com/" target="_blank"><i class="fa fa-stack-overflow" aria-hidden="true"></i></a>
+              Building a 3D map from any video/image sequence
             </li>
             <li>
-              <a href="https://linkedin.com/in/zawarqureshi/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+              <b>On device</b> depth estimation <b>refinement</b> using any video/image sequence
             </li>
             <li>
-              <a href="https://www.facebook.com/" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+              Deploying the demo as a <b>React Native</b> app
             </li>
             <li>
-              <a href="https://twitter.com/" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+              On device training of models using available video/image sequences (<b>Privacy preserving training/Federated learning</b>)
             </li>
           </ul>
+
+        </div>
+
+
+        <!-- Solid divider -->
+        <hr class="solid">
+        </hr>
+
+
+        <div>
+          <h3>
+            Credits
+          </h3>
+          <p>
+            This demo was put together by <a href="https://github.com/qureshizawar">Zawar Qureshi</a>
+            but could not have been done without the following:
+          </p>
+          <ul>
+            <li>
+              Authors of <a href="https://arxiv.org/abs/1806.01260">the Monodepth2 paper</a>.
+            </li>
+            <li>
+              The <a href="https://threejs.org/">three.js library</a>.
+            </li>
+            <li>
+              The <a href="https://github.com/nerox8664/onnx2keras">onnx2keras package</a>.
+            </li>
+            <li>
+              The <a href="https://js.tensorflow.org">TensorFlow.js library</a>.
+            </li>
+          </ul>
+          <p>
+            I'd love to hear from people interested
+            in making tools/apps using these models!
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+    <!-- End .demo-section-block -->
+
+    <!-- End .demo-section -->
+
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-5 copyright">
+            <p>
+              Copyright &copy; 2020 Zawar Qureshi
+            </p>
+          </div>
+          <div class="col-sm-2 top">
+            <span id="to-top">
+              <i class="fa fa-chevron-up" aria-hidden="true"></i>
+            </span>
+          </div>
+          <div class="col-sm-5 social">
+            <ul>
+              <li>
+                <a href="https://github.com/qureshizawar" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+              </li>
+              <li>
+                <a href="https://stackoverflow.com/" target="_blank"><i class="fa fa-stack-overflow" aria-hidden="true"></i></a>
+              </li>
+              <li>
+                <a href="https://linkedin.com/in/zawarqureshi/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+              </li>
+              <li>
+                <a href="https://www.facebook.com/" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+              </li>
+              <li>
+                <a href="https://twitter.com/" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
-  </footer>
-  <!-- End footer -->
-  <script src="js/scripts.min.js"></script>
-  <script type="text/javascript" src="js/utils.min.js"></script>
-  <script type="module" src="js/pointCloud.min.js"></script>
-  <script src="js/depthDemo.min.js"></script>
+    </footer>
+    <!-- End footer -->
+    <script src="js/scripts.min.js"></script>
+    <script type="text/javascript" src="js/utils.min.js"></script>
+    <script type="module" src="js/pointCloud.min.js"></script>
+    <script src="js/depthDemo.min.js"></script>
 </body>
 
 </html>

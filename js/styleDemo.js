@@ -1,35 +1,27 @@
 tf.setBackend('webgl');
 // tf.ENV.set('WEBGL_CONV_IM2COL', false);
 // tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
-// tf.webgl.forceHalfFloat();
+tf.ENV.set('WEBGL_FORCE_F16_TEXTURES', true)
 
 //tf.enableDebugMode()
 //tf.ENV.set('BEFORE_PAGING_CONSTANT ', 1000);
 //tf.setBackend('cpu');
-//tf.enableProdMode();
+tf.enableProdMode();
 
 class MirrorPad extends tf.layers.Layer {
-   static className = 'MirrorPad';
+  static className = 'MirrorPad';
 
-   constructor(config) {
-     super(config);
-   // config.mode = 'reflect'
-   // console.log(config)
-   // console.log("config.padding: ", config.padding)
-   this.pad0 = config.padding[0]
-   this.pad1 = config.padding[1]
-   }
-   call(inputs, kwargs) {
-        // console.log(inputs)
-        // console.log("this.pad0: ", this.pad0)
-        // console.log("this.pad1: ", this.pad1)
-        // let input = inputs;
-        // if (Array.isArray(input)) {
-        //     input = input[0];
-        // }
-        return inputs[0].mirrorPad([[0,0], this.pad0,
-        this.pad1, [0,0]], 'reflect')
-    }
+  constructor(config) {
+    super(config);
+    this.pad0 = config.padding[0]
+    this.pad1 = config.padding[1]
+  }
+  call(inputs, kwargs) {
+    return inputs[0].mirrorPad([
+      [0, 0], this.pad0,
+      this.pad1, [0, 0]
+    ], 'reflect')
+  }
 }
 
 tf.serialization.registerClass(MirrorPad);
@@ -39,9 +31,6 @@ tf.serialization.registerClass(MirrorPad);
 // let blur_kernel;
 let model_transformer;
 
-var segmentation_IMAGE_HEIGHT = 512
-var segmentation_IMAGE_WIDTH = 512
-
 // var style_IMAGE_HEIGHT = 384
 // var style_IMAGE_WIDTH = 384
 // const ratio = 0.75
@@ -50,13 +39,13 @@ const ratio = 0.5625
 // var style_IMAGE_WIDTH = 64
 // var style_IMAGE_HEIGHT = Math.floor(style_IMAGE_WIDTH*(3/4))
 var style_IMAGE_HEIGHT = 512
-var style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT*ratio)
+var style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT * ratio)
 
 var output_HEIGHT = 512;
-var output_WIDTH = Math.floor(output_HEIGHT*ratio);
+var output_WIDTH = Math.floor(output_HEIGHT * ratio);
 
 var videoHeight = 512;
-var videoWidth = Math.floor(videoHeight*0.75);
+var videoWidth = Math.floor(videoHeight * 0.75);
 // var videoWidth = Math.floor(videoHeight*ratio);
 
 var de_canvas = document.getElementById('mask');
@@ -65,18 +54,7 @@ const mean = tf.tensor3d([0.485, 0.456, 0.406], [1, 1, 3]);
 const std = tf.tensor3d([0.229, 0.224, 0.225], [1, 1, 3]);
 const scale = tf.scalar(255.);
 
-var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
-
-// const dropdown_seg_qual = document.getElementById('dropdown_seg_qual');
-// const seg_low = document.getElementById('seg_low')
-// const seg_medium = document.getElementById('seg_medium')
-// const seg_high = document.getElementById('seg_high')
-
 const dropdown_style_qual = document.getElementById('dropdown_style_qual');
-const style_low = document.getElementById('style_low')
-const style_medium = document.getElementById('style_medium')
-const style_high = document.getElementById('style_high')
-const style_vhigh = document.getElementById('style_vhigh')
 
 const mobile = isMobile();
 
@@ -95,7 +73,7 @@ if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').mat
   // style_IMAGE_HEIGHT = 128//512
   // style_IMAGE_WIDTH = 128//512
   var style_IMAGE_HEIGHT = 512
-  var style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT*ratio)
+  var style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT * ratio)
   dropdown_style_qual.textContent = style_vhigh.textContent;
   //console.log("Desktop detected!")
 }
@@ -119,26 +97,21 @@ document.getElementById("btn_style").addEventListener("click", function(evt) {
     status_style, style_Demo);
 });
 
+const model_lookup = {
+  // mosaic_small: '/assets/TransformerNet_literrvocmosaic6_pruned/model.json',
+  mosaic_small: '/assets/mosaic6_style_literr_pruned_quant/model.json',
+  mosaic: '/assets/mosaic_style_lite_quant/model.json',
+  madhubani: '/assets/madhubani4_style_literr_pruned_quant/model.json',
+  sketch: '/assets/sketch_style_literr_pruned_quant/model.json',
+  feathers: '/assets/feathers_style_literr_pruned_quant/model.json',
+};
+
 const Load_style_model = async (style_type) => {
-
-  if (model_transformer) {
-    console.log("disposing model")
-    model_transformer.dispose();
-
-  }
-
-  if (style_type == 'madhubani') {
-    // model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite_madhubani/model.json');
-    model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmadhubani4_pruned/model.json');
-  } else if (style_type == 'mosaic_small') {
-    // model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite/model.json');
-    // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic_pruned/model.json');
-    // model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic_pruned_test/model.json');
-    model_transformer = await tf.loadLayersModel('/assets/TransformerNet_literrvocmosaic5_pruned/model.json');
-  } else {
-    model_transformer = await tf.loadLayersModel('/assets/tfjs_layers_style_lite/model.json');
-  }
-
+  // if (model_transformer) {
+  //   console.log("disposing model")
+  //   model_transformer.dispose();
+  // }
+  model_transformer = await tf.loadLayersModel(model_lookup[style_type]);
 }
 
 const StyleWarmup = async () => {
@@ -146,11 +119,6 @@ const StyleWarmup = async () => {
   status_style.textContent = 'Status: Loading...';
 
   await Load_style_model(style_type)
-
-  // model_sem_encoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_encoder_bi_quant/model.json');
-  // model_sem_decoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_decoder_pruned_quant/model.json');
-  // blur_kernel = await tf.loadLayersModel('/assets/gaus_21_1/model.json');
-  // blur_kernel = await tf.loadLayersModel('/asssets/gaus_61/model.json');
 
   // Make a prediction through the locally hosted inpimg_style.jpg.
   let img = document.getElementById('inpimg_style');
@@ -174,30 +142,20 @@ const StyleWarmup = async () => {
 const style_Demo = async (imElement) => {
 
   status_style.textContent = 'Status: Loading image into model...';
-
-  var seg_time = 0;
-  var style_time = 0;
-
-  //var t0 = performance.now();
-  //var bt0 = performance.now();
-
   // console.log(style_IMAGE_HEIGHT, style_IMAGE_WIDTH);
 
-    var tbt0 = performance.now();
+  // var tbt0 = performance.now();
 
-  const masked_style_comp = tf.tidy(() => {
+  const style_output = tf.tidy(() => {
 
     //console.log(tf.memory ());
-    // output_WIDTH = imElement.clientWidth;
-    // output_HEIGHT = imElement.clientHeight;
-    var img = tf.browser.fromPixels(imElement).toFloat(); //tf.image.resizeBilinear(tf.browser.fromPixels(imElement).toFloat(),
-    //[512,512]);
+    const img = tf.browser.fromPixels(imElement).toFloat();
 
-    console.log(img.shape)
+    // console.log(img.shape)
     output_HEIGHT = img.shape[0];
     output_WIDTH = img.shape[1];
-    console.log(output_HEIGHT,output_WIDTH)
-    console.log(style_IMAGE_HEIGHT, style_IMAGE_WIDTH)
+    // console.log(output_HEIGHT, output_WIDTH)
+    // console.log(style_IMAGE_HEIGHT, style_IMAGE_WIDTH)
 
     const style_in = tf.image.resizeBilinear(img, [style_IMAGE_HEIGHT, style_IMAGE_WIDTH], true).expandDims();
     // const style_in = tf.image.resizeNearestNeighbor(img, [style_IMAGE_HEIGHT, style_IMAGE_WIDTH], true).expandDims();
@@ -209,56 +167,39 @@ const style_Demo = async (imElement) => {
 
     status_style.textContent = 'Status: Model loaded! running inference';
 
-    //var bt1 = performance.now();
-    //console.log("Call to pre took " + (bt1 - bt0) + " milliseconds.");
+    //console.log(tf.memory ());
+
+    const style = model_transformer.predict(style_in);
 
     //console.log(tf.memory ());
 
-    // var st0 = performance.now();
-     const style = model_transformer.predict(style_in);
-
-    //console.log(tf.memory ());
-
-    //var postt0 = performance.now();
-
-   const style_out = style.squeeze(0).clipByValue(0, 255).div(scale);
-   // const style_out = style_in.squeeze(0).clipByValue(0, 255).div(scale);
-
-   // var st1 = performance.now();
-   // style_time = (st1 - st0)
-   // console.log("Call to style took " + style_time + " milliseconds.");
-
-    //var postt1 = performance.now();
-    //console.log("Call to post took " + (postt1 - postt0) + " milliseconds.");
+    const style_out = style.squeeze(0).clipByValue(0, 255).div(scale);
 
 
     const resized_style = tf.image.resizeBilinear(style_out, [output_HEIGHT,
-      output_WIDTH], true)
+      output_WIDTH
+    ], true)
 
-      // return style_out
-      return resized_style
+    return resized_style
 
   });
 
   //console.log(tf.memory ());
 
-  // const maskCanvas = document.getElementById('mask');
-  // const maskCanvas = document.getElementById('mask');
 
-  await tf.browser.toPixels(masked_style_comp, de_canvas);
+  await tf.browser.toPixels(style_output, de_canvas);
 
-  var tbt1 = performance.now();
-  console.log(style_type);
-  console.log("Call to tb took " + (tbt1 - tbt0) + " milliseconds.");
+  // var tbt1 = performance.now();
+  // console.log(style_type);
+  // console.log("Call to tb took " + (tbt1 - tbt0) + " milliseconds.");
 
 
   status_style.textContent = "Status: Done!";
-  // status_style.textContent = "Status: Done! inference took " + ((seg_time + style_time).toFixed(1)) + " milliseconds.";
 
   //var t1 = performance.now();
   // console.log("Call to mask_Demo took " + (t1 - t0) + " milliseconds.");
 
-  masked_style_comp.dispose();
+  style_output.dispose();
   //console.log("after: ", tf.memory());
   //console.log(tf.memory ());
 };
@@ -268,10 +209,10 @@ const style_Demo_RT = async (imElement) => {
   // output_HEIGHT = imElement.clientHeight;
   // console.log(output_WIDTH,output_HEIGHT);
 
-  const masked_style_comp = tf.tidy(() => {
+  const style_output = tf.tidy(() => {
 
     //console.log(tf.memory ());
-    var img = tf.browser.fromPixels(imElement).toFloat(); //tf.image.resizeBilinear(tf.browser.fromPixels(imElement).toFloat(),
+    const img = tf.browser.fromPixels(imElement).toFloat(); //tf.image.resizeBilinear(tf.browser.fromPixels(imElement).toFloat(),
     //[512,512]);
 
     const style_in = tf.image.resizeBilinear(img, [style_IMAGE_HEIGHT, style_IMAGE_WIDTH], true).expandDims();
@@ -280,31 +221,37 @@ const style_Demo_RT = async (imElement) => {
     // console.log(img.shape)
     //var img = tf.browser.fromPixels(imElement).toFloat();
 
-     const style = model_transformer.predict(style_in);
+    const style = model_transformer.predict(style_in);
 
-   const style_out = style.squeeze(0).clipByValue(0, 255).div(scale);
-   // const style_out = style_in.squeeze(0).clipByValue(0, 255).div(scale);
-   // const style_out = style_in.toInt();
+    const style_out = style.squeeze(0).clipByValue(0, 255).div(scale);
+    // const style_out = style_in.squeeze(0).clipByValue(0, 255).div(scale);
+    // const style_out = style_in.toInt();
 
-   // style_out = tf.image.resizeBilinear(style_out,
-   //   [output_HEIGHT, output_WIDTH])
+    // style_out = tf.image.resizeBilinear(style_out,
+    //   [output_HEIGHT, output_WIDTH])
 
-      return style_out
+    // return style_out
+
+    const resized_style = tf.image.resizeBilinear(style_out, [output_HEIGHT,
+      output_WIDTH
+    ], true)
+
+    return resized_style
 
   });
 
-  var tbt0 = performance.now();
+  // var tbt0 = performance.now();
 
-  await tf.browser.toPixels(tf.image.resizeBilinear(masked_style_comp,
-    [output_HEIGHT, output_WIDTH]), de_canvas);
+  // await tf.browser.toPixels(tf.image.resizeBilinear(style_output,
+  //   [output_HEIGHT, output_WIDTH]), de_canvas);
   // await tf.browser.toPixels(tf.image.resizeNearestNeighbor(masked_style_comp,
   //   [output_HEIGHT, output_WIDTH]), de_canvas);
-  // await tf.browser.toPixels(masked_style_comp, de_canvas);
+  await tf.browser.toPixels(style_output, de_canvas);
 
-  var tbt1 = performance.now();
-  console.log("Call to tb took " + (tbt1 - tbt0) + " milliseconds.");
+  // var tbt1 = performance.now();
+  // console.log("Call to tb took " + (tbt1 - tbt0) + " milliseconds.");
 
-  masked_style_comp.dispose();
+  style_output.dispose();
 };
 
 let request;
@@ -323,10 +270,10 @@ function detectInRealTime(video) {
   de_canvas.width = output_WIDTH;
   de_canvas.height = output_HEIGHT;
 
-  console.log(de_canvas.width, de_canvas.height)
-    console.log(de_canvas)
+  // console.log(de_canvas.width, de_canvas.height)
+  // console.log(de_canvas)
   const ctx = de_canvas.getContext('2d');
-  console.log(ctx);
+  // console.log(ctx);
   ctx.save();
 
   async function DetectionFrame() {
@@ -350,6 +297,18 @@ function detectInRealTime(video) {
       // style_Demo(video);
       // console.log(video)
       style_Demo_RT(video);
+      // await style_Demo_RT(video);
+
+      // ctx.save();
+      if (flipHorizontal) {
+        ctx.scale(-1, 1);
+        ctx.translate(-videoWidth, 0);
+      }
+      /*else{
+        ctx.scale(1, 1);*/
+      //console.log(video)
+      // ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
+      // ctx.restore();
 
     }
 
@@ -422,11 +381,11 @@ async function bindPage() {
     throw e;
   }
 
-  console.log(video)
-
-  console.log("##############################")
-  console.log(video.srcObject.getVideoTracks()[0].getSettings())
-  console.log("##############################")
+  // console.log(video)
+  //
+  // console.log("##############################")
+  // console.log(video.srcObject.getVideoTracks()[0].getSettings())
+  // console.log("##############################")
 
   //setupFPS();
   detectInRealTime(video);
@@ -462,6 +421,11 @@ function webc() {
     //if (mobile){document.getElementById("camswitch").style.display = "block";}
     imagecheckBox.checked = false;
 
+    document.getElementById('dropdown_style_qual').textContent =
+      document.getElementById("style_high").textContent;
+    style_IMAGE_HEIGHT = style_res_lookup["style_high"]
+    style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT * ratio)
+
     t_Width = document.getElementById("mainopt").clientWidth
     t_Height = 384;
     maini.style.display = "none";
@@ -473,7 +437,7 @@ function webc() {
     output_WIDTH = apectWidth > t_Width ? t_Width : apectWidth;
     output_HEIGHT = t_Height;
 
-    console.log(output_WIDTH, output_HEIGHT)
+    // console.log(output_WIDTH, output_HEIGHT)
     // videoHeight = 256;
     // videoWidth = Math.floor(videoHeight*ratio);
 
@@ -510,9 +474,11 @@ function imagec() {
       document.getElementById("camswitch").style.display = "none";
       videocheckBox.checked = false;
       cancelAnimationFrame(request);
-      video.srcObject.getTracks().forEach(function(track) {
-        track.stop();
-      });
+      if (video) {
+        video.srcObject.getTracks().forEach(function(track) {
+          track.stop();
+        });
+      }
     }
     document.getElementById("main").style.display = "block";
     maini.style.display = "block";
@@ -523,94 +489,28 @@ function imagec() {
   }
 }
 
-// const dropdown_output = document.getElementById('dropdown_output');
-// const style_only = document.getElementById('style_only')
-// const masked_style = document.getElementById('masked_style')
-// const masked_style_inverted = document.getElementById('masked_style_inverted')
-//const all = document.getElementById('all')
-// var output_type = 'style_only'
-//
-// style_only.onclick = function() {
-//   event.preventDefault();
-//   //console.log("btn pressed!")
-//   output_type = 'style_only'
-//   dropdown_output.textContent = style_only.textContent;
-// }
-// masked_style.onclick = function() {
-//   event.preventDefault();
-//   //console.log("btn pressed!")
-//   output_type = 'masked_style'
-//   dropdown_output.textContent = masked_style.textContent;
-// }
-// masked_style_inverted.onclick = function() {
-//   event.preventDefault();
-//   //console.log("btn pressed!")
-//   output_type = 'masked_style_inverted'
-//   dropdown_output.textContent = masked_style_inverted.textContent;
-// }
-//
-// // const dropdown_style = document.getElementById('dropdown_style');
-// const mosaic = document.getElementById('mosaic')
-// const madhubani = document.getElementById('madhubani')
-
 function load_style(style) {
   event.preventDefault();
   document.getElementById('dropdown_style').textContent =
     document.getElementById(style).textContent;
-    style_type = style
-    Load_style_model(style_type)
+  style_type = style
+  Load_style_model(style_type)
 
 }
 
-// seg_low.onclick = function() {
-//   event.preventDefault();
-//   //console.log("btn pressed!")
-//   segmentation_IMAGE_HEIGHT = 128
-//   segmentation_IMAGE_WIDTH = 128
-//   dropdown_seg_qual.textContent = seg_low.textContent;
-// }
-// seg_medium.onclick = function() {
-//   event.preventDefault();
-//   //console.log("btn pressed!")
-//   segmentation_IMAGE_HEIGHT = 256
-//   segmentation_IMAGE_WIDTH = 256
-//   dropdown_seg_qual.textContent = seg_medium.textContent;
-// }
-// seg_high.onclick = function() {
-//   event.preventDefault();
-//   //console.log("btn pressed!")
-//   segmentation_IMAGE_HEIGHT = 512
-//   segmentation_IMAGE_WIDTH = 512
-//   dropdown_seg_qual.textContent = seg_high.textContent;
-// }
+const style_res_lookup = {
+  style_low: 192,
+  style_medium: 256,
+  style_high: 384,
+  style_vhigh: 512
+}
 
-style_low.onclick = function() {
+function set_style_res(res) {
   event.preventDefault();
-  //console.log("btn pressed!")
-  style_IMAGE_HEIGHT = 192
-  style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT*ratio)
-  dropdown_style_qual.textContent = style_low.textContent;
-}
-style_medium.onclick = function() {
-  event.preventDefault();
-  //console.log("btn pressed!")
-  style_IMAGE_HEIGHT = 256
-  style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT*ratio)
-  dropdown_style_qual.textContent = style_medium.textContent;
-}
-style_high.onclick = function() {
-  event.preventDefault();
-  // console.log("btn pressed!")
-  style_IMAGE_HEIGHT = 384
-  style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT*ratio)
-  dropdown_style_qual.textContent = style_high.textContent;
-}
-style_vhigh.onclick = function() {
-  event.preventDefault();
-  // console.log("btn pressed!")
-  style_IMAGE_HEIGHT = 512
-  style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT*ratio)
-  dropdown_style_qual.textContent = style_vhigh.textContent;
+  document.getElementById('dropdown_style_qual').textContent =
+    document.getElementById(res).textContent;
+  style_IMAGE_HEIGHT = style_res_lookup[res]
+  style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT * ratio)
 }
 
 StyleWarmup();

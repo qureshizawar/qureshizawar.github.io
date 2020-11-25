@@ -69,7 +69,8 @@
   <div id="lead">
     <div id="lead-content">
       <div class="lead-image">
-        <img src="images/profile_pic2.png" />
+        <!-- <img src="images/profile_pic2.png" /> -->
+        <img src="/assets/demo_images/profile_crop.jpg" />
       </div>
       <h1>Zawar Qureshi</h1>
       <h2>Software Engineer - Machine Learning</h2>
@@ -220,7 +221,7 @@
       <table>
         <tbody>
           <tr>
-            <td>
+            <td style="padding-bottom:5px">
               <a href="/classifierDemo.html" class="btn-rounded-blue">Image classifier</a>
             </td>
             <td style="padding:10px">
@@ -229,38 +230,32 @@
                 (cars, buses, etc.) </p>
             </td>
           </tr>
-        </tbody>
-      </table>
-
-      <table>
-        <tbody>
           <tr>
-            <td>
+            <td style="padding-bottom:5px">
               <a href="/depthDemo.html" class="btn-rounded-blue">Depth</a>
             </td>
             <td style="padding:10px">
-              <p> Monocular depth estimation model trained using single camera views
-                from the kitti dataset</p>
+              <p> Monocular depth estimation using a single image input</p>
             </td>
           </tr>
-        </tbody>
-      </table>
-
-      <table>
-        <tbody>
           <tr>
-            <td>
+            <td style="padding-bottom:5px">
               <a href="/styleDemo.html" class="btn-rounded-blue">Style</a>
             </td>
             <td style="padding:10px">
-              <p> Style transfer and semantic segmentation models trained on the
-                PASCAL dataset for applying selective style to a person only
-                (select masked style output to see it in action!) </p>
+              <p> Real-time style transfer </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom:5px">
+              <a href="/profileDemo.html" class="btn-rounded-blue">Profile</a>
+            </td>
+            <td style="padding:10px">
+              <p> Create your own stylised profile picture using ML! </p>
             </td>
           </tr>
         </tbody>
       </table>
-
 
     </div>
     <!-- End .optional-section-block -->
@@ -289,7 +284,7 @@
   </div>
   <!-- End #skills -->
 
-  <div id="contact">
+  <div id="contact" style='display:none'>
     <h2>Get in Touch</h2>
     <div id="contact-form">
       <form method="POST" action="https://formspree.io/email@email.com">
