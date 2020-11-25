@@ -3,65 +3,67 @@ import {
 } from './OrbitControls.min.js';
 import * as THREE from 'https://unpkg.com/three/build/three.module.js'
 
+function createTextCanvas(text, color, font, size) {
+  size = size || 16;
+  var canvas = document.createElement('canvas'); //document.getElementById('3d_depth');//document.createElement('canvas');
+  var ctx = canvas.getContext('2d');
+  var fontStr = (size + 'px ') + (font || 'Arial');
+  ctx.font = fontStr;
+  var w = ctx.measureText(text).width;
+  var h = Math.ceil(size);
+  canvas.width = w;
+  canvas.height = h;
+  canvas.id = "depth_canvas"
+  ctx.font = fontStr;
+  ctx.fillStyle = color || 'black';
+  ctx.fillText(text, 0, Math.ceil(size * 0.8));
+  return canvas;
+}
+
+function createText2D(text, color, font, size, segW, segH) {
+  var canvas = createTextCanvas(text, color, font, size);
+  var plane = new THREE.PlaneGeometry(canvas.width, canvas.height, segW, segH);
+  var tex = new THREE.Texture(canvas);
+  tex.needsUpdate = true;
+  var planeMat = new THREE.MeshBasicMaterial({
+    map: tex,
+    color: 0xffffff,
+    transparent: true
+  });
+  var mesh = new THREE.Mesh(plane, planeMat);
+  mesh.scale.set(0.5, 0.5, 0.5);
+  mesh.doubleSided = true;
+  return mesh;
+}
+
+// from http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+function hexToRgb(hex) { //TODO rewrite with vector output
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+}
+
+function componentToHex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(r, g, b) {
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+var renderer = new THREE.WebGLRenderer({
+  antialias: true
+});
+
 window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_array) {
 
   var controls;
 
-  function createTextCanvas(text, color, font, size) {
-    size = size || 16;
-    var canvas = document.createElement('canvas'); //document.getElementById('3d_depth');//document.createElement('canvas');
-    var ctx = canvas.getContext('2d');
-    var fontStr = (size + 'px ') + (font || 'Arial');
-    ctx.font = fontStr;
-    var w = ctx.measureText(text).width;
-    var h = Math.ceil(size);
-    canvas.width = w;
-    canvas.height = h;
-    canvas.id = "depth_canvas"
-    ctx.font = fontStr;
-    ctx.fillStyle = color || 'black';
-    ctx.fillText(text, 0, Math.ceil(size * 0.8));
-    return canvas;
-  }
 
-  function createText2D(text, color, font, size, segW, segH) {
-    var canvas = createTextCanvas(text, color, font, size);
-    var plane = new THREE.PlaneGeometry(canvas.width, canvas.height, segW, segH);
-    var tex = new THREE.Texture(canvas);
-    tex.needsUpdate = true;
-    var planeMat = new THREE.MeshBasicMaterial({
-      map: tex,
-      color: 0xffffff,
-      transparent: true
-    });
-    var mesh = new THREE.Mesh(plane, planeMat);
-    mesh.scale.set(0.5, 0.5, 0.5);
-    mesh.doubleSided = true;
-    return mesh;
-  }
-
-  // from http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
-  function hexToRgb(hex) { //TODO rewrite with vector output
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
-  }
-
-  function componentToHex(c) {
-    var hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
-  }
-
-  function rgbToHex(r, g, b) {
-    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-  }
-
-  var renderer = new THREE.WebGLRenderer({
-    antialias: true
-  });
   var w = img_array[0].length; //400;
   var h = img_array.length; //300;
   renderer.setSize(w, h);

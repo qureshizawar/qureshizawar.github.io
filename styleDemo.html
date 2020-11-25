@@ -74,12 +74,11 @@
     <h2 class="heading" style="padding:10px">Style</h2>
 
     <div class="demo-section-block shadow-large">
-      <h4>Style transfer and semantic segmentation models trained on the PASCAL dataset for applying selective style
-        to a person only (select masked style output to see it in action!)
-      </h4>
+      <h3>Real-time style transfer
+      </h3>
       <section>
-        <p> Since this model runs locally on device, any uploaded pictures stay safely
-          on the device. Please note that the first run would
+        <p> <b>Note:</b> Since these models run locally on device, any uploaded pictures stay safely
+          on the device. Please note that the first run may
           be much slower than subsequent runs as Tensorflow loads the necessary
           files. (WIP so there may be bugs!) </p>
 
@@ -130,24 +129,10 @@
         <hr class="solid">
         </hr>
 
+        <h3>Settings:</h3>
+
         <table style="width: 100%;">
           <tbody>
-            <!-- <tr>
-              <td>
-                <p style="display: inline-block"> Output: </p>
-                <div class="dropdown" style="display: inline-block">
-                  <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                    <t id="dropdown_output">style only</t>
-                    <span class="caret"></span>
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li><a id="style_only" href="#">style only</a></li>
-                    <li><a id="masked_style" href="#">Style person only</a></li>
-                    <li><a id="masked_style_inverted" href="#">Style background only</a></li>
-                  </ul>
-                </div>
-              </td>
-            </tr> -->
             <td>
               <p style="display: inline-block"> Style: </p>
               <div class="dropdown" style="display: inline-block">
@@ -157,8 +142,10 @@
                 </button>
                 <ul class="dropdown-menu">
                   <li><a id="mosaic_small" href="#" onclick="load_style('mosaic_small')">mosaic_small</a></li>
-                    <li><a id="mosaic" href="#" onclick="load_style('mosaic')">mosaic</a></li>
+                  <li><a id="mosaic" href="#" onclick="load_style('mosaic')">mosaic</a></li>
                   <li><a id="madhubani" href="#" onclick="load_style('madhubani')">madhubani</a></li>
+                  <li><a id="sketch" href="#" onclick="load_style('sketch')">sketch</a></li>
+                  <li><a id="feathers" href="#" onclick="load_style('feathers')">feathers</a></li>
                 </ul>
               </div>
             </td>
@@ -172,26 +159,10 @@
                     <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
-                    <li><a id="style_low" href="#">low</a></li>
-                    <li><a id="style_medium" href="#">medium</a></li>
-                    <li><a id="style_high" href="#">high</a></li>
-                    <li><a id="style_vhigh" href="#">very high</a></li>
-                  </ul>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <p style="display: inline-block"> Mask quality: </p>
-                <div class="dropdown" style="display: inline-block">
-                  <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                    <t id="dropdown_seg_qual">high</t>
-                    <span class="caret"></span>
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li><a id="seg_low" href="#">low</a></li>
-                    <li><a id="seg_medium" href="#">medium</a></li>
-                    <li><a id="seg_high" href="#">high</a></li>
+                    <li><a id="style_low" href="#" onclick="set_style_res('style_low')">low</a></li>
+                    <li><a id="style_medium" href="#" onclick="set_style_res('style_medium')">medium</a></li>
+                    <li><a id="style_high" href="#" onclick="set_style_res('style_high')">high</a></li>
+                    <li><a id="style_vhigh" href="#" onclick="set_style_res('style_vhigh')">very high</a></li>
                   </ul>
                 </div>
               </td>
@@ -204,7 +175,7 @@
         </hr>
 
         <div id="main" style='display:block'>
-          <p id="status_style"></p>
+          <h3 id="status_style"></h3>
           <div id='mainImage' style='display:block'>
 
             <table style="width: 100%; max-width: 400px;">
@@ -252,8 +223,9 @@
             <!-- Solid divider -->
             <hr class="solid">
             </hr>
-            <img class="inp_img" id="inpimg_style" src="/assets/demo_images/Oxford.jpg" />
-            <p class="section-head">Prediction:</p>
+            <img class="inp_img" id="inpimg_style" src="/assets/demo_images/profile_2.jfif" />
+
+            <h3 class="section-head">Output:</h3>
             <canvas id="mask" class="canvas"></canvas>
           </div>
 
@@ -282,51 +254,56 @@
 
 
         <div>
-          <h5>
+          <h3>
             Details
-          </h5>
+          </h3>
           <p>
-            I started with the style transfer model described in <a href="https://arxiv.org/abs/1603.08155">the Real-Time Style Transfer paper</a>,
+            I started with the <b>style transfer model</b> described in <a href="https://arxiv.org/abs/1603.08155">the Real-Time Style Transfer paper</a>,
             which proved too slow/computationally expensive for low power and edge devices.
           </p>
-          <p> To bring down the computational cost, I first replaced the convolutional layers with separable filters (as in MobileNet achitectures).
-            To further bring down the cost and tune
-            the models; model achitecture search and pruning (as described in this <a href="https://arxiv.org/abs/1804.03294">paper</a>) was employed.
-            Finally, all the layers in the models that could be fused were fused to give the final optimised model.
+          <p> To bring down the computational cost, I first replaced the convolutional layers with <b>separable convolutional filters</b> (as in <b>MobileNet</b> achitectures).
+            This allowed for significant reduction in computational cost at little to no significant loss to quality of the output.
           </p>
           <p>
-            This allowed for significant reduction in model parameters (as shown in the table below) making realtime inference on low power devices
-            feasible. All models were trained and optimised in Pytorch and then converted for deployment on TensorFlow.js.
+            To further bring down the cost and tune
+            the models; <b>model achitecture search</b> and <b>pruning</b> (as described in this <a href="https://arxiv.org/abs/1804.03294">paper</a>) was employed.
+            This led to another order of magnitude drop in the total number of parameters at the cost of some overall output quality for some styles (see mosaic).
+            Finally, all the layers in the models that could be <b>fused</b> were fused and the models <b>quantised</b> to give the final optimised model.
+          </p>
+          <p>
+            All these techniques combined allowed for orders of magnitude reduction in model parameters (as shown in the table below) making realtime inference on low power devices
+            feasible. All models were trained and optimised in <b>Pytorch</b> and then converted for deployment on <b>TensorFlow.js</b> .
+
           </p>
 
           <table class="table_2" style="width:100%; font-size:min(2.5vw, 20px)">
             <tr style="border: 1px solid black">
               <th>Model</th>
               <th>Prams.</th>
-              <th>FLOPs</th>
-              <th>size</th>
-              <th>size(quantised)</th>
+              <th>GFLOPs @384x216</th>
+              <th>Size</th>
+              <th>Size(quantised)</th>
             </tr>
             <tr style="border: 1px solid black">
               <td>Original</td>
               <td>~1.68M</td>
-              <td>~6.39G @ 384x216</td>
-              <td>6.4MB</td>
-              <td>1.6MB</td>
+              <td>~25.56</td>
+              <td>~6.4MB</td>
+              <td>~3.2MB</td>
             </tr>
             <tr style="border: 1px solid black">
               <td>Separable</td>
               <td>~211.07K</td>
-              <td>~335M @ 384x216</td>
-              <td>886KB</td>
-              <td>221KB</td>
+              <td>~3.52 </td>
+              <td>~799KB</td>
+              <td>~399KB</td>
             </tr>
             <tr style="border: 1px solid black">
               <td>Optimised</td>
               <td>~22.2K</td>
-              <td>~185M @ 384x216</td>
-              <td>87KB</td>
-              <td>21.75KB</td>
+              <td>~0.74</td>
+              <td>~87.4KB</td>
+              <td>~43.7KB</td>
             </tr>
           </table>
 
@@ -337,9 +314,28 @@
         </hr>
 
         <div>
-          <h5>
+          <h3>
+            Currently working on
+          </h3>
+          <ul>
+            <li>
+              Deploying <b>arbitrary style transfer</b> model to allow for style transfer from any user defined image
+            </li>
+            <li>
+              Deploying the demo as a <b>React Native</b> app
+            </li>
+          </ul>
+
+        </div>
+
+        <!-- Solid divider -->
+        <hr class="solid">
+        </hr>
+
+        <div>
+          <h3>
             Credits
-          </h5>
+          </h3>
           <p>
             This demo was put together by <a href="https://github.com/qureshizawar">Zawar Qureshi</a>
             but could not have been done without the following:
@@ -408,8 +404,8 @@
     <!-- End footer -->
     <script src="js/scripts.min.js"></script>
     <script type="text/javascript" src="js/utils.min.js"></script>
-    <!-- <script src="js/styleDemo.min.js"></script> -->
-    <script src="js/styleDemo.js"></script>
+    <script src="js/styleDemo.min.js"></script>
+    <!-- <script src="js/styleDemo.js"></script> -->
 </body>
 
 </html>

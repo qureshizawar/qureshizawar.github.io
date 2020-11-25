@@ -1,6 +1,8 @@
 // util functions
 // some functions adapted from tfjs pix2pix demo
 
+const cors_api_url = 'https://cors-anywhere.herokuapp.com/';
+
 function isAndroid() {
   return /Android/i.test(navigator.userAgent);
 }
@@ -13,7 +15,11 @@ function isMobile() {
   return isAndroid() || isiOS();
 }
 
-
+function is_touch_device() {
+  return 'ontouchstart' in window // works on most browsers
+    ||
+    'onmsgesturechange' in window; // works on ie10
+}
 /**
  * Toggles between the loading UI and the main canvas UI.
  */

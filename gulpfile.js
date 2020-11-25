@@ -78,6 +78,15 @@ gulp.task('styleDemo', function() {
     .pipe(gulp.dest('./js'));
 });
 
+gulp.task('profileDemo', function() {
+  return gulp.src('./js/profileDemo.js')
+    .pipe(terser())
+    .pipe(rename({
+      extname: '.min.js'
+    }))
+    .pipe(gulp.dest('./js'));
+});
+
 gulp.task('utils', function() {
   return gulp.src('./js/utils.js')
     .pipe(terser())
@@ -104,6 +113,7 @@ gulp.task('watch', function() {
   gulp.watch('./js/pointCloud.js', gulp.series('pointCloud'));
   gulp.watch('./js/OrbitControls.js', gulp.series('OrbitControls'));
   gulp.watch('./js/styleDemo.js', gulp.series('styleDemo'));
+  gulp.watch('./js/profileDemo.js', gulp.series('profileDemo'));
   gulp.watch('./js/utils.js', gulp.series('utils'));
   gulp.watch('./scss/styles.scss', gulp.series('styles'));
 });
