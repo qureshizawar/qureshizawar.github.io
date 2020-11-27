@@ -1,4 +1,3 @@
-
 tf.setBackend('webgl');
 // tf.ENV.set('WEBGL_CONV_IM2COL', false);
 // tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
@@ -516,3 +515,4 @@ function set_style_res(res) {
 
 StyleWarmup();
 
+// tf.setBackend('wasm').then(() => StyleWarmup());

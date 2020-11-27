@@ -90,10 +90,10 @@
             <tbody>
               <tr>
                 <td>
-                  <p style='display:block'>image mode:</p>
+                  <h3 style='display:block'>image mode:</h3>
                 </td>
                 <td>
-                  <p style='display:block'>video mode:</p>
+                  <h3 style='display:block'>video mode:</h3>
                 </td>
               </tr>
               <tr>
@@ -261,19 +261,18 @@
             I started with the <b>style transfer model</b> described in <a href="https://arxiv.org/abs/1603.08155">the Real-Time Style Transfer paper</a>,
             which proved too slow/computationally expensive for low power and edge devices.
           </p>
-          <p> To bring down the computational cost, I first replaced the convolutional layers with <b>separable convolutional filters</b> (as in <b>MobileNet</b> achitectures).
+          <p> To bring down the computational cost, I first replaced the convolutional layers with <b>separable convolutional filters</b> (as in <b>MobileNet</b> architectures).
             This allowed for significant reduction in computational cost at little to no significant loss to quality of the output.
           </p>
           <p>
             To further bring down the cost and tune
-            the models; <b>model achitecture search</b> and <b>pruning</b> (as described in this <a href="https://arxiv.org/abs/1804.03294">paper</a>) was employed.
+            the models; <b>model architecture search</b> and <b>pruning</b> (as described in this <a href="https://arxiv.org/abs/1804.03294">paper</a>) was employed.
             This led to another order of magnitude drop in the total number of parameters at the cost of some overall output quality for some styles (see mosaic).
-            Finally, all the layers in the models that could be <b>fused</b> were fused and the models <b>quantised</b> to give the final optimised model.
+            Finally, all the layers in the models that could be <b>fused</b> were fused and the models <b>quantised</b> to give the final optimised models.
           </p>
           <p>
             All these techniques combined allowed for orders of magnitude reduction in model parameters (as shown in the table below) making realtime inference on low power devices
             feasible. All models were trained and optimised in <b>Pytorch</b> and then converted for deployment on <b>TensorFlow.js</b> .
-
           </p>
 
           <table class="table_2" style="width:100%; font-size:min(2.5vw, 20px)">

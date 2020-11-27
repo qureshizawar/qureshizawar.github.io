@@ -148,7 +148,7 @@
                   <li><a id="mosaic" href="#" onclick="load_style('mosaic')">mosaic</a></li>
                   <li><a id="madhubani" href="#" onclick="load_style('madhubani')">madhubani</a></li>
                   <li><a id="sketch" href="#" onclick="load_style('sketch')">sketch</a></li>
-                  <li><a id="feathers" href="#" onclick="load_style('feathers')">feathers
+                  <li><a id="feathers" href="#" onclick="load_style('feathers')">feathers</a></li>
                 </ul>
               </div>
             </td>
@@ -299,7 +299,7 @@
               </div>
 
               <p></p>
-              <img class="inp_img" id="bg_img" src="assets/demo_images/abstract.jpg" />
+              <img class="inp_img" id="bg_img" src="assets/demo_images/canvas_art.jpg" />
             </div>
 
             <!-- Solid divider -->
@@ -351,7 +351,7 @@
 
 
             <p></p>
-            <img class="inp_img" id="inpimg_style" src="/assets/demo_images/ZQ_profile_c3.png" />
+            <img class="inp_img" id="inpimg_style" src="/assets/demo_images/profile_2.jfif" />
 
             <!-- Solid divider -->
             <hr class="solid">
@@ -378,12 +378,15 @@
             Details
           </h3>
           <p>
-            This demo combines <b>style transfer models</b> (for more details please see <a href="/styleDemo.html">here</a>) and
+            This demo combines <b>style transfer models</b> (please see the details section of my
+            <a href="/styleDemo.html">Real-time style transfer demo</a> for information on how the models were optimised
+            using techniques such as <b>pruning</b>) and
             a <b>semantic segmentation model</b> to extract people out of an image. The semantic segmentation model was mostly
-            trained on open datasets and lightly <b>pruned</b> to give the final model.
+            trained on open datasets and lightly pruned to give the final model.
           </p>
           <p> All models were trained and optimised in <b>Pytorch</b> and then converted for deployment on <b>TensorFlow.js</b>.
-            For deployment, all the layers in the models that could be <b>fused</b> were fused to give the final optimised model.
+            For deployment, all the layers in the models that could be <b>fused</b> were fused and the models <b>quantised</b>
+            to give the final optimised models.
           </p>
 
         </div>
@@ -492,3 +495,4 @@
 </body>
 
 </html>
+
