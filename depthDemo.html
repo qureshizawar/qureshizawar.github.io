@@ -87,16 +87,16 @@
           <tbody>
             <tr>
               <td>
-                <p style="display: inline-block"> Model type: </p>
+                <p style="display: inline-block"> Model: </p>
                 <div class="dropdown" style="display: inline-block">
                   <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                    <t id="dropdown_scene">outdoors2</t>
+                    <t id="dropdown_scene">outdoors</t>
                     <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
-                    <li><a id="scene_indoors" href="#">indoors</a></li>
-                    <li><a id="scene_outdoors1" href="#">outdoors1</a></li>
-                    <li><a id="scene_outdoors2" href="#">outdoors2</a></li>
+                    <li><a id="scene_indoors" href="#" onclick="set_model('scene_indoors')">indoors</a></li>
+                    <!-- <li><a id="scene_outdoors1" href="#" onclick="set_model('scene_outdoors1')">outdoors1</a></li> -->
+                    <li><a id="scene_outdoors2" href="#" onclick="set_model('scene_outdoors2')">outdoors</a></li>
                   </ul>
                 </div>
               </td>
@@ -108,9 +108,9 @@
                     <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
-                    <li><a id="depth_low" href="#">low</a></li>
-                    <li><a id="depth_medium" href="#">medium</a></li>
-                    <li><a id="depth_high" href="#">high</a></li>
+                    <li><a id="depth_low" href="#" onclick="set_res('depth_low')">low</a></li>
+                    <li><a id="depth_medium" href="#" onclick="set_res('depth_medium')">medium</a></li>
+                    <li><a id="depth_high" href="#" onclick="set_res('depth_high')">high</a></li>
                   </ul>
                 </div>
               </td>
@@ -129,7 +129,7 @@
             <tbody>
               <tr>
                 <td>
-                  <p> Select an image:</p>
+                  <p>Select an image:</p>
                 </td>
                 <td>
                   <p>Upload an image:</p>
@@ -348,6 +348,7 @@
     <script src="js/scripts.min.js"></script>
     <script type="text/javascript" src="js/utils.min.js"></script>
     <script type="module" src="js/pointCloud.min.js"></script>
+    <!-- <script src="js/depthDemo.js"></script> -->
     <script src="js/depthDemo.min.js"></script>
 </body>
 
