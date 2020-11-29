@@ -56,8 +56,10 @@ var mode = 'user' //'user'
 if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').matches)) {
   // style_IMAGE_HEIGHT = 128//512
   // style_IMAGE_WIDTH = 128//512
-  segmentation_IMAGE_HEIGHT = 480
-  segmentation_IMAGE_WIDTH = 480
+  // segmentation_IMAGE_HEIGHT = 480
+  // segmentation_IMAGE_WIDTH = 480
+  segmentation_IMAGE_HEIGHT = 448
+  segmentation_IMAGE_WIDTH = 448
   ratio = 1
   style_IMAGE_HEIGHT = 512
   style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT * ratio)
@@ -103,8 +105,9 @@ const model_lookup = {
   sketch: '/assets/sketch_style_literr_pruned_quant/model.json',
   feathers: '/assets/feathers_style_literr_pruned_quant/model.json',
 };
-
+var curr_style
 const Load_style_model = async (style_type) => {
+  curr_style = style_type
   model_transformer = await tf.loadLayersModel(model_lookup[style_type]);
 }
 
@@ -114,8 +117,14 @@ const StyleWarmup = async () => {
 
   Load_style_model(style_type)
 
-  model_sem_encoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_encoder_bi_quant/model.json');
-  model_sem_decoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_decoder_pruned_quant/model.json');
+  // model_sem_encoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_encoder_bi_quant/model.json');
+  // model_sem_decoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_decoder_pruned_quant/model.json');
+  // model_sem_encoder = await tf.loadLayersModel('/assets/keras_mobile2_encoder/model.json');
+  // model_sem_decoder = await tf.loadLayersModel('/assets/keras_mobile2_decoder/model.json');
+  // model_sem_encoder = await tf.loadLayersModel('/assets/keras_mobile2_encoder_bi/model.json');
+  // model_sem_decoder = await tf.loadLayersModel('/assets/keras_mobile2_decoder_bi/model.json');
+  model_sem_encoder = await tf.loadLayersModel('/assets/keras_mobile3_encoder_bi/model.json');
+  model_sem_decoder = await tf.loadLayersModel('/assets/keras_mobile3_decoder_bi/model.json');
   // blur_kernel = await tf.loadLayersModel('/assets/gaus_11/model.json');
   blur_kernel = await tf.loadLayersModel('/assets/gaus_21_1/model.json');
   bg_blur_kernel = await tf.loadLayersModel('/assets/gaus_21_3/model.json');
@@ -147,13 +156,13 @@ const style_Demo = async (imElement) => {
   // var style_time = 0;
 
   //var t0 = performance.now();
-  //var bt0 = performance.now();
+  // var bt0 = performance.now();
 
   // console.log(style_IMAGE_HEIGHT, style_IMAGE_WIDTH);
 
   // var tbt0 = performance.now();
 
-  const masked_style_comp = tf.tidy(() => {
+  var masked_style_comp = tf.tidy(() => {
 
     const mean = tf.tensor3d([0.485, 0.456, 0.406], [1, 1, 3]);
     const std = tf.tensor3d([0.229, 0.224, 0.225], [1, 1, 3]);
@@ -203,15 +212,21 @@ const style_Demo = async (imElement) => {
       // console.log(output_type, use_bg, blur_bg)
 
       const segmentation_img = tf.image.resizeBilinear(img, [segmentation_IMAGE_HEIGHT, segmentation_IMAGE_WIDTH], true)
-      const segmentation_in = segmentation_img.div(scale).sub(mean).div(std).expandDims();
+      // const segmentation_in = segmentation_img.div(scale).sub(mean).div(std).expandDims();
+      const segmentation_in = segmentation_img.div(scale).sub(mean).div(std).transpose([2, 0, 1]).expandDims();
       const ones = tf.ones([output_HEIGHT, output_WIDTH])
 
+      // console.log(segmentation_in.shape)
       const features = model_sem_encoder.predict(segmentation_in);
-      const input_feature = tf.image.resizeNearestNeighbor(features[4], [64, 64])
+      // console.log(features[4].shape)
+      // const input_feature = tf.image.resizeNearestNeighbor(features[4], [64, 64])
+      const input_feature = tf.image.resizeNearestNeighbor(features[4].transpose([0, 2, 3, 1]), [56, 56])//.transpose([0, 3, 1, 2])
       // const input_feature = tf.image.resizeBilinear(features[4], [64, 64], true)
       // const input_feature = tf.image.resizeBilinear(features[4], [64, 64], false)
+      // console.log(input_feature.shape)
       const predictions = model_sem_decoder.predict(input_feature);
-
+      // const predictions = model_sem_decoder.predict(input_feature).transpose([0, 2, 3, 1]);
+      // console.log(predictions.shape)
       //const out = tf.image.resizeNearestNeighbor(predictions[0],[512,512]).squeeze(0);
       // const Sem_mask = tf.image.resizeNearestNeighbor(predictions, [output_HEIGHT,
       //   output_WIDTH
@@ -219,8 +234,9 @@ const style_Demo = async (imElement) => {
       const Sem_mask = tf.image.resizeBilinear(predictions, [output_HEIGHT,
         output_WIDTH
       ], false).squeeze(0).argMax(2);
-
-      const mask = ones.where(Sem_mask.equal(15), 0).expandDims(0).expandDims(3)
+      // console.log(Sem_mask)
+      // const mask = ones.where(Sem_mask.equal(15), 0).expandDims(0).expandDims(3)
+      const mask = ones.where(Sem_mask.equal(1), 0).expandDims(0).expandDims(3)
       // console.log(mask.shape)
       const blur_mask = blur_kernel.predict(mask).squeeze(0).squeeze(2);
       const blur_mask_neg = blur_mask.sub(1).abs()
@@ -362,6 +378,14 @@ const style_Demo = async (imElement) => {
   });
 
   // console.log(tf.memory());
+
+  if (output_type !== 'masked_background' && curr_style == "sketch") {
+    masked_style_comp = tf.tidy(() => {
+      const gray = tf.tensor3d([0.2126, 0.7152, 0.0722], [1, 1, 3]);
+      return masked_style_comp.mul(gray).sum(2)
+    });
+  }
+
 
   await tf.browser.toPixels(masked_style_comp, de_canvas);
 
