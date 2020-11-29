@@ -21,8 +21,8 @@ let model_transformer;
 // var segmentation_IMAGE_HEIGHT = 480
 // var segmentation_IMAGE_WIDTH = 480
 
-var segmentation_IMAGE_HEIGHT = 384
-var segmentation_IMAGE_WIDTH = 384
+var segmentation_IMAGE_HEIGHT = 448 //384
+var segmentation_IMAGE_WIDTH = 448 //384
 
 // var style_IMAGE_HEIGHT = 384
 // var style_IMAGE_WIDTH = 384
