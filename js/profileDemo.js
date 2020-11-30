@@ -1,6 +1,6 @@
 tf.setBackend('webgl');
 tf.ENV.set('WEBGL_CONV_IM2COL', false);
-tf.ENV.set('WEBGL_PACK', false); // This needs to be done otherwise things run very slow v1.0.4
+tf.ENV.set('WEBGL_PACK', false);
 tf.ENV.set('WEBGL_FORCE_F16_TEXTURES', true)
 
 //tf.enableDebugMode()
@@ -18,14 +18,9 @@ let blur_kernel;
 var blur_bg = false;
 let model_transformer;
 
-// var segmentation_IMAGE_HEIGHT = 480
-// var segmentation_IMAGE_WIDTH = 480
+var segmentation_IMAGE_HEIGHT = 448
+var segmentation_IMAGE_WIDTH = 448
 
-var segmentation_IMAGE_HEIGHT = 384
-var segmentation_IMAGE_WIDTH = 384
-
-// var style_IMAGE_HEIGHT = 384
-// var style_IMAGE_WIDTH = 384
 // var ratio = 0.75
 var ratio = 0.5625
 // var ratio = 1
@@ -54,12 +49,8 @@ const mobile = isMobile();
 var mode = 'user' //'user'
 
 if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').matches)) {
-  // style_IMAGE_HEIGHT = 128//512
-  // style_IMAGE_WIDTH = 128//512
-  // segmentation_IMAGE_HEIGHT = 480
-  // segmentation_IMAGE_WIDTH = 480
-  segmentation_IMAGE_HEIGHT = 448
-  segmentation_IMAGE_WIDTH = 448
+  // segmentation_IMAGE_HEIGHT = 448
+  // segmentation_IMAGE_WIDTH = 448
   ratio = 1
   style_IMAGE_HEIGHT = 512
   style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT * ratio)
@@ -123,8 +114,10 @@ const StyleWarmup = async () => {
   // model_sem_decoder = await tf.loadLayersModel('/assets/keras_mobile2_decoder/model.json');
   // model_sem_encoder = await tf.loadLayersModel('/assets/keras_mobile2_encoder_bi/model.json');
   // model_sem_decoder = await tf.loadLayersModel('/assets/keras_mobile2_decoder_bi/model.json');
-  model_sem_encoder = await tf.loadLayersModel('/assets/keras_mobile3_encoder_bi/model.json');
-  model_sem_decoder = await tf.loadLayersModel('/assets/keras_mobile3_decoder_bi/model.json');
+  // model_sem_encoder = await tf.loadLayersModel('/assets/keras_mobile3_encoder_bi/model.json');
+  // model_sem_decoder = await tf.loadLayersModel('/assets/keras_mobile3_decoder_bi/model.json');
+  model_sem_encoder = await tf.loadLayersModel('/assets/keras_mobile3_encoder_bi_quant/model.json');
+  model_sem_decoder = await tf.loadLayersModel('/assets/keras_mobile3_decoder_bi_quant/model.json');
   // blur_kernel = await tf.loadLayersModel('/assets/gaus_11/model.json');
   blur_kernel = await tf.loadLayersModel('/assets/gaus_21_1/model.json');
   bg_blur_kernel = await tf.loadLayersModel('/assets/gaus_21_3/model.json');
@@ -224,8 +217,8 @@ const style_Demo = async (imElement) => {
       // const input_feature = tf.image.resizeBilinear(features[4], [64, 64], true)
       // const input_feature = tf.image.resizeBilinear(features[4], [64, 64], false)
       // console.log(input_feature.shape)
-      const predictions = model_sem_decoder.predict(input_feature);
-      // const predictions = model_sem_decoder.predict(input_feature).transpose([0, 2, 3, 1]);
+      // const predictions = model_sem_decoder.predict(input_feature);
+      const predictions = model_sem_decoder.predict(input_feature)//.transpose([0, 2, 3, 1]);
       // console.log(predictions.shape)
       //const out = tf.image.resizeNearestNeighbor(predictions[0],[512,512]).squeeze(0);
       // const Sem_mask = tf.image.resizeNearestNeighbor(predictions, [output_HEIGHT,
@@ -389,7 +382,7 @@ const style_Demo = async (imElement) => {
 
   await tf.browser.toPixels(masked_style_comp, de_canvas);
 
-  // var tbt1 = performance.now();
+  var tbt1 = performance.now();
   // console.log(style_type);
   // console.log("Call to tb took " + (tbt1 - tbt0) + " milliseconds.");
 
