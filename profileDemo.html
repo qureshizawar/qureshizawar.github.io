@@ -290,9 +290,10 @@
                   <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
-                  <!-- <li><a id="white" href="#" onclick="bg_load('white')">white</a></li> -->
+                  <li><a id="white" href="#" onclick="bg_load('white')">blank</a></li>
                   <li><a id="abstract" href="#" onclick="bg_load('abstract')">abstract</a></li>
                   <li><a id="floral" href="#" onclick="bg_load('floral')">floral</a></li>
+                  <li><a id="feathers" href="#" onclick="bg_load('feathers')">feathers</a></li>
                   <li><a id="floral_patchwork" href="#" onclick="bg_load('floral_patchwork')">floral patchwork</a></li>
                   <li><a id="canvas_art" href="#" onclick="bg_load('canvas_art')">canvas art</a></li>
                 </ul>
@@ -381,8 +382,8 @@
             This demo combines <b>style transfer models</b> (please see the details section of my
             <a href="/styleDemo.html">Real-time style transfer demo</a> for information on how the models were optimised
             using techniques such as <b>pruning</b>) and
-            a <b>semantic segmentation model</b> to extract people out of an image. The semantic segmentation model was mostly
-            trained on open datasets and lightly pruned to give the final model.
+            a <b>semantic segmentation model</b> to extract people out of an image. The semantic segmentation model is based on
+            <a href="https://arxiv.org/abs/1905.02244">MobileNetV3</a> and was mostly trained on open datasets and lightly pruned to give the final model.
           </p>
           <p> All models were trained and optimised in <b>Pytorch</b> and then converted for deployment on <b>TensorFlow.js</b>.
             For deployment, all the layers in the models that could be <b>fused</b> were fused and the models <b>quantised</b>
@@ -428,6 +429,9 @@
           <ul>
             <li>
               Authors of <a href="https://arxiv.org/abs/1603.08155">the Real-Time Style Transfer paper</a>.
+            </li>
+            <li>
+              Authors of <a href="https://arxiv.org/abs/1905.02244">the MobileNetV3 paper</a>.
             </li>
             <li>
               Authors of <a href="https://arxiv.org/abs/1612.01105">the PSP net paper</a>.
