@@ -214,6 +214,7 @@ const style_Demo = async (imElement) => {
       // console.log(features[4].shape)
       // const input_feature = tf.image.resizeNearestNeighbor(features[4], [64, 64])
       const input_feature = tf.image.resizeNearestNeighbor(features[4].transpose([0, 2, 3, 1]), [56, 56]) //.transpose([0, 3, 1, 2])
+      // const input_feature = tf.image.resizeBilinear(features[4].transpose([0, 2, 3, 1]), [56, 56], true)
       // const input_feature = tf.image.resizeBilinear(features[4], [64, 64], true)
       // const input_feature = tf.image.resizeBilinear(features[4], [64, 64], false)
       // console.log(input_feature.shape)
@@ -247,11 +248,11 @@ const style_Demo = async (imElement) => {
       } else if (output_type == 'masked_background' && use_bg && bg_loaded == true) {
         // just replace background
         // console.log('just replace background')
-        const bg_resized = tf.image.resizeBilinear(bg, [output_HEIGHT,
+        var bg_resized = tf.image.resizeBilinear(bg, [output_HEIGHT,
           output_WIDTH
         ], true)
         if (blur_bg) {
-          const bg_resized = bg_blur_kernel.predict(bg_resized.expandDims(0)).squeeze(0)
+          bg_resized = bg_blur_kernel.predict(bg_resized.expandDims(0)).squeeze(0)
         }
         // return img.div(scale).mul(mask_stacked).add(bg_resized.div(scale).mul(mask_stacked_neg))
         return (img.div(scale).mul(mask_stacked).add(bg_resized.div(scale).mul(mask_stacked_neg))).clipByValue(0, 1)
@@ -270,13 +271,13 @@ const style_Demo = async (imElement) => {
         if (use_bg && bg_loaded == true) {
           // replace background and stylise
           // console.log('replace background and stylise')
-          const bg_in = tf.image.resizeBilinear(bg, [style_IMAGE_HEIGHT,
+          var bg_in = tf.image.resizeBilinear(bg, [style_IMAGE_HEIGHT,
             style_IMAGE_WIDTH
           ], true)
 
 
           if (blur_bg) {
-            const bg_in = bg_blur_kernel.predict(bg_in.expandDims(0)).squeeze(0)
+            bg_in = bg_blur_kernel.predict(bg_in.expandDims(0)).squeeze(0)
           }
 
           const style_in = img_in.mul(mask_stacked_in).add(bg_in.mul(mask_stacked_neg_in))
@@ -312,11 +313,11 @@ const style_Demo = async (imElement) => {
         if (use_bg && bg_loaded == true) {
           // replace background and stylise person
           // console.log('replace background and stylise person')
-          const bg_resized = tf.image.resizeBilinear(bg, [output_HEIGHT,
+          var bg_resized = tf.image.resizeBilinear(bg, [output_HEIGHT,
             output_WIDTH
           ], true)
           if (blur_bg) {
-            const bg_resized = bg_blur_kernel.predict(bg_resized.expandDims(0)).squeeze(0)
+            bg_resized = bg_blur_kernel.predict(bg_resized.expandDims(0)).squeeze(0)
           }
           // return resized_style.mul(mask_stacked).add(bg_resized.mul(mask_stacked_neg).div(scale))
           return (resized_style.mul(mask_stacked).add(bg_resized.mul(mask_stacked_neg).div(scale))).clipByValue(0, 1)
@@ -339,11 +340,11 @@ const style_Demo = async (imElement) => {
             style_IMAGE_WIDTH
           ], true).expandDims();
           const style_out = model_transformer.predict(style_in).squeeze(0).clipByValue(0, 255).div(scale);
-          const resized_style = tf.image.resizeBilinear(style_out, [output_HEIGHT,
+          var resized_style = tf.image.resizeBilinear(style_out, [output_HEIGHT,
             output_WIDTH
           ], true)
           if (blur_bg) {
-            const resized_style = bg_blur_kernel.predict(resized_style.expandDims(0)).squeeze(0)
+            resized_style = bg_blur_kernel.predict(resized_style.expandDims(0)).squeeze(0)
           }
           // return img.div(scale).mul(mask_stacked).add(resized_style.mul(mask_stacked_neg))
           return (img.div(scale).mul(mask_stacked).add(resized_style.mul(mask_stacked_neg))).clipByValue(0, 1)
@@ -355,11 +356,11 @@ const style_Demo = async (imElement) => {
             style_IMAGE_WIDTH
           ], true).expandDims();
           const style_out = model_transformer.predict(style_in).squeeze(0).clipByValue(0, 255).div(scale);
-          const resized_style = tf.image.resizeBilinear(style_out, [output_HEIGHT,
+          var resized_style = tf.image.resizeBilinear(style_out, [output_HEIGHT,
             output_WIDTH
           ], true)
           if (blur_bg) {
-            const resized_style = bg_blur_kernel.predict(resized_style.expandDims(0)).squeeze(0)
+            resized_style = bg_blur_kernel.predict(resized_style.expandDims(0)).squeeze(0)
           }
           // return img.div(scale).mul(mask_stacked).add(resized_style.mul(mask_stacked_neg))
           return (img.div(scale).mul(mask_stacked).add(resized_style.mul(mask_stacked_neg))).clipByValue(0, 1)
