@@ -98,12 +98,12 @@ document.getElementById("btn_style").addEventListener("click", function(evt) {
 });
 
 const model_lookup = {
-  // mosaic_small: '/assets/TransformerNet_literrvocmosaic6_pruned/model.json',
   mosaic_small: '/assets/mosaic6_style_literr_pruned_quant/model.json',
   mosaic: '/assets/mosaic_style_lite_quant/model.json',
   madhubani: '/assets/madhubani4_style_literr_pruned_quant/model.json',
   sketch: '/assets/sketch_style_literr_pruned_quant/model.json',
   feathers: '/assets/feathers_style_literr_pruned_quant/model.json',
+  oil: '/assets/oil1_style_literr_pruned_quant/model.json',
 };
 
 const Load_style_model = async (style_type) => {

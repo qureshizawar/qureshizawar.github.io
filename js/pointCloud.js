@@ -1,7 +1,9 @@
 import {
   OrbitControls
 } from './OrbitControls.min.js';
-import * as THREE from 'https://unpkg.com/three/build/three.module.js'
+// import * as THREE from 'https://unpkg.com/three/build/three.module.js'
+// import * as THREE from 'https://unpkg.com/three@0.123.0/build/three.module.js'
+import * as THREE from './three.module.js'
 
 function createTextCanvas(text, color, font, size) {
   size = size || 16;
@@ -62,8 +64,6 @@ var renderer = new THREE.WebGLRenderer({
 window.createPointCloud = function createPointCloud(xx, yy, depth_array, img_array) {
 
   var controls;
-
-
   var w = img_array[0].length; //400;
   var h = img_array.length; //300;
   renderer.setSize(w, h);
