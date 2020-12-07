@@ -89,12 +89,13 @@ document.getElementById("btn_style").addEventListener("click", function(evt) {
 });
 
 const model_lookup = {
-  // mosaic_small: '/assets/TransformerNet_literrvocmosaic6_pruned/model.json',
   mosaic_small: '/assets/mosaic6_style_literr_pruned_quant/model.json',
   mosaic: '/assets/mosaic_style_lite_quant/model.json',
   madhubani: '/assets/madhubani4_style_literr_pruned_quant/model.json',
   sketch: '/assets/sketch_style_literr_pruned_quant/model.json',
   feathers: '/assets/feathers_style_literr_pruned_quant/model.json',
+  oil: '/assets/oil1_style_literr_pruned_quant/model.json',
+  // oil1: '/assets/oil1_style_literr_pruned_quant/model.json',
 };
 var curr_style
 const Load_style_model = async (style_type) => {
@@ -108,16 +109,7 @@ const StyleWarmup = async () => {
 
   Load_style_model(style_type)
 
-  // model_sem_encoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_encoder_bi_quant/model.json');
-  // model_sem_decoder = await tf.loadLayersModel('/assets/tfjs_layers_sem_decoder_pruned_quant/model.json');
-  // model_sem_encoder = await tf.loadLayersModel('/assets/keras_mobile2_encoder/model.json');
-  // model_sem_decoder = await tf.loadLayersModel('/assets/keras_mobile2_decoder/model.json');
-  // model_sem_encoder = await tf.loadLayersModel('/assets/keras_mobile2_encoder_bi/model.json');
-  // model_sem_decoder = await tf.loadLayersModel('/assets/keras_mobile2_decoder_bi/model.json');
-  // model_sem_encoder = await tf.loadLayersModel('/assets/keras_mobile3_encoder_bi/model.json');
-  // model_sem_decoder = await tf.loadLayersModel('/assets/keras_mobile3_decoder_bi/model.json');
-  model_sem_encoder = await tf.loadLayersModel('/assets/keras_mobile3_encoder_bi_quant/model.json');
-  model_sem_decoder = await tf.loadLayersModel('/assets/keras_mobile3_decoder_bi_quant/model.json');
+  model_seg = await tf.loadLayersModel('/assets/mobile3_seg_bi_quant/model.json');
   // blur_kernel = await tf.loadLayersModel('/assets/gaus_11/model.json');
   blur_kernel = await tf.loadLayersModel('/assets/gaus_21_1/model.json');
   bg_blur_kernel = await tf.loadLayersModel('/assets/gaus_21_3/model.json');
@@ -209,22 +201,8 @@ const style_Demo = async (imElement) => {
       const segmentation_in = segmentation_img.div(scale).sub(mean).div(std).transpose([2, 0, 1]).expandDims();
       const ones = tf.ones([output_HEIGHT, output_WIDTH])
 
-      // console.log(segmentation_in.shape)
-      const features = model_sem_encoder.predict(segmentation_in);
-      // console.log(features[4].shape)
-      // const input_feature = tf.image.resizeNearestNeighbor(features[4], [64, 64])
-      const input_feature = tf.image.resizeNearestNeighbor(features[4].transpose([0, 2, 3, 1]), [56, 56]) //.transpose([0, 3, 1, 2])
-      // const input_feature = tf.image.resizeBilinear(features[4].transpose([0, 2, 3, 1]), [56, 56], true)
-      // const input_feature = tf.image.resizeBilinear(features[4], [64, 64], true)
-      // const input_feature = tf.image.resizeBilinear(features[4], [64, 64], false)
-      // console.log(input_feature.shape)
-      // const predictions = model_sem_decoder.predict(input_feature);
-      const predictions = model_sem_decoder.predict(input_feature) //.transpose([0, 2, 3, 1]);
-      // console.log(predictions.shape)
-      //const out = tf.image.resizeNearestNeighbor(predictions[0],[512,512]).squeeze(0);
-      // const Sem_mask = tf.image.resizeNearestNeighbor(predictions, [output_HEIGHT,
-      //   output_WIDTH
-      // ]).squeeze(0).argMax(2); //.expandDims(2);
+      const predictions = model_seg.predict(segmentation_in).transpose([0, 2, 3, 1]);
+
       const Sem_mask = tf.image.resizeBilinear(predictions, [output_HEIGHT,
         output_WIDTH
       ], false).squeeze(0).argMax(2);

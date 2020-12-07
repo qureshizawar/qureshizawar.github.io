@@ -5,8 +5,7 @@ tf.ENV.set('WEBGL_FORCE_F16_TEXTURES', true)
 
 tf.enableProdMode();
 
-let model_depth_encoder;
-let model_depth_decoder;
+let model_depth;
 
 // H x W
 const input_res_lookup = {
@@ -21,49 +20,13 @@ const input_res_lookup = {
   scene_indoors_depth_high: [416, 544]
 };
 
-const model_lookup = {
-  scene_outdoors1: ['/assets/tfjs_encoder_quant/model.json',
-    '/assets/tfjs_decoder_quant/model.json'
-  ],
-  // scene_outdoors2: ['/assets/outdoors_tfjs_encoder/model.json',
-  //   '/assets/outdoors_tfjs_decoder/model.json'
-  // ],
-  scene_outdoors2: ['/assets/outdoors2_Mnet_tfjs_encoder_quant/model.json',
-    '/assets/outdoors2_Mnet_tfjs_decoder/model.json'
-  ],
-  // scene_indoors: ['/assets/indoors_tfjs_encoder/model.json',
-  //   '/assets/indoors_tfjs_decoder/model.json'
-  // ]
-  scene_indoors: ['/assets/indoors2_tfjs_encoder_quant/model.json',
-    '/assets/indoors2_tfjs_decoder_quant/model.json'
-  ]
-
-};
-
-const norm_lookup = {
-  scene_outdoors1: [
-    [0, 0, 0],
-    [1, 1, 1]
-  ],
-  scene_outdoors2: [
-    [0.485, 0.456, 0.406],
-    [0.229, 0.224, 0.225]
-  ],
-  scene_indoors: [
-    [0.485, 0.456, 0.406],
-    [0.229, 0.224, 0.225]
-  ]
-}
-
-const out_idx = {
-  scene_outdoors1: 3,
-  scene_outdoors2: 0,
-  scene_indoors: 0
-}
-
 var curr_model = "scene_outdoors2"
-var curr_res = "depth_mid"
 
+// var curr_res = "depth_high"
+// var Depth_IMAGE_HEIGHT = 320;
+// var Depth_IMAGE_WIDTH = 640;
+
+var curr_res = "depth_mid"
 var Depth_IMAGE_HEIGHT = 192;
 var Depth_IMAGE_WIDTH = 320;
 
@@ -120,7 +83,7 @@ document.getElementById("select_files_btn").onclick = function() {
 //   }
 // });
 
-document.getElementById("btn").addEventListener("click", function(evt) {
+document.getElementById("url_btn").addEventListener("click", function(evt) {
   status_depth.textContent = 'Status: Loading...';
   url_infer(document.getElementById('imagename'), document.getElementById('inpimg'),
     status_depth, Depth_Demo);
@@ -133,46 +96,32 @@ function custom_mgrid(rows, cols) {
   return [a, b];
 }
 
-const update_model = async (name) => {
-  // console.log("update_model!")
-  // console.log(name)
-  // console.log(model_lookup[name][0])
-  model_depth_encoder = await tf.loadLayersModel(model_lookup[name][0]);
-  model_depth_decoder = await tf.loadLayersModel(model_lookup[name][1]);
-
-  const dummy = tf.tidy(() => {
-    // var dummy_feat
-    // if (curr_model == "scene_outdoors2") {
-    var dummy_feat = model_depth_encoder.predict(tf.ones([1, 3, Depth_IMAGE_HEIGHT, Depth_IMAGE_WIDTH]))
-    for (var i = 0; i < 5; i++) {
-      dummy_feat[i] = dummy_feat[i].transpose([0, 2, 3, 1])
-    }
-    // }
-    // else{
-    //   dummy_feat = model_depth_encoder.predict(tf.ones([1, 3, Depth_IMAGE_HEIGHT, Depth_IMAGE_WIDTH]))
-    // }
-    const dummy = model_depth_decoder.predict(dummy_feat);
-    return 0
-  });
+const load_model = async (name) => {
+  // console.log("load_model!")
+  if (name == "scene_indoors") {
+    model_depth = await tf.loadLayersModel('/assets/indoors_Mnet_tfjs_quant/model.json');
+  } else {
+    model_depth = await tf.loadLayersModel('/assets/outdoors_Mnet_tfjs_quant/model.json');
+  }
 
 };
 
 const DepthWarmup = async () => {
 
   status_depth.textContent = 'Status: Loading...';
-  model_depth_encoder = await tf.loadLayersModel(model_lookup[curr_model][0]);
-  model_depth_decoder = await tf.loadLayersModel(model_lookup[curr_model][1]);
+  model_depth = await tf.loadLayersModel('/assets/outdoors_Mnet_tfjs_quant/model.json');
+  // await load_model(curr_model);
 
   // Make a prediction through the locally hosted inpimg.jpg.
-  let inpElement = document.getElementById('inpimg');
+  inpElement = document.getElementById('inpimg');
   //inpElement.src = e.target.result;
   if (inpElement.complete && inpElement.naturalHeight !== 0) {
-    set_static_output_size(inpElement);
+    // set_static_output_size(inpElement);
     Depth_Demo(inpElement);
     inpElement.style.display = '';
   } else {
     inpElement.onload = () => {
-      set_static_output_size(inpElement);
+      // set_static_output_size(inpElement);
       Depth_Demo(inpElement);
       inpElement.style.display = '';
     }
@@ -200,9 +149,12 @@ const Depth_Demo = async (imElement) => {
 
   // console.log("before: ", tf.memory());
 
-  in_img = tf.browser.fromPixels(imElement).toFloat();
+  // in_img = tf.browser.fromPixels(imElement).toFloat();
 
   const depthMask_resized = tf.tidy(() => {
+
+
+    in_img = tf.browser.fromPixels(imElement).toFloat();
 
     const img = tf.image.resizeBilinear(in_img,
       [Depth_IMAGE_HEIGHT, Depth_IMAGE_WIDTH]);
@@ -215,29 +167,17 @@ const Depth_Demo = async (imElement) => {
     const normalised = img.div(scale).sub(mean).div(std);
 
     status_depth.textContent = 'Status: Model loaded! running inference';
-    const batched = normalised.transpose([2, 0, 1]).expandDims();
+    const batched = normalised.expandDims();
 
-    // var it0 = performance.now();
-    // console.log(batched)
-    var features = model_depth_encoder.predict(batched);
-    // console.log(features)
-    // if (curr_model == "scene_outdoors2") {
-    for (var i = 0; i < 5; i++) {
-      features[i] = features[i].transpose([0, 2, 3, 1])
-    }
-    // }
-    // console.log(features)
-
-    const predictions = model_depth_decoder.predict(features);
-    // console.log(predictions)
-    // console.log(predictions[0].shape)
-    // var it1 = performance.now();
-    // depth_time = (it1 - it0);
-    // const dispPred = predictions[3].squeeze(0).transpose([1, 2, 0]);
-    // const dispPred = predictions[0].squeeze(0).transpose([1, 2, 0]);
-    const dispPred = predictions.squeeze(0) //.transpose([1, 2, 0]);
+    const dispPred = model_depth.predict(batched).squeeze(0) //.transpose([1, 2, 0]);
 
     const dispPred_norm = dispPred.sub(dispPred.min()).divNoNan(dispPred.max().sub(dispPred.min()));
+
+    img_array = tf.image.resizeBilinear(in_img, [output_HEIGHT, output_WIDTH]).arraySync()
+
+    const xy = custom_mgrid(img_array.length, img_array[0].length)
+    xs_array = xy[0].arraySync()
+    ys_array = xy[1].arraySync()
 
     return tf.image.resizeBilinear(dispPred_norm, [output_HEIGHT, output_WIDTH])
   });
@@ -246,27 +186,19 @@ const Depth_Demo = async (imElement) => {
   depthCanvas.width = output_WIDTH;
   depthCanvas.height = output_HEIGHT;
 
-  // const depthMask_resized = tf.image.resizeBilinear(depthMask, [output_HEIGHT, output_WIDTH])
-
-  img_array = tf.image.resizeBilinear(in_img, [output_HEIGHT, output_WIDTH]).arraySync()
   depth_array = depthMask_resized.arraySync()
 
   await tf.browser.toPixels(depthMask_resized, depthCanvas);
 
   //status_depth.textContent = "Status: Done! inference took " + (depth_time.toFixed(1)) + " milliseconds.";
 
-
-  const xy = custom_mgrid(img_array.length, img_array[0].length)
-  createPointCloud(xy[0].arraySync(), xy[1].arraySync(), depth_array, img_array);
+  createPointCloud(xs_array, ys_array, depth_array, img_array);
 
   // var t1 = performance.now();
   // console.log("Call to depth took " + (t1 - t0) + " milliseconds.");
 
   // console.log("after: ", tf.memory());
-  in_img.dispose();
-  // depthMask.dispose();
-  xy[0].dispose();
-  xy[1].dispose();
+
   depthMask_resized.dispose();
   status_depth.textContent = "Status: Done!";
   // console.log("after: ", tf.memory());
@@ -278,7 +210,7 @@ const Depth_Demo = async (imElement) => {
 function set_model(model) {
   event.preventDefault();
   curr_model = model
-  update_model(curr_model);
+  load_model(curr_model);
   Depth_IMAGE_WIDTH = input_res_lookup[curr_model.concat("_").concat(curr_res)][1]
   Depth_IMAGE_HEIGHT = input_res_lookup[curr_model.concat("_").concat(curr_res)][0]
 
@@ -362,4 +294,4 @@ class MirrorPad extends tf.layers.Layer {
 
 tf.serialization.registerClass(MirrorPad);
 
-DepthWarmup();
+// DepthWarmup();

@@ -172,7 +172,7 @@
               <input type="text" value="" id="imagename" />
             </form>
             <div>
-              <input type="button" id="btn" value="Run" />
+              <input type="button" id="url_btn" value="Run" />
             </div>
           </div>
 
@@ -184,12 +184,12 @@
                 <span class="caret"></span>
               </button>
               <ul class="dropdown-menu">
-                <li><a id="inp_outdoors" href="#" onclick="inp_load('inp_outdoors')">outdoors</a></li>
                 <li><a id="inp_indoors" href="#" onclick="inp_load('inp_indoors')">indoors</a></li>
+                <li><a id="inp_outdoors" href="#" onclick="inp_load('inp_outdoors')">outdoors</a></li>
               </ul>
             </div>
             <p></p>
-            <input type="button" id="select_files_btn" value="Run" style="display: block" />
+            <input type="button" id="select_files_btn" value="Run" />
           </div>
 
 
@@ -346,10 +346,12 @@
     </footer>
     <!-- End footer -->
     <script src="js/scripts.min.js"></script>
-    <script type="text/javascript" src="js/utils.min.js"></script>
     <script type="module" src="js/pointCloud.min.js"></script>
+    <script type="text/javascript" src="js/utils.min.js"></script>
     <!-- <script src="js/depthDemo.js"></script> -->
     <script src="js/depthDemo.min.js"></script>
-</body>
+
+    <body onload="DepthWarmup()">
+    </body>
 
 </html>
