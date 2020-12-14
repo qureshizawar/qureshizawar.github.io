@@ -74,6 +74,17 @@
 
       <!--button class="collapsible_tf" title="Depth">Depth</button-->
       <section id="depth_sec">
+
+
+
+
+        <p>Monocular depth estimation from a single image input using deep encoder/decoder models,
+          projected as a pointcloud using <b>three.js</b>.
+
+          An indoors and an outdoors model is available(please see <b>model</b> setting under the <b>Settings</b> section)
+          feel free to experiment with both depending on the input image</p>
+
+
         <p><b>Note:</b> Since these models runs locally on device, any uploaded pictures stay safely
           on the device. Please note that the first run would
           be much slower than subsequent runs as Tensorflow loads the necessary
@@ -123,6 +134,8 @@
         </hr>
 
         <div id='mainImage' style='display:block'>
+          <!-- <div id="overlay"> -->
+          <!-- <div class="loader"></div> -->
           <h3 id="status_depth"></h3>
 
           <table style="width: 100%; max-width: 400px;">
@@ -204,7 +217,13 @@
           <p class="section-head">3D point cloud:</p>
           <canvas id="depth_canvas" class="canvas"></canvas>
         </div>
+        <!-- <div id="infoi">
+          <img src="http://via.placeholder.com/32x20/000000/ffffff?text=?"/>
+        </div> -->
+        <!-- </div> -->
       </section>
+
+
 
     </div>
     <!-- End .optional-section-block -->

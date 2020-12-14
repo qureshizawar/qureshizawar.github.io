@@ -129,6 +129,8 @@ const DepthWarmup = async () => {
 
   // status_depth.textContent = "Status: Done!";
   // document.getElementById('file-container').style.display = '';
+  // document.getElementById("loader").style.display = "none";
+  // document.getElementById("depth_sec").style.visibility = "visible";
 };
 
 const Depth_Demo = async (imElement) => {
@@ -202,6 +204,7 @@ const Depth_Demo = async (imElement) => {
   depthMask_resized.dispose();
   status_depth.textContent = "Status: Done!";
   // console.log("after: ", tf.memory());
+  // document.getElementById("infoi").style.display = "none";
 };
 
 
@@ -276,21 +279,22 @@ urlcheckBox.addEventListener('click', function() {
   }
 });
 
-class MirrorPad extends tf.layers.Layer {
-  static className = 'MirrorPad';
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+class MirrorPad extends tf.layers.Layer {
   constructor(config) {
     super(config);
-    this.pad0 = config.padding[0]
-    this.pad1 = config.padding[1]
+    this.pad0 = config.padding[0];
+    this.pad1 = config.padding[1];
   }
+
   call(inputs, kwargs) {
-    return inputs[0].mirrorPad([
-      [0, 0], this.pad0,
-      this.pad1, [0, 0]
-    ], 'reflect')
+    return inputs[0].mirrorPad([[0, 0], this.pad0, this.pad1, [0, 0]], 'reflect');
   }
+
 }
+
+_defineProperty(MirrorPad, "className", 'MirrorPad');
 
 tf.serialization.registerClass(MirrorPad);
 
