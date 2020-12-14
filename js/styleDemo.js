@@ -8,27 +8,6 @@ tf.ENV.set('WEBGL_FORCE_F16_TEXTURES', true)
 //tf.setBackend('cpu');
 tf.enableProdMode();
 
-class MirrorPad extends tf.layers.Layer {
-  static className = 'MirrorPad';
-
-  constructor(config) {
-    super(config);
-    this.pad0 = config.padding[0]
-    this.pad1 = config.padding[1]
-  }
-  call(inputs, kwargs) {
-    return inputs[0].mirrorPad([
-      [0, 0], this.pad0,
-      this.pad1, [0, 0]
-    ], 'reflect')
-  }
-}
-
-tf.serialization.registerClass(MirrorPad);
-
-// let model_sem_encoder;
-// let model_sem_decoder;
-// let blur_kernel;
 let model_transformer;
 
 // var style_IMAGE_HEIGHT = 384
@@ -513,6 +492,26 @@ function set_style_res(res) {
   style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT * ratio)
 }
 
-StyleWarmup();
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+class MirrorPad extends tf.layers.Layer {
+  constructor(config) {
+    super(config);
+    this.pad0 = config.padding[0];
+    this.pad1 = config.padding[1];
+  }
+
+  call(inputs, kwargs) {
+    return inputs[0].mirrorPad([[0, 0], this.pad0, this.pad1, [0, 0]], 'reflect');
+  }
+
+}
+
+_defineProperty(MirrorPad, "className", 'MirrorPad');
+
+tf.serialization.registerClass(MirrorPad);
+
+
+// StyleWarmup();
 
 // tf.setBackend('wasm').then(() => StyleWarmup());

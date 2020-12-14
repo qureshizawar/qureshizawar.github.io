@@ -77,6 +77,11 @@
       <h3>Real-time style transfer
       </h3>
       <section>
+        <p> Real-time image stylisation using optimised deep style transfer models.
+          You can select different styles in the <b>Settings</b> section to experiment with,
+          please select video mode if you would like to see the model output in real-time.
+          </p>
+
         <p> <b>Note:</b> Since these models run locally on device, any uploaded pictures stay safely
           on the device. Please note that the first run may
           be much slower than subsequent runs as Tensorflow loads the necessary
@@ -406,6 +411,7 @@
     <script type="text/javascript" src="js/utils.min.js"></script>
     <script src="js/styleDemo.min.js"></script>
     <!-- <script src="js/styleDemo.js"></script> -->
+    <body onload="StyleWarmup()">
 </body>
 
 </html>

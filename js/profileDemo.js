@@ -32,10 +32,6 @@ var style_IMAGE_WIDTH = Math.floor(style_IMAGE_HEIGHT * ratio)
 var output_HEIGHT = 512;
 var output_WIDTH = Math.floor(output_HEIGHT * ratio);
 
-// var videoHeight = 512;
-// var videoWidth = Math.floor(videoHeight * 0.75);
-// var videoWidth = Math.floor(videoHeight*ratio);
-
 var use_bg = true
 
 var de_canvas = document.getElementById('mask');
@@ -554,24 +550,25 @@ download_img = function(el) {
   el.href = image;
 };
 
-class MirrorPad extends tf.layers.Layer {
-  static className = 'MirrorPad';
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+class MirrorPad extends tf.layers.Layer {
   constructor(config) {
     super(config);
-    this.pad0 = config.padding[0]
-    this.pad1 = config.padding[1]
+    this.pad0 = config.padding[0];
+    this.pad1 = config.padding[1];
   }
+
   call(inputs, kwargs) {
-    return inputs[0].mirrorPad([
-      [0, 0], this.pad0,
-      this.pad1, [0, 0]
-    ], 'reflect')
+    return inputs[0].mirrorPad([[0, 0], this.pad0, this.pad1, [0, 0]], 'reflect');
   }
+
 }
+
+_defineProperty(MirrorPad, "className", 'MirrorPad');
 
 tf.serialization.registerClass(MirrorPad);
 
-StyleWarmup();
+// StyleWarmup();
 
 // tf.setBackend('wasm').then(() => StyleWarmup());
