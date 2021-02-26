@@ -1,7 +1,7 @@
 // util functions
 // some functions adapted from tfjs pix2pix demo
 
-const cors_api_url = 'https://cors-anywhere.herokuapp.com/';
+const cors_api_url = 'https://cors.bridged.cc/';
 
 function isAndroid() {
   return /Android/i.test(navigator.userAgent);
