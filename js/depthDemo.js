@@ -27,8 +27,11 @@ var curr_model = "scene_outdoors2"
 // var Depth_IMAGE_WIDTH = 640;
 
 var curr_res = "depth_mid"
-var Depth_IMAGE_HEIGHT = 192;
-var Depth_IMAGE_WIDTH = 320;
+// var Depth_IMAGE_HEIGHT = 192;
+// var Depth_IMAGE_WIDTH = 320;
+
+var Depth_IMAGE_WIDTH = input_res_lookup[curr_model.concat("_").concat(curr_res)][1]
+var Depth_IMAGE_HEIGHT = input_res_lookup[curr_model.concat("_").concat(curr_res)][0]
 
 var output_HEIGHT = 300;
 var output_WIDTH = 400;
@@ -37,7 +40,7 @@ const status_depth = document.getElementById('status_depth');
 
 const dropdown_depth_qual = document.getElementById('dropdown_depth_qual');
 const depth_low = document.getElementById('depth_low');
-const depth_medium = document.getElementById('depth_medium');
+const depth_mid = document.getElementById('depth_mid');
 const depth_high = document.getElementById('depth_high');
 
 if (!(is_touch_device()) && !(window.matchMedia('(max-device-width: 960px)').matches)) {

@@ -106,9 +106,15 @@ const StyleWarmup = async () => {
   Load_style_model(style_type)
 
   model_seg = await tf.loadLayersModel('/assets/mobile3_seg_bi_quant/model.json');
-  // blur_kernel = await tf.loadLayersModel('/assets/gaus_11/model.json');
-  blur_kernel = await tf.loadLayersModel('/assets/gaus_21_1/model.json');
+  // model_seg = await tf.loadLayersModel('/assets/keras_mobile3_seg_bi_align_false_tfjs/model.json');
+  // model_seg = await tf.loadLayersModel('/assets/keras_mobile3_seg_bi_align_true_tfjs/model.json');
+  blur_kernel = await tf.loadLayersModel('/assets/gaus_11/model.json');
+  // blur_kernel = await tf.loadLayersModel('/assets/gaus_21_1/model.json');
   bg_blur_kernel = await tf.loadLayersModel('/assets/gaus_21_3/model.json');
+
+  // console.log(model_seg.summary())
+  // console.log(model_seg.getLayer('819'))
+  // console.log(model_seg.getLayer('output_0'))
 
   // Make a prediction through the locally hosted inpimg_style.jpg.
   let img = document.getElementById('inpimg_style');
@@ -207,6 +213,7 @@ const style_Demo = async (imElement) => {
       const mask = ones.where(Sem_mask.equal(1), 0).expandDims(0).expandDims(3)
       // console.log(mask.shape)
       const blur_mask = blur_kernel.predict(mask).squeeze(0).squeeze(2);
+      // const blur_mask = mask.squeeze(0).squeeze(2);
       const blur_mask_neg = blur_mask.sub(1).abs()
       // console.log(blur_mask.shape)
       const mask_stacked = tf.stack([blur_mask, blur_mask, blur_mask], 2);
@@ -568,6 +575,39 @@ class MirrorPad extends tf.layers.Layer {
 _defineProperty(MirrorPad, "className", 'MirrorPad');
 
 tf.serialization.registerClass(MirrorPad);
+
+class UpSampling2Dcustom extends tf.layers.Layer {
+  constructor(config) {
+    super(config);
+    this.size0 = config.size[0];
+    this.size1 = config.size[1];
+    this.dataFormat = config.dataFormat
+    // console.log(config)
+  }
+
+  call(inputs, kwargs) {
+    // console.log(inputs)
+    // console.log([this.size0, this.size1])
+    // return inputs[0].resizeBilinear([this.size0, this.size1], false, false);
+    const inputshape = inputs[0].shape;
+    // console.log(this.dataFormat)
+    // console.log("inputshape")
+    // console.log(inputshape)
+    if (this.dataFormat=="channelsFirst"){
+      // console.log(tf.image.resizeBilinear(inputs[0].transpose([0, 2, 3, 1]),[this.size0*inputshape[2], this.size1*inputshape[3]], false, true).transpose([0, 3, 1, 2]).shape)
+      return tf.image.resizeBilinear(inputs[0].transpose([0, 2, 3, 1]),[this.size0*inputshape[2], this.size1*inputshape[3]], false, true).transpose([0, 3, 1, 2])
+    }
+    else{
+      // console.log(tf.image.resizeBilinear(inputs[0],[this.size0*inputshape[2], this.size1*inputshape[3]], false, true).shape)
+      return tf.image.resizeBilinear(inputs[0],[this.size0*inputshape[2], this.size1*inputshape[3]], false, true)
+    }
+    }
+
+}
+
+_defineProperty(UpSampling2Dcustom, "className", 'UpSampling2Dcustom');
+
+tf.serialization.registerClass(UpSampling2Dcustom);
 
 // StyleWarmup();
 
